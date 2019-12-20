@@ -1,0 +1,5 @@
+= Project Syn
+
+image::syn.png[]
+
+This is the documentation of Project Syn.

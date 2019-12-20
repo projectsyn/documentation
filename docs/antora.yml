@@ -1,0 +1,6 @@
+name: syn
+title: Project Syn Documentation
+version: master
+start_page: ROOT:index.adoc
+nav:
+- modules/ROOT/nav.adoc
