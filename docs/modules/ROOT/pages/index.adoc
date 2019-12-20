@@ -3,3 +3,8 @@
 image::syn.png[]
 
 This is the documentation of Project Syn.
+
+== Components
+
+* xref:commodore::index.adoc[Commodore]
+* xref:steward::index.adoc[Steward]
