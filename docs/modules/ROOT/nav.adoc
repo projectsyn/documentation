@@ -1,3 +1,4 @@
+.General Documentation
 * xref:index.adoc[Home]
 
 .Project Syn
