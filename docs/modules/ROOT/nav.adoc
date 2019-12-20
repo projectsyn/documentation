@@ -1,5 +1,7 @@
 * xref:index.adoc[Home]
 
-** Project Syn
+Project Syn
+
+* xref:syn::index.adoc[General Documentation]
 * xref:commodore::index.adoc[Commodore]
 * xref:steward::index.adoc[Steward]
