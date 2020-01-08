@@ -1,14 +1,14 @@
 [.meta-info-table,cols="2*"]
 |===
-| *Author*
+| Author
 | {sdd_author}
 
-| *Owner* 
+| Owner
 | {sdd_owner}
 
-| *Reviewers (SIG)*
+| Reviewers (SIG)
 | {sdd_reviewers}
 
-| *Status*
+| Status
 | [.{sdd_status} .status-macro]#{sdd_status}#
 |===
