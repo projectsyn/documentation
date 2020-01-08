@@ -1,0 +1,14 @@
+[.meta-info-table,cols="2*"]
+|===
+| *Author*
+| {sdd_author}
+
+| *Owner* 
+| {sdd_owner}
+
+| *Reviewers (SIG)*
+| {sdd_reviewers}
+
+| *Status*
+| [.{sdd_status} .status-macro]#{sdd_status}#
+|===

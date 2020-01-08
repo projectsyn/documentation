@@ -1,10 +1,10 @@
 = SDD 0002 - Application deployments
 
-:sdd_author: Tobias Brunner, Marco Fretz
-:sdd_owner: SIG Documentation
+:sdd_author:    Tobias Brunner, Marco Fretz
+:sdd_owner:     SIG Documentation
 :sdd_reviewers: Syn Kickstart Group
-:sdd_status: Accepted
-include::table.adoc[]
+:sdd_status:    accepted
+include::partial$meta-info-table.adoc[]
 
 [NOTE]
 .Summary

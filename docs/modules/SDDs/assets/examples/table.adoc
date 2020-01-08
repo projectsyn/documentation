@@ -1,9 +1,0 @@
-{set:cellbgcolor:grey}
-[grid=none, frame=none]
-|===
-| Author          >| {sdd_author}
-| Owner           >| {sdd_owner}
-| Reviewers (SIG) >| {sdd_reviewers}
-| Status          >| {sdd_status}
-|===
-{set:cellbgcolor!}
