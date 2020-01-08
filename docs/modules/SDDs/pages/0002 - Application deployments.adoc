@@ -1,0 +1,45 @@
+= SDD 0002 - Application deployments
+
+:sdd_author: Tobias Brunner, Marco Fretz
+:sdd_owner: SIG Documentation
+:sdd_reviewers: Syn Kickstart Group
+:sdd_status: Accepted
+include::table.adoc[]
+
+[NOTE]
+.Summary
+====
+This defines how applications can be deployed on a VSHN managed kubernetes Platform.
+====
+
+== Motivation
+
+As described in SDD#2019-10-18 - Management Layers it is important to understand why we differentiate applications from Managed Services and why there are arbitrary ways how workloads or applications come onto a kubernetes cluster.
+
+== Goals
+
+Make it clear the SYN does not actually care about how applications come onto a managed platform.
+
+== Non-Goals
+
+Define how in details you can deploy an application or custom service
+
+== Design Proposal
+
+Applications are deployed in several ways on a cluster
+
+* CI/CD pipeline managed by us or by the customer on its own (Kustomize, Helm, etc.)
+* Customer / project specific GitOps repository
+* Manually (kubectl, Rancher / OpenShift UI, etc.)
+
+== Defining Services
+
+An application deployment can create Service Objects in the Kubernetes API to provision needed backend services (DB, cache, etc.), see above.
+
+* Such services are then automatically added to the "SYN Application Monitoring"
+* The deployment can create special objects to add the applications health / metrics endpoint to the "SYN Application Monitoring"
+* Via additional objects things like Backup, Maintenance, etc. can be controlled (question)
+
+This automation is achieved with the help of Crossplane Services, see SDD#2019-10-18 - Crossplane Service Provisioning
+
+== References
