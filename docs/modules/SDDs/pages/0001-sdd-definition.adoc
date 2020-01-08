@@ -6,7 +6,7 @@
 
 This is the title of the SDD. Keep it simple and descriptive. A good title can help communicate what the SDD is and should be considered as part of any review.
 
-#The title should be CamelCase and spaces/punctuation should be replaced with -.#
+The title should be CamelCase and spaces/punctuation should be replaced with -.
 
 
 == Meta Information Table
