@@ -19,20 +19,15 @@ A central inventory helps to keep track of all Syn managed Kubernetes clusters, 
 
 === Goals
 
-The API provides several key features for the Syn platform. It's
-architected around many helper services and orchestrates them to do
-their job well.
+The API provides several key features for the Syn platform. It's architected around many helper services and orchestrates them to do their job well.
 
-* Be the central hub of Syn managed services and clusters including
-tenant information, fully ready for multitenancy operations
+* Be the central hub of Syn managed services and clusters including tenant information, fully ready for multitenancy operations
 * Provide insights to all running services and clusters
-* Be the key part of config management by providing management
-functionality for GitOps Git repositories
+* Be the key part of config management by providing management functionality for GitOps Git repositories
 
 === Non-Goals
 
-* Kubernetes cluster provisioning - That's up to external tools like
-Rancher and/or Crossplane
+* Kubernetes cluster provisioning - That's up to external tools like Rancher and/or Crossplane
 
 === API Personas
 
