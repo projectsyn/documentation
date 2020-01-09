@@ -15,3 +15,4 @@
 * xref:0012-synsights-logging.adoc[0012 - SYNsights Logging]
 * xref:0013-synsights-metrics-and-alerting.adoc[0013 - SYNsights Metrics and Alerting]
 * xref:0014-synsights-external-monitoring.adoc[0014 - SYNsights External Monitoring]
+* xref:0015-secrets-management.adoc[0015 - Secrets Management]
