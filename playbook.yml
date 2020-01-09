@@ -20,6 +20,7 @@ asciidoc:
     hide-uri-scheme: ''
     experimental: ''
     stem: ''
+    icons: font
     kroki-server-url: https://vshn-kroki.appuioapp.ch
   extensions:
   - asciidoctor-kroki
