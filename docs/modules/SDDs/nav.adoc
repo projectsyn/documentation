@@ -13,3 +13,4 @@
 * xref:0010-syn-overall-concept.adoc[0010 - Syn Overall Concept]
 * xref:0011-synsights-dashboards.adoc[0011 - SYNsights Dashboards]
 * xref:0012-synsights-logging.adoc[0012 - SYNsights Logging]
+* xref:0013-synsights-metrics-and-alerting.adoc[0013 - SYNsights Metrics and Alerting]
