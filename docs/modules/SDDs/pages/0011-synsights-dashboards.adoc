@@ -1,0 +1,48 @@
+= SDD 0011 SYNsights Dashboards
+
+:sdd_author:    Marco Fretz
+:sdd_owner:     Marco Fretz
+:sdd_reviewers: SYN Workgroupd
+:sdd_date:      2019-10-25
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+With the Prometheus setup designed in https://wiki.vshn.net/pages/viewpage.action?pageId=153846140[SDD#2019-10-25 - SYNsights Metrics and Alerting] we collect a lot of metrics which we use for Alerting. In this Design we build Grafana based dashboards on this Prometheus (and other) datasources to get beautiful and useful graphing of important metrics.
+====
+
+== Motivation
+
+Having an easy way to observe current system health and being able to correlate events with metrics is key to system and application operations and Incident handling.
+
+=== Goals
+
+* Dashboard framework, so other services can easily bring their own dashboards (together with the metric endpoints they register for scraping in prometheus)
+* Framework so that other monitoring tools can add their datasource to Grafana
+* Default dashboards depending on the cluster monitoring (e.g. for Nodes, Kubernetes, etc.)
+** e.g. reuse what Rancher brings in the cluster-monitoring
+
+=== Non-Goals
+
+* Alerting out of Grafana
+* Add custom dashboards
+
+== Design Proposal
+
+=== Implementation Details
+
+* Grafana installed using the https://github.com/integr8ly/grafana-operator Operator, which manages the following using CRDs
+** Grafana instances
+** Dashboards
+** Datasources
+* The https://wiki.vshn.net/pages/viewpage.action?pageId=153846140[Prometheus] and Logging config management component register their datasources in Grafana using the CRD
+* Dashboards are big json documents which are not suited well to come with configmaps (size limit). The Operator supports pulling dashboards from HTTP URLs, which makes much more sense
+** We can also pack all dashboard in a container image with a http server, then dashboards can be pulled from within the cluster.
+* Still dashboards are defined using the CRD from the Operator, this way any crossplane managed or config management defined platform service can install its dashboards
+
+=== Risks and Mitigations
+
+* The one and only kind of working Operator we found is not really feature complete, e.g. it cannot manage a Loki datasource by now. Also sometimes manual pod deletions are needed to actually have changes applied.
+** We can contribute to fix the open issues and add features - worst case we can fork or build our own operator. As as starting point, the operator is good enough.
