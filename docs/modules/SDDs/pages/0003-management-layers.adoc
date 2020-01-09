@@ -3,6 +3,7 @@
 :sdd_author:    Marco Fretz
 :sdd_owner:     Marco Fretz
 :sdd_reviewers: 
+:sdd_date:      2019-10-18
 :sdd_status:    draft
 include::partial$meta-info-table.adoc[]
 

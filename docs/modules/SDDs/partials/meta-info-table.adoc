@@ -9,6 +9,9 @@
 | Reviewers (SIG)
 | {sdd_reviewers}
 
+| Date
+| {sdd_date}
+
 | Status
 | [.{sdd_status} .status-macro]#{sdd_status}#
 |===

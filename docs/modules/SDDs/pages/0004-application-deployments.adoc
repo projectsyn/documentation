@@ -1,8 +1,9 @@
-= SDD 0005 - Application deployments
+= SDD 0004 - Application deployments
 
 :sdd_author:    Tobias Brunner, Marco Fretz
 :sdd_owner:     SIG Documentation
 :sdd_reviewers: Syn Kickstart Group
+:sdd_date:      2019-10-18
 :sdd_status:    accepted
 include::partial$meta-info-table.adoc[]
 

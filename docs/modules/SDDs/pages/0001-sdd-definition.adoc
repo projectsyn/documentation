@@ -6,7 +6,7 @@
 
 This is the title of the SDD. Keep it simple and descriptive. A good title can help communicate what the SDD is and should be considered as part of any review.
 
-The title should be CamelCase and spaces/punctuation should be replaced with -.
+The number of the SDD is the next available one in the sequence.
 
 
 == Meta Information Table
@@ -14,6 +14,7 @@ The title should be CamelCase and spaces/punctuation should be replaced with -.
 :sdd_author:    Tobias Brunner, Marco Fretz
 :sdd_owner:     SIG Documentation
 :sdd_reviewers: Syn Kickstart Group
+:sdd_date:      2019-10-18
 :sdd_status:    accepted
 include::partial$meta-info-table.adoc[]
 
@@ -24,6 +25,7 @@ You can generate the meta information table using the following syntax in your A
 :sdd_author:    Tobias Brunner, Marco Fretz
 :sdd_owner:     SIG Documentation
 :sdd_reviewers: Syn Kickstart Group
+:sdd_date:      2019-10-18
 :sdd_status:    accepted
 \include::partial$meta-info-table.adoc[]
 ....
