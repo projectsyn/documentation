@@ -16,3 +16,4 @@
 * xref:0013-synsights-metrics-and-alerting.adoc[0013 - SYNsights Metrics and Alerting]
 * xref:0014-synsights-external-monitoring.adoc[0014 - SYNsights External Monitoring]
 * xref:0015-secrets-management.adoc[0015 - Secrets Management]
+* xref:0016-backup-framework.adoc[0016 - Backup Framework]
