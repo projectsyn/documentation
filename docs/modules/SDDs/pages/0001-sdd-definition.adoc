@@ -8,6 +8,7 @@ This is the title of the SDD. Keep it simple and descriptive. A good title can h
 
 The number of the SDD is the next available one in the sequence.
 
+IMPORTANT: There is a xref:sdd-template.adoc[SDD Template] to be used for new documents.
 
 == Meta Information Table
 

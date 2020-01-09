@@ -1,7 +1,9 @@
 .Syn Design Documents - SDD
 * xref:sdd-template.adoc[SDD Template]
+
 * xref:0001-sdd-definition.adoc[0001 - SDD Definition]
 * xref:0002-naming-scheme.adoc[0002 - Naming Scheme]
 * xref:0003-management-layers.adoc[0003 - Management Layers]
 * xref:0004-application-deployments.adoc[0004 - Application deployments]
 * xref:0005-crossplane-service-provisioning.adoc[0005 - Crossplane Service Provisioning]
+* xref:0006-commodore-configuration-catalog-compilation.adoc[0006 - Commodore Configuration Catalog Compilation]

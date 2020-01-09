@@ -15,7 +15,7 @@ This defines how applications can be deployed on a VSHN managed kubernetes Platf
 
 == Motivation
 
-As described in SDD#2019-10-18 - Management Layers it is important to understand why we differentiate applications from Managed Services and why there are arbitrary ways how workloads or applications come onto a kubernetes cluster.
+As described in xref:0003-management-layers.adoc[SDD 0003 - Management Layers] it is important to understand why we differentiate applications from Managed Services and why there are arbitrary ways how workloads or applications come onto a kubernetes cluster.
 
 == Goals
 
