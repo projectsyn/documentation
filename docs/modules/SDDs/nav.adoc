@@ -1,3 +1,4 @@
 .Syn Design Documents - SDD
 * xref:0001-sdd-definition.adoc[0001 - SDD Definition]
-* xref:0002-application-deployments.adoc[0002 - Application deployments]
+* xref:0002-naming-scheme.adoc[0002 - Naming Scheme]
+* xref:0005-application-deployments.adoc[0002 - Application deployments]

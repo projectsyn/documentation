@@ -1,4 +1,4 @@
-= SDD 0002 - Application deployments
+= SDD 0005 - Application deployments
 
 :sdd_author:    Tobias Brunner, Marco Fretz
 :sdd_owner:     SIG Documentation
