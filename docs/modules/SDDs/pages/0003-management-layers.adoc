@@ -1,4 +1,4 @@
-= SDD 0002 - Naming Scheme
+= SDD 0003 - Management Layers
 
 :sdd_author:    Marco Fretz
 :sdd_owner:     Marco Fretz
