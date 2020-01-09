@@ -1,0 +1,105 @@
+= SDD 0012 - SYNsights Logging
+
+:sdd_author:    Marco Fretz
+:sdd_owner:     Marco Fretz
+:sdd_reviewers: SYN Workgroup
+:sdd_date:      2019-10-25
+:sdd_status:    speculative
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+In a central Logging system all logs relevant for VSHN Operations are collected, stored and are shown in a easy to use interface to browse though the logs.
+
+Fluentd is the de-facto-standard to ship logs in the kubernetes ecosystem. As we're already using Grafana for https://wiki.vshn.net/pages/viewpage.action?pageId=153846160[dashboards] it makes sense to use https://grafana.com/oss/loki/[Grafana Loki] to store and search logs. Of course Loki is fully integrated into Grafana and allows easy searching and correlation with metrics.
+====
+
+= Motivation
+
+Central Logging is key to see what's coning on when services are not behaving as they should or just to see what's going on. Ideally metrics and logs can be correlated to have a better picture of the situation.
+
+=== Goals
+
+* All relevant platform services (Grafana, Flux, Prometheus, Steward, etc.) log into central logging system
+
+=== Non-Goals
+
+
+== Design Proposal
+
+Using the https://github.com/banzaicloud/logging-operator/blob/master/docs/example-loki-nginx.md[https://github.com/banzaicloud/logging-operator] we can fully automate the configuration of Fluentd and FluentBit to ship logs to Loki.
+
+Installing Loki is done using the Helm chart. The Helm chart can configure Loki to create a PVC for persistent log index and chunks storage.
+
+image::logging_operator_flow.png[]
+
+=== Implementation Details
+
+==== Cluster Logging
+
+Default Logging for VSHN managed services (including platform services)
+
+[source,yaml]
+--
+---
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: Logging
+metadata:
+  name: vshn-loki-clusterlogging
+  namespace: vshn-monitoring
+spec:
+  fluentd:
+    disablePvc: true
+  fluentbit: {}
+  controlNamespace: vshn-monitoring
+---
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterOutput
+metadata:
+  name: vshn-loki-clusteroutput
+  namespace: vshn-monitoring
+spec:
+  loki:
+    url: http://loki:3100
+    configure_kubernetes_labels: true
+    buffer:
+      timekey: 1m
+      timekey_wait: 30s
+      timekey_use_utc: true
+---
+apiVersion: logging.banzaicloud.io/v1beta1
+kind: ClusterFlow
+metadata:
+  name: vshn-loki-clusterflow-prom
+  namespace: vshn-monitoring
+spec:
+  selectors:
+    app: prometheus
+  outputRefs:
+    - vshn-loki-clusteroutput
+--
+
+==== Customer specific Logging
+
+A customer can freely define any other logging flow using the banzaicloud operator.
+
+image::nginx_loki.png[]
+
+=== Risks and Mitigations
+
+* Fluentd might be too overkill. This is unfortunately the only way when using the banzaicloud operator. It would be more lightweight to use just FluentBit → Loki. There is progress in directly supporting this mode on the Loki side, not in the banzaicloud operator though.
+
+
+== Drawbacks
+
+* Grafana Loki works with Labels only and does not provide fulltext index and search features for logs. Besides the labels Loki is more or less "grep" when searching logs.
+
+
+== Alternatives [optional]
+
+* Elasticserach as the log indexer and storage. ES can be integrated into Grafana (standard DataSource) in a very similar way than Loki. The operation footprint for ES is far bigger than Loki why we think Loki is better suited as our default logging system.
+
+
+== References
+
