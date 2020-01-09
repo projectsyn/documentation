@@ -17,3 +17,4 @@
 * xref:0014-synsights-external-monitoring.adoc[0014 - SYNsights External Monitoring]
 * xref:0015-secrets-management.adoc[0015 - Secrets Management]
 * xref:0016-backup-framework.adoc[0016 - Backup Framework]
+* xref:0017-maintenance-with-renovate.adoc[0017 - Maintenance with Renovate]
