@@ -3,7 +3,7 @@
 :sdd_author:    Marco Fretz & Tobias Brunner
 :sdd_owner:     Tobias Brunner
 :sdd_reviewers: 
-:sdd_date:      2019-10-18
+:sdd_date:      2019-10-21
 :sdd_status:    speculative
 include::partial$meta-info-table.adoc[]
 
