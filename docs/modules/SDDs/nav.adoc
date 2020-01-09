@@ -7,3 +7,4 @@
 * xref:0004-application-deployments.adoc[0004 - Application deployments]
 * xref:0005-crossplane-service-provisioning.adoc[0005 - Crossplane Service Provisioning]
 * xref:0006-commodore-configuration-catalog-compilation.adoc[0006 - Commodore Configuration Catalog Compilation]
+* xref:0007-lieutenant-management-api.adoc[0007 - Lieutenant - Management API]
