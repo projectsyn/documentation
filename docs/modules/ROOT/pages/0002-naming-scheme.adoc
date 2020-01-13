@@ -1,0 +1,64 @@
+= SDD 0002 - Naming Scheme
+
+:sdd_author:    Simon Rüegg
+:sdd_owner:     SIG Syn
+:sdd_reviewers: SIG Syn
+:sdd_date:      2019-10-18
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This defines the naming scheme for all SYN components.
+====
+
+== Motivation
+
+It safes a lot of time by providing a guideline for names. Also it ensures a certain structure and consistency.
+
+== Goals
+
+Name all components of SYN in a consistent and structured way.
+
+== Non-Goals
+
+Being a hard rule. It's only a guideline and there can be exceptions in certain cases.
+
+== Design Proposal
+
+=== Tool naming
+
+* Names should follow the navy ranks, as specified in https://en.wikipedia.org/wiki/Royal_Navy_ranks,_rates,_and_uniforms_of_the_18th_and_19th_centuries[Wikipedia].
+* Where the name is not such a navy rank the word "SYN" should be included in the name (e.g. SYNventory, SYNsights, etc.) if possible.
+
+=== Commodore Component Names
+
+* The name should be independent from the tool(s) it manages, e.g. synsights-metrics instead of prometheus, or backup instead of k8up
+
+=== Git repository naming and location
+
+[options="header"]
+|===
+| Type             | Scheme
+| Tool             | https://git.vshn.net/syn/<toolname>
+| Component        | https://git.vshn.net/syn/commodore-components/<componentname>
+| Inventories      | https://git.vshn.net/syn/customers/<customername>
+| Cluster catalogs | https://git.vshn.net/syn/cluster-catalogs/<clustername>
+|===
+
+=== Kubernetes namespace naming
+
+The convention is: syn-<name> 
+
+=== Kubernetes object naming
+
+When the object already is in a syn named namespace it doesn't need to contain syn again, so f.e. instead of synbackup it's enough to name it backup.
+
+=== Configuration parameters
+
+tbd (naming scheme for configuration parameters of component variables)
+
+=== Configuration hierarchy
+
+tbd
