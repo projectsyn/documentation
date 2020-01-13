@@ -1,0 +1,134 @@
+= SDD 0014 - SYNsights External Monitoring
+
+:sdd_author:    Marco Fretz
+:sdd_owner:     Marco Fretz
+:sdd_reviewers: Christian Häusler, SYN Workgroup
+:sdd_date:      2019-10-28
+:sdd_status:    speculative
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This is the concept on how we can monitor services from outside of the managed platform (the Kubernetes cluster).
+====
+
+== Motivation
+
+=== VSHN Requirements
+
+* *SLA relevant* reachability monitoring from outside the cluster but as close as possible to the cluster (same network, same cloud account, etc.). This is need to ensure:
+** that ingress and load-balancer work
+** IP failover / floating IPs work for a serivce
+** ensure that inboud FW rules are okay
+* It is not necessary to monitor the correct function of the service, as this is already done within the cluster
+* *SLA irrelevant* monitoring via the internet or wider company network to compare results to show the customer where a problem sits.
+
+=== Customer Requirements
+
+The customer usually sells a service that is accessed via the internet or wider company network, this is what counts for him.
+
+* Add arbitrary remote checks in a mostly automated and convenient way.
+** Reachability is enough here, too. Functionality is already covered by our in-cluster monitoring.
+* Being able to compare metrics with our monitored metrics
+
+=== Goals
+
+* External Black Box monitoring
+* An easy way to add monitoring configuration for services running on the platform so that they are automatically monitored for reachability from outside of the cluster or even from the public internet.
+* Alerting is configurable
+** by the customer to go to any supported channels and recipients
+** to go to the VSHN central alert handling tool
+* Metrics (be it just up/down and response time) can be pulled into the https://wiki.vshn.net/pages/viewpage.action?pageId=153846140[Metrics] tool so we can later correlate metrics on dashboards and for better alerting rules
+
+=== Non-Goals
+
+* Being able to execute any check from external (like what we have in the VSHN icinga world).
+* White Box monitoring (doing more than just monitor reachability and repsonse time).
+
+== Design Proposal
+
+=== General assumptions
+
+* We should only monitor services consumed by end-users.
+* Monitoring services via TCP, UDP or usually HTTP is enough (Black Box monitoring), because +
+** external monitoring is only to check reachability
+** all other checks are done in-cluster using the service's health / metrics endpoint or a specific check-plugin or similar
+** things like certificate validity is enough to monitor in cluster as well - nevertheless common monitoring services usually can do certificate checks
+* There are three types of sources, where we might want to monitor *from*:
+** From a external VSHN defined location
+*** To see whether the we  can reach the service
+*** to correlate this with the cluster internal availability of the service (if this is not the same, it's a "internet" or network problem)
+*** This is what should be relevant for SLA when monitoring SLIs
+** From (many) external locations to check global internet availability
+*** This is outside of the scope of a VSHN managed services, as VSHN does not operate own networks or VM infrastructure and does not include this in its SLAs.
+*** Still this is a service we could offer as "managed" (at least configuring it automatically) via a service like statuscake (monitoring, ensuring global availability is still out of scope)
+** From inside the same network at a customer site or over customer VPN, etc.
+*** special use cases, different from customer to customer
+*** usually relevant for services not exposed to the internet
+*** This can be SLA relevant monitoring of SLIs too
+
+=== Internet / public monitoring
+
+* Have an operator that reacts on objects and configures an external service (e.g. statuscake) to monitor a service or HTTP URL
+
+==== Operator
+
+* https://github.com/stakater/IngressMonitorController
+** Looks promising, reacts on ingress / route objects only (maybe that's enough though)
+** Can select but not define recipients, also all other configuration of the external services is out-of-scope
+* Own operator that can also react on other resources (or a CRD)
+
+==== Monitoring Services
+
+===== Statuscake
+
+* Mostly UP/Down for HTTP with a lot of added features
+* Free for a few URLs
+* well known
+* can alert to webhooks to back feed into our alerta for example, etc. https://www.statuscake.com/kb/knowledge-base/how-to-use-the-web-hook-url/
+
+===== Own Service
+
+We should build our own service, e.g
+
+* Prometheus blackbox-exporter which gets its scrape targets from a service discovery tool fed by a small API services.
+** Alertmanager configured to send alerts to our VSHN central alert handling
+* https://github.com/hunterlong/statping
+** http and TCP/UDP monitoring
+** has Prometheus metrics endpoint for all monitored services
+** lightweight, could be run per customer cluster / customer
+** can send to arbitrary webhooks (our VSHN central alert handling)
+
+This service should run per customer "at VSHN central", provisioned (or at least provisioning triggered) by SYNventory when a customer (or the first SYN managed cluster) is created.
+
+This service could be the default and the only external monitoring relevant for SLA relevant monitoring. Using status cake can be a (extra payed) addition.
+
+===== Others
+
+There are many others similar to statuscake.
+
+=== Cluster external monitoring
+
+* Deploy a service that monitors targets configured via an API call, see link:#SDD20191028SYNsightsExternalMonitoring-ExternalMonitoring-OwnService[ExternalMonitoring-OwnService]
+* Have an operator that reacts on objects and configures that service to monitor the services
+
+=== Multi-site / cross-cluster monitoring
+
+* Basically the same as link:#SDD20191028SYNsightsExternalMonitoring-ExternalMonitoring-Clusterexternalmonitoring[Cluster external monitoring] just that we could deploy that services in at the other site or in another cluster (of the same customer).
+
+== Drawbacks
+
+* Most public services support HTTP only, but we'll also have other services running on our platforms (DNS, Mail, DBaaS, etc.)
+** Having our own services for external monitor would allow to extend it as needed
+
+== Alternatives
+
+* Somehow federate another kubernetes cluster (be it just a k3s instance) so that a Prometheus operator there can sees the resources it should monitor, prepends the external-URL, etc..
+
+== References
+
+* https://github.com/stakater/IngressMonitorController
+* https://www.statuscake.com/kb/knowledge-base/how-to-use-the-web-hook-url/
+* https://github.com/prometheus/blackbox_exporter
+
