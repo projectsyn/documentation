@@ -1,0 +1,64 @@
+= SDD 0016 - Backup Framework
+
+:sdd_author:    Simon Gerber
+:sdd_owner:     Simon Gerber
+:sdd_reviewers:
+:sdd_date:      2019-10-30
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+A SYN managed cluster provides a framework for application backups. This SDD proposes to use https://k8up.io/[K8up] to provide a Kubernetes-native framework for backups. K8up is configured and managed through https://wiki.vshn.net/display/SYN/SDD%232019-10-18+-+Commodore+Configuration+Catalog+Compilation[Commodore], and the `backup` Commodore component provides a Jsonnet library that allows other components to easily create K8up jobs, schedules and pre-backup pods.
+
+Applications can request that their managed services (e.g. requested through Crossplane) are backed up automatically by annotating the Kubernetes objects that define the managed services.
+====
+
+== Motivation
+
+A SYN-managed cluster provides a mechanism that applications can use to create backups, and provides a mechanism (through annotations) where applications can request managed services to be backed up as well. This is part of the aim of SYN to provide a framework for managing applications.
+
+=== Goals
+
+* Define how backups are done in a SYN-managed cluster
+* Define how SYN managed services can automatically be backed up
+
+=== Non-Goals
+
+* TBD
+
+== Design Proposal
+
+A SYN-managed cluster has K8up installed to do backups onto S3 buckets. K8up is configured to store all backups into a cluster-wide S3 bucket with a cluster-wide backup password. However, individual jobs can configure their own buckets and backup passwords. The K8up configuration is codified in a https://git.vshn.net/syn/commodore-components/backup[Commodore component] which provides a library of Jsonnet methods which can be used by other SYN components to configure backups.
+
+The Commodore component creates and manages a K8up schedule and pre-backup pod which backs up all the Kubernetes objects of the cluster every 15 minutes. This schedule uses K8up's pre-backup pod mechanism to run a custom command which uses Kubernetes's API discovery mechanisms to discover all object types in the cluster and backs up all objects of all discovered types. This is inspired by VSHN's https://git.vshn.net/appuio/openshift-pre-backup[openshift-pre-backup] script, which uses the same mechanisms to backup all OpenShift objects as part of the nightly Burp backup on OpenShift master nodes.
+
+*Speculative*
+
+SYN also provides a Kubernetes controller which observes objects of interest, such as Crossplane `MysqlInstance`  claims. This controller reacts to the presence of an annotation such as `backup.syn.vshn.net/schedule` and automatically creates a backup schedule for those objects. This backup schedule uses the global backup bucket and password unless specified otherwise with annotations `backup.syn.vshn.net/password-secret`  and `backup.syn.vshn.net/bucket-name`. If the `passwordSecret`  annotation is set, the controller creates a K8up schedule which uses the provided secret (in the same namespace as the object) as the source for the backup password. If `bucket-name`  is set, the controller also creates a Crossplane `Bucket`  claim, which creates a separate S3 bucket for the backup schedule. The schedule is then configured to use this S3 bucket instead of the global bucket.
+
+=== Implementation Details/Notes/Constraints
+
+* Currently the Kubernetes object backup is implemented, but highly PoC quality. It only works if the docker image containing the shell script which discovers and downloads the objects is made available in the cluster's docker daemons.
+
+=== Risks and Mitigations
+
+* K8up is developed by VSHN, and thus we can add features which are required for SYN
+* This design proposal doesn't restrict users from creating nonsense backup schedules (e.g. backing up the database every minute).
+
+== Drawbacks
+
+* The design requires a S3-compatible object storage for the backup buckets. Since this is available at most cloud providers in some form this is not a big issue
+* The design assumes that Crossplane is available to provision S3 buckets on demand. While this works "out of the box" on Azure, AWS and GCP, there is some effort required to provide the same abstraction on e.g. Cloudscale.ch.
+
+== Alternatives
+
+* K8up could be replaced with https://velero.io/[Velero], if all the required functionality is available in Velero.
+
+== References
+
+* https://k8up.io/
+* https://velero.io/
+* https://git.vshn.net/appuio/openshift-pre-backup
+
