@@ -74,143 +74,83 @@ API, managing the objects of the Operators.
 
 === REST API
 
-==== Tenant Management
+Tenant Management::
 
-Management of tenants for assigning clusters and managing access rights.
+* Management of tenants for assigning clusters and managing access rights.
 CRUD functionality.
+* For VSHN: The idea is to sync this data from the portal. A customer can be Syn enabled which then automatically syncs the information to Lieutenant and makes it available in the API.
+* Data storage location: `Tenant` CRD
 
-Implementation details::
+Cluster Registry::
 
-For VSHN: The idea is to sync this data from the portal. A customer can be Syn enabled which then automatically syncs the information to Lieutenant and makes it available in the API.
-
-Data storage location::
-
-`Tenant` CRD
-
-==== Cluster Registry
-
-Registry of all Syn managed Kubernetes cluster with the following
+* Registry of all Syn managed Kubernetes cluster with the following
 features:
-
-* Create (register) cluster
-* Read (list) all clusters with filtering possibilities
-* Update (edit) cluster
-* Delete cluster
-
-Implementation details::
-
-The following information are stored:
-
-* Automatically generated cluster ID (string with 6 lowercase chars and
+** Create (register) cluster
+** Read (list) all clusters with filtering possibilities
+** Update (edit) cluster
+** Delete cluster
+* The following information is stored:
+** Automatically generated cluster ID (string with 6 lowercase chars and
 numbers) - not editable
-* Cluster display name and slug (shortname)
-* Initial registration key for Steward
-** Lifetime
-** Validity
-* Kubernetes API endpoint
-* Reference to Kubernetes credentials in Vault
+** Cluster display name and slug (shortname)
+** Initial registration key for Steward
+*** Lifetime
+*** Validity
+** Kubernetes API endpoint
+** Reference to Kubernetes credentials in Vault
+* Data storage location: `Cluster` CRD
 
-Data storage location::
+Facts Inventory::
 
-`Cluster` CRD
-
-==== Facts Inventory
-
-Inventory of facts about the clusters and services
-with a query interface.
-
-Implementation details::
-
-The key of the facts is the cluster ID.
-
-There are two type of facts:
-
-* _Static facts_: Manually configured meta information about a cluster,
-stored in cluster Object +
-** Customer
-** SLA
-** Contact information
-** Cloud information
-** Kubernetes distribution
-* _Dynamic facts_: Facts collected by an in-cluster agent and regularly
-sent to Lieutenant, stored in Timeseries DB +
-** Kubernetes version
-** Deployed managed services and their version
-** Node details (OS, CPU, RAM, labels) and number of nodes
-** Important objects
-*** Syn predefined annotations on objects
-*** Per object contact information and responsibilities via annotations
-*** _Ingress_ objects: `spec.rules[].host` (helps to find which cluster
-hosts which URL)
-
-Facts are not actively collected by polling, they are pushed to the API
+* Inventory of facts about the clusters and services with a query interface.
+* The key of the facts is the cluster ID.
+* There are two type of facts:
+** _Static facts_: Manually configured meta information about a cluster,
+stored in cluster Object: Tenant, SLA, Contact information, Cloud information, Kubernetes distribution
+** _Dynamic facts_: Facts collected by an in-cluster agent and regularly
+sent to Lieutenant, stored in Timeseries DB: Kubernetes version, Deployed managed services and their version, Node details (OS, CPU, RAM, labels) and number of nodes, important objects, Syn predefined annotations on objects, per object contact information and responsibilities via annotations, _Ingress_ objects `spec.rules[].host` (helps to find which cluster
+hosts which URL).
+* Facts are not actively collected by polling, they are pushed to the API
 by Steward.
-
-All dynamic facts are versioned (and update generates a new version)
+* All dynamic facts are versioned (and update generates a new version)
 which allows historical information when has what changed. Facts have
 timestamps, so that a freshness indicator is possible.
+* Data storage location: _InfluxDB_
 
-Data storage location::
+Component state::
 
-_InfluxDB_
+* Live state of the managed services
+* Querying Argo CD, running on the cluster
+* Data storage location: _Argo CD_
 
-==== Component state
+Steward Configuration::
 
-Live state of the managed services
-
-Implementation details::
-
-Querying Argo, running on the cluster …​
-
-Data storage location::
-
-_Argo CD_
-
-==== Steward Configuration
-
-Deployment and configuration delivery for Steward bootstrapping
-
-Implementation details::
-
-The API provides the Steward deployment JSON for the initial cluster
+* Deployment and configuration delivery for Steward bootstrapping
+* The API provides the Steward deployment JSON for the initial cluster
 synfection.
+* The following data is delivered to Steward:
+** URL to cluster catalog git repository
+** SSH host key of git repository
 
-The following data is delivered to Steward:
+Vault Integration::
 
-* URL to cluster catalog git repository
-* SSH host key of git repository
-
-==== Vault Integration
-
-Vault bootstrapping for cluster
-
-Implementation details::
-
-The API configures Vault for the cluster:
-
-* Create access credentials
-* Configure authorization
-* Steward authentication token handling
-** Bootstrap token can only be used once and for a limited time. After
+* Vault bootstrapping for cluster
+* The API configures Vault for the cluster:
+** Create access credentials
+** Configure authorization
+** Steward authentication token handling
+*** Bootstrap token can only be used once and for a limited time. After
 bootstrapping the token will be generated by Vault and used by Steward
 from now on.
-* ...
 
-==== Maintenance Utilities
+Maintenance Utilities::
 
-Helper functions to facilitate proper maintenance
-
-Implementation details::
-
+* Helper functions to facilitate proper maintenance
 * Integration with Renovate, f.e. list all open Renovate Merge Request
 on different Git repository instances, including the possibility to
 merge them.
 * Integration with to-be-invented host maintenance agent?
-* ...
-
-Data storage location::
-
-Git Merge/Pull requests
+* Data storage location: Git Merge/Pull requests
 
 ==== REST OpenAPI Spec
 
