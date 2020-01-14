@@ -10,12 +10,12 @@ include::partial$meta-info-table.adoc[]
 [NOTE]
 .Summary
 ====
-This is the overall SYN design overview. SYN consists of a lot of components which are designed and documented in their own design definitions (aka xref:0001-sdd-definition.adoc[SDD 001 - SDD Definition]).
+This is the overall Project Syn design overview. Project Syn consists of a lot of components which are designed and documented in their own design definitions (aka xref:0001-sdd-definition.adoc[SDD 001 - SDD Definition]).
 ====
 
 == Motivation
 
-As this is SYN itself, the reasons and motivation is described in detail in https://wiki.vshn.net/display/SYN/The+VSHN+Syn+Project[The VSHN Syn Project] itself already.
+As this is Project Syn itself, the reasons and motivation is described in detail in https://wiki.vshn.net/display/SYN/The+VSHN+Syn+Project[The VSHN Syn Project] itself already.
 
 === Goals
 
@@ -43,7 +43,7 @@ image::concept_1.png[]
 
 ==== Platform
 
-Currently SYN does focus on adapting existing kubernetes cluster, not on provisioning them. 
+Currently Project Syn does focus on adapting existing kubernetes cluster, not on provisioning them. 
 
 * Rancher provisioned and managed Cluster
 * BYOC (Bring your own clsuter)
