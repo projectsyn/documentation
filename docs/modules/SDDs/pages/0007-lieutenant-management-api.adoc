@@ -363,7 +363,7 @@ Functionality:
 
 * Responsible for the `Cluster`  kind
 * Manages the `GitRepo` object for cluster configuration catalog
-* Manages `Proxy`  object for providing an Inlets server endpoint
+* (Manages `Proxy`  object for providing an Inlets server endpoint) later
 * Stores the registration key and it's validity for initial Steward
 bootstrapping
 * Admission webhook denies creation of `Cluster` object when the
@@ -396,11 +396,12 @@ spec:
   bootstrapToken:
     token: sdaf445ftzzt
     validUntil: 2020-01-27 12:00
-    valid: true
   facts:
     distribution: openshift3
     cloud: cloudscale
     region: rma1
+status:
+  bootstrapTokenValid: true
 ---
 apiVersion: syn.tools/v1alpha1
 kind: Cluster
@@ -424,11 +425,12 @@ spec:
   bootstrapToken:
     token: sd09u3fss33
     validUntil: 2020-01-27 12:00
-    valid: true
   facts:
     distribution: openshift4
     cloud: aws
     region: eu-west-1
+status:
+  bootstrapTokenValid: true
 --
 
 [cols=",",options="header",]
@@ -477,6 +479,10 @@ be changed to `false`.
 
 |`spec.facts` |Key/value pairs of statically configured cluster facts
 which do not change on a cluster.
+
+|`status.bootstrapTokenValid` |`true` or `false`. Validity of the bootstrap
+token, set by the Lieutenant API.
+
 |===
 
 
