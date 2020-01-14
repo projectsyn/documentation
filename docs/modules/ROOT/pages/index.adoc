@@ -6,5 +6,9 @@ This is the documentation of Project Syn.
 
 == Components
 
+pass:[<!-- vale Microsoft.GenderBias = NO -->]
+
 * xref:commodore::index.adoc[Commodore]
 * xref:steward::index.adoc[Steward]
+
+pass:[<!-- vale Microsoft.GenderBias = YES -->]
