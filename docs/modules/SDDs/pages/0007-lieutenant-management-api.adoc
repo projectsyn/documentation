@@ -349,8 +349,8 @@ spec:
 status:
   bootstrapToken:
     token: sdaf445ftzzt
+    valid: true
     validUntil: 2020-01-27 12:00
-    bootstrapTokenValid: true
 ---
 apiVersion: syn.tools/v1alpha1
 kind: Cluster
@@ -379,8 +379,8 @@ spec:
 status:
   bootstrapToken:
     token: sdaf445ftzzt
+    valid: true
     validUntil: 2020-01-27 12:00
-   bootstrapTokenValid: true
 --
 
 [cols=",",options="header",]
@@ -391,7 +391,7 @@ Field
 a|
 Description
 
-|`metadata.labels.tenant` |Autosynced to `spec.tenantRef.name`. Helpful
+|`metadata.labels.tenant` |Autosynced from `spec.tenantRef.name`. Helpful
 for label filtering.
 
 |`metadata.annotations.tenantslug` |Autosynced to `spec.slug` of
@@ -553,4 +553,3 @@ tbd
 * https://openapi-generator.tech/
 * Operator SDK -
 https://github.com/operator-framework/operator-sdk/[https://github.com/operator-framework/operator-sdk]
-
