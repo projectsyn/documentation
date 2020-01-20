@@ -2,7 +2,7 @@
 
 :sdd_author:    Marco Fretz, Tobias Brunner
 :sdd_owner:     SIG Syn
-:sdd_reviewers: 
+:sdd_reviewers:
 :sdd_date:      2019-10-18
 :sdd_status:    draft
 include::partial$meta-info-table.adoc[]
@@ -341,15 +341,16 @@ spec:
   tenantRef:
     name: aezoo6
     namespace: syn-lieutenant
-  bootstrapToken:
-    token: sdaf445ftzzt
-    validUntil: 2020-01-27 12:00
+  tokenLifetime: 4h
   facts:
     distribution: openshift3
     cloud: cloudscale
     region: rma1
 status:
-  bootstrapTokenValid: true
+  bootstrapToken:
+    token: sdaf445ftzzt
+    valid: true
+    validUntil: 2020-01-27 12:00
 ---
 apiVersion: syn.tools/v1alpha1
 kind: Cluster
@@ -370,15 +371,16 @@ spec:
   tenantRef:
     name: os3ce3
     namespace: syn-lieutenant
-  bootstrapToken:
-    token: sd09u3fss33
-    validUntil: 2020-01-27 12:00
+  tokenLifetime: 4h
   facts:
     distribution: openshift4
     cloud: aws
     region: eu-west-1
 status:
-  bootstrapTokenValid: true
+  bootstrapToken:
+    token: sdaf445ftzzt
+    valid: true
+    validUntil: 2020-01-27 12:00
 --
 
 [cols=",",options="header",]
@@ -389,7 +391,7 @@ Field
 a|
 Description
 
-|`metadata.labels.tenant` |Autosynced to `spec.tenantRef.name`. Helpful
+|`metadata.labels.tenant` |Autosynced from `spec.tenantRef.name`. Helpful
 for label filtering.
 
 |`metadata.annotations.tenantslug` |Autosynced to `spec.slug` of
@@ -551,4 +553,3 @@ tbd
 * https://openapi-generator.tech/
 * Operator SDK -
 https://github.com/operator-framework/operator-sdk/[https://github.com/operator-framework/operator-sdk]
-
