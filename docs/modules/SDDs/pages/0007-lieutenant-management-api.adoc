@@ -92,7 +92,7 @@ features:
 * The following information is stored:
 ** Automatically generated cluster ID (string with 6 lowercase chars and
 numbers) - not editable
-** Cluster display name and slug (shortname)
+** Cluster display name
 ** Initial registration key for Steward
 *** Lifetime
 *** Validity
@@ -265,7 +265,6 @@ metadata:
   name: aezoo6
   namespace: syn-lieutenant
 spec:
-  slug: bigcorp
   displayName: Big Corp.
   gitRepoTemplate:
     spec:
@@ -277,7 +276,6 @@ metadata:
   name: os3ce3
   namespace: syn-lieutenant
 spec:
-  slug: acmecorp
   displayName: Acme Corp. (Subtenant of Big Corp)
   tenantRef:
     name: aezoo6
@@ -292,8 +290,6 @@ Field
 
 a|
 Description
-
-|`spec.slug` |Identification of the tenant (shortname or slug).
 
 |`spec.displayName` |Display name of the tenant.
 
@@ -327,14 +323,11 @@ metadata:
   namespace: syn-lieutenant
   labels:
     tenant: aezoo6
-  annotations:
-    tenantslug: bigcorp
 spec:
   apiEndpointSecretRef:
     name: k8sapi-ae3oso
     namespace: syn-lieutenant
   displayName: Big Corp. Production Cluster
-  slug: prodcluster
   gitRepoTemplate:
     spec:
       <GitRepoSpec>
@@ -359,14 +352,11 @@ metadata:
   namespace: syn-lieutenant
   labels:
     tenant: os3ce3
-  annotations:
-    tenantslug: acmecorp
 spec:
   apiEndpointSecretRef:
     name: k8sapi-etahv3
     namespace: syn-lieutenant
   displayName: Acme Corp. Dev Cluster
-  slug: acmedev
   gitRepoURL: https://github.com/acmecorp/gitops-mycluster.git
   tenantRef:
     name: os3ce3
@@ -394,9 +384,6 @@ Description
 |`metadata.labels.tenant` |Autosynced from `spec.tenantRef.name`. Helpful
 for label filtering.
 
-|`metadata.annotations.tenantslug` |Autosynced to `spec.slug` of
-referenced Tenant. Helpful for debugging and object inspection.
-
 |`spec.apiEndpointSecretRef` a|
 Reference to secret containing connection information to Kubernetes API
 endpoint of the registered Kubernetes cluster.:
@@ -406,8 +393,6 @@ endpoint of the registered Kubernetes cluster.:
 
 |`spec.displayName` |Display name of cluster which could be different
 from `metadata.name`. Allows cluster renaming should it be needed.
-
-|`spec.slug` |Identification of the cluster (shortname or slug).
 
 |`spec.gitRepoURL` |Git repository storing the cluster configuration
 catalog. If this is set, no `gitRepoTemplate` is needed.
@@ -454,8 +439,6 @@ metadata:
   namespace: syn-lieutenant
   labels:
     tenant: aezoo6
-  annotations:
-    tenantslug: bigcorp
 spec:
   apiSecretRef:
     name: my-api-secret
@@ -490,9 +473,6 @@ Description
 
 |`metadata.labels.tenant` |Autosynced to `spec.tenantRef.name`. Helpful
 for label filtering.
-
-|`metadata.annotations.tenantslug` |Autosynced to `spec.slug` of
-referenced Tenant. Helpful for debugging and object inspection.
 
 |`spec.apiSecretRef` a|
 Reference to secret containing connection information:
