@@ -510,6 +510,7 @@ Updated by Operator with current phase. Can be:
 * updating
 * deleting
 * deleted
+* failed
 
 |`status.type` a|
 Autodiscovered Git repo type. Can be:
