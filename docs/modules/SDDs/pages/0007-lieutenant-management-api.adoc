@@ -455,7 +455,7 @@ spec:
 status:
   phase: created
   type: GitHub
-  url: https://github.com/acmecorp/commodore-config.git
+  url: https://github.com/bigcorp/commodore-config.git
   conditions:
   - lastTransitionTime: "2019-12-31T10:55:14Z"
     reason: Git repo is ready to be used
