@@ -2,13 +2,40 @@
 
 image::syn.png[]
 
-This is the documentation of Project Syn.
+== Introduction
 
-== Components
+> Project Syn is a pre-integrated set of tools to provision, update, backup, observe and react/alert production applications on Kubernetes and in the cloud. It supports DevOps through full self-service and automation using containers, Kubernetes and GitOps.
 
-pass:[<!-- vale Microsoft.GenderBias = NO -->]
+All code lives on GitHub under https://github.com/projectsyn.
 
-* xref:commodore::index.adoc[Commodore]
-* xref:steward::index.adoc[Steward]
+=== What's in for: Dev
 
-pass:[<!-- vale Microsoft.GenderBias = YES -->]
+The tooling provided by Project Syn enables the user of the platform to consume all the available services in self-service. By fully automating the day-2 operations (see below), all consumed services are automatically "managed." There is no need to use different configuration management tooling, it's all defined at the same place: Kubernetes objects in a Git repository, delivered and enforced by GitOps.
+
+* Automated service deployment with https://crossplane.io/[Crossplane].
+* Backup of data with https://k8up.io[K8up] and https://restic.readthedocs.io[Restic].
+* GitOps with https://argoproj.github.io/argo-cd/[Argo CD].
+* Secrets management with https://www.vaultproject.io/[Vault].
+* Monitoring and alerting with https://prometheus.io/[Prometheus], https://github.com/prometheus/alertmanager[Alertmanager] and https://github.com/vshn/signalilo[Signalilo].
+
+=== What's in for: Ops
+
+With Project Syn it gets easy to manage a fleet of Kubernetes clusters. Delivering applications and configuration to all managed Kubernetes clusters and providing an inventory of all the available clusters and their content is part of Project Syn.
+
+* Configuration management for system components with xref:commodore::index.adoc[Commodore], https://kapitan.dev/[Kapitan] and https://jsonnet.org/[Jsonnet] by leveraging a hierarchical configuration value store.
+* Central cluster registry and inventory including GitOps Git repository management provided by https://github.com/projectsyn/lieutenant-api[Lieutenant API], https://github.com/projectsyn/lieutenant-operator[Lieutenant Operator] and xref:steward::index.adoc[Steward].
+* Automated component maintenance with https://github.com/renovatebot/renovate[Renovate] which helps to keep all the applications up-to-date.
+
+=== High-Level Architecture
+
+The following diagram shows the current high-level architecture (subject to change):
+
+image::syn_highlevel_architecture.png[]
+
+== Project Syn provided tools
+
+* xref:commodore::index.adoc[Commodore]: Hierarchical Configuration Management with Kapitan.
+* xref:steward::index.adoc[Steward]: In-Cluster agent.
+* xref:lieutenant-api::index.adoc[Lieutenant API]: REST API for cluster management.
+* xref:lieutenant-operator::index.adoc[Lieutenant Operator]: Kubernetes operator providing the business logic for the API.
+* https://github.com/vshn/signalilo[Signalilo]: Tool to forward Prometheus alerts to Icinga2.
