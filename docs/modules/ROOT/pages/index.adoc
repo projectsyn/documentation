@@ -16,7 +16,7 @@ The tooling provided by Project Syn enables the user of the platform to consume 
 * Backup of data with https://k8up.io[K8up] and https://restic.readthedocs.io[Restic].
 * GitOps with https://argoproj.github.io/argo-cd/[Argo CD].
 * Secrets management with https://www.vaultproject.io/[Vault].
-* Monitoring and alerting with Prometheus, Alertmanager and Signalilo.
+* Monitoring and alerting with https://prometheus.io/[Prometheus], https://github.com/prometheus/alertmanager[Alertmanager] and https://github.com/vshn/signalilo[Signalilo].
 
 === What's in for: Ops
 
