@@ -1,7 +1,8 @@
-.General Documentation
 * xref:index.adoc[Home]
 
-.Project Syn
-* xref:syn::index.adoc[General Documentation]
+.Projects
 * xref:commodore::index.adoc[Commodore]
+* xref:lieutenant-api::index.adoc[Lieutenant API]
+* xref:lieutenant-operator::index.adoc[Lieutenant Operator]
 * xref:steward::index.adoc[Steward]
+
