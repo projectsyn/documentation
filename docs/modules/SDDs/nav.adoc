@@ -1,4 +1,4 @@
-.Syn Design Documents - SDD
+.Syn Design Documents
 * xref:sdd-template.adoc[SDD Template]
 
 * xref:0001-sdd-definition.adoc[0001 - SDD Definition]
