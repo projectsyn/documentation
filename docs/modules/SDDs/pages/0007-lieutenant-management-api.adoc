@@ -432,11 +432,6 @@ status:
   phase: created
   type: GitHub
   url: https://github.com/bigcorp/commodore-config.git
-  conditions:
-  - lastTransitionTime: "2019-12-31T10:55:14Z"
-    reason: Git repo is ready to be used
-    status: "True"
-    type: Ready
 --
 
 [cols=",",options="header",]
@@ -470,22 +465,14 @@ configured.
 
 |`spec.tenantRef` |Reference to `Tenant` object the Git repository belongs to. It needs to be in the same namespace as the cluster object.
 
-|`status.conditions` a|
-Updated by Operator with current conditions.
-
-Available conditions:
-
-* type: Ready
-
 |`status.phase` a|
 Updated by Operator with current phase. Can be:
 
-* creating
 * created
-* updating
-* deleting
-* deleted
 * failed
+* unknown
+
+There's no deleted phase as a deleted repo will be re-created on the next reconcile run.
 
 |`status.type` a|
 Autodiscovered Git repo type. Can be:
