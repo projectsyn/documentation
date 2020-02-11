@@ -346,6 +346,9 @@ metadata:
 spec:
   displayName: Acme Corp. Dev Cluster
   gitRepoURL: https://github.com/acmecorp/gitops-mycluster.git
+  gitHostKeys: |
+    gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
+    gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
   tenantRef:
     name: os3ce3
   tokenLifetime: 4h
@@ -375,6 +378,8 @@ from `metadata.name`. Allows cluster renaming should it be needed.
 
 |`spec.gitRepoURL` |Git repository storing the cluster configuration
 catalog. If this is set, no `gitRepoTemplate` is needed.
+
+|`spec.gitHostKeys` |SSH host key of the git server. Only needed if not standard (GitHub, GitLab.com). Will be set by the git operator.
 
 |`spec.gitRepoTemplate.spec` |Template for managing the `GitRepo`
 object.
@@ -432,6 +437,9 @@ status:
   phase: created
   type: GitHub
   url: https://github.com/bigcorp/commodore-config.git
+  hostKeys: |
+    gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
+    gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
 --
 
 [cols=",",options="header",]
@@ -449,6 +457,7 @@ Reference to secret containing connection information:
 
 * `endpoint`: URL to API endpoint
 * `token`: API token
+* `hostKeys`: SSH host keys of this git server (optional)
 
 |`spec.deployKeys` a|
 _Optional_ dict of SSH deploy keys. If not set, no deploy keys will be
@@ -482,6 +491,8 @@ Autodiscovered Git repo type. Can be:
 * Gitea
 
 |`status.url` |Computed Git repository URL
+
+|`status.hostKeys` |SSH host keys of the git server. Will be synced from the `spec.apiSecretRef.data["hostKeys"]` secret.
 |===
 
 ==== Controller: Proxy
