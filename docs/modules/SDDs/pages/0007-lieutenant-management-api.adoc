@@ -431,6 +431,7 @@ spec:
       writeAccess: true
   path: bigcorp
   repoName: commodore-config
+  repoType: auto
   tenantRef:
     name: aezoo6
 status:
@@ -471,6 +472,9 @@ configured.
 |`spec.path` |Path to Git repository
 
 |`spec.repoName` |Name of Git repository
+
+|`spec.repoType` |Type of the repo. Can be one of `auto` or `unmanaged`, defaults to `auto`. With a value of `unmanaged` the git operator
+won't manage this object and it's only used as data storage (i.e. for SSH keys).
 
 |`spec.tenantRef` |Reference to `Tenant` object the Git repository belongs to. It needs to be in the same namespace as the cluster object.
 
