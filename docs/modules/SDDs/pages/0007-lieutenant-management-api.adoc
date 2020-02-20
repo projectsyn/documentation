@@ -157,20 +157,47 @@ The OpenAPI specification is stored in Git: https://github.com/projectsyn/lieute
 
 ==== API Authentication
 
-_*tbd*_
+===== Bearer Token
 
-oauth2 and/or openid connect
+Authentication to the API is handled via https://kubernetes.io/docs/reference/access-authn-authz/authentication/#service-account-tokens[Kubernetes service account tokens]. Except for the `/docs`, `/healthz` and `/install/steward.json` endpoints, every request must contain a bearer token. The HTTP header `Authorization` must be set to `Bearer <token>` with `<token>` beign a valid https://jwt.io/[JWT token]. This JWT token will then be used by the API to authenticate against the Kubernetes cluster.
+
+===== Bootstrap Token
+
+The `/install/steward.json` endpoint must provide a query parameter `token` which contains the bootstrap token of a cluster. Such a token can only be used once and has a short (e.g. ~30 minutes) expiry time. The API uses it's own service account to authenticate to Kubernetes and search the clusters for the provided bootstrap token. Once a cluster is found and the bootstrap token is still valid, the installation manifests will be returned and the token marked invalid.
+
+===== API Token
+
+The API needs a service account to authenticate to Kubernetes. This service account should have the minimum required rights to search for clusters, mark bootstrap tokens as invalid and read a cluster's service account token.
 
 ==== API Authorization
 
-_*tbd*_
+With the exception of the `/install/steward.json` endpoint, authorization of all API requests is fully delegated to the Kubernetes cluster.
 
-Open Policy Agent with Go library
+===== Kubernetes RBAC
 
-* Directly in Go:
-https://github.com/open-policy-agent/example-api-authz-go
-* Or
-https://www.openpolicyagent.org/docs/latest/integration/#integrating-with-the-go-api
+Kubernets RBAC rules will be used to restrict the various service accounts to their required scope.
+
+===== Open Policy Agent
+
+The https://www.openpolicyagent.org/[Open Policy Agent] (OPA) will be used to further restrict access of the service accounts to the cluster. More advanced features like a tenant accessing all his clusters can be implemented with the OPA which can not be represented by RBAC alone.
+
+===== Cluster Bootstrap
+
+The `/install/steward.json` endpoint serves as an entrypoint to bootstrap (adopt) a new cluster. It delivers the manifests required to bootstrap the SYN system on a cluster. Authorization is done via a <<Bootstrap Token>> which identifies the cluster to bootstrap. The API searches the cluster and checks the validity of the token: if the token has expired or was already used (attribute `valid=false`).
+
+===== Different Entities
+
+Cluster::
+
+A service account per cluster is created with an RBAC role restricting it's access to the cluster it belongs to (using https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources[resourceNames]).
+
+Tenant::
+
+TBD
+
+Commodore::
+
+TBD
 
 === Operator and Custom Resource Definitions (CRDs)
 
