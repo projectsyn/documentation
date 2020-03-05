@@ -6,3 +6,4 @@
 * xref:lieutenant-operator::index.adoc[Lieutenant Operator]
 * xref:steward::index.adoc[Steward]
 
+* xref:roadmap.adoc[Roadmap]

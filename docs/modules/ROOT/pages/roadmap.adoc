@@ -1,0 +1,44 @@
+= Project Syn Roadmap
+
+This page lists the high level Roadmap. It will be under constant change.
+
+> It's done when it's done
+
+== v0.1.0
+
+*Released*: 2020-03-02
+
+This is the very first release of Project Syn and contains the following tool releases:
+
+* https://github.com/projectsyn/lieutenant-operator/releases/tag/v0.1.0[Lieutenant Operator - v0.1.0]
+* https://github.com/projectsyn/lieutenant-api/releases/tag/v0.1.0[Lieutenant API - v0.1.0]
+* https://github.com/projectsyn/commodore/tree/v0.1.0[Commodore - v0.1.0]
+* https://github.com/projectsyn/steward/releases/tag/v0.1.0[Steward - v0.1.0]
+
+With this initial release the focus was to get the basics up and running:
+
+* Registering Tenants and Clusters in Lieutenant
+* Bootstrap GitOps repositories
+* Bootstrap Steward and GitOps on the Cluster
+* Generate Cluster Catalogs with Commodore
+
+== v0.2.0
+
+Focus for this release:
+
+* Enable people to work with Commodore Components, "Dev Experience"
+* Decommissioning of Clusters and other Components fully automated
+* Get the bootstrap process fully automated
+* Bring the documentation of Project Syn up to speed
+
+== v0.3.0
+
+Focus for this release:
+
+* Managed services on top of a Project Syn enabled Kubernetes cluster
+* GitOps for application deployment on a Project Syn enabled Kubernetes Cluster
+
+== v0.4.0
+
+* Full https://crossplane.io/[Crossplane] integration
+
