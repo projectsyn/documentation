@@ -1,6 +1,6 @@
 * xref:index.adoc[Home]
 
-.Projects
+.Tools
 * xref:commodore::index.adoc[Commodore]
 * xref:lieutenant-api::index.adoc[Lieutenant API]
 * xref:lieutenant-operator::index.adoc[Lieutenant Operator]

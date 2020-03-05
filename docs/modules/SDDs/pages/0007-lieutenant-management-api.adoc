@@ -157,20 +157,47 @@ The OpenAPI specification is stored in Git: https://github.com/projectsyn/lieute
 
 ==== API Authentication
 
-_*tbd*_
+===== Bearer Token
 
-oauth2 and/or openid connect
+Authentication to the API is handled via https://kubernetes.io/docs/reference/access-authn-authz/authentication/#service-account-tokens[Kubernetes service account tokens]. Except for the `/docs`, `/healthz` and `/install/steward.json` endpoints, every request must contain a bearer token. The HTTP header `Authorization` must be set to `Bearer <token>` with `<token>` beign a valid https://jwt.io/[JWT token]. This JWT token will then be used by the API to authenticate against the Kubernetes cluster.
+
+===== Bootstrap Token
+
+The `/install/steward.json` endpoint must provide a query parameter `token` which contains the bootstrap token of a cluster. Such a token can only be used once and has a short (e.g. ~30 minutes) expiry time. The API uses it's own service account to authenticate to Kubernetes and search the clusters for the provided bootstrap token. Once a cluster is found and the bootstrap token is still valid, the installation manifests will be returned and the token marked invalid.
+
+===== API Token
+
+The API needs a service account to authenticate to Kubernetes. This service account should have the minimum required rights to search for clusters, mark bootstrap tokens as invalid and read a cluster's service account token.
 
 ==== API Authorization
 
-_*tbd*_
+With the exception of the `/install/steward.json` endpoint, authorization of all API requests is fully delegated to the Kubernetes cluster.
 
-Open Policy Agent with Go library
+===== Kubernetes RBAC
 
-* Directly in Go:
-https://github.com/open-policy-agent/example-api-authz-go
-* Or
-https://www.openpolicyagent.org/docs/latest/integration/#integrating-with-the-go-api
+Kubernets RBAC rules will be used to restrict the various service accounts to their required scope.
+
+===== Open Policy Agent
+
+The https://www.openpolicyagent.org/[Open Policy Agent] (OPA) will be used to further restrict access of the service accounts to the cluster. More advanced features like a tenant accessing all his clusters can be implemented with the OPA which can not be represented by RBAC alone.
+
+===== Cluster Bootstrap
+
+The `/install/steward.json` endpoint serves as an entrypoint to bootstrap (adopt) a new cluster. It delivers the manifests required to bootstrap the SYN system on a cluster. Authorization is done via a <<Bootstrap Token>> which identifies the cluster to bootstrap. The API searches the cluster and checks the validity of the token: if the token has expired or was already used (attribute `valid=false`).
+
+===== Different Entities
+
+Cluster::
+
+A service account per cluster is created with an RBAC role restricting it's access to the cluster it belongs to (using https://kubernetes.io/docs/reference/access-authn-authz/rbac/#referring-to-resources[resourceNames]).
+
+Tenant::
+
+TBD
+
+Commodore::
+
+TBD
 
 === Operator and Custom Resource Definitions (CRDs)
 
@@ -346,6 +373,9 @@ metadata:
 spec:
   displayName: Acme Corp. Dev Cluster
   gitRepoURL: https://github.com/acmecorp/gitops-mycluster.git
+  gitHostKeys: |
+    gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
+    gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
   tenantRef:
     name: os3ce3
   tokenLifetime: 4h
@@ -375,6 +405,8 @@ from `metadata.name`. Allows cluster renaming should it be needed.
 
 |`spec.gitRepoURL` |Git repository storing the cluster configuration
 catalog. If this is set, no `gitRepoTemplate` is needed.
+
+|`spec.gitHostKeys` |SSH host key of the git server. Only needed if not standard (GitHub, GitLab.com). Will be set by the git operator.
 
 |`spec.gitRepoTemplate.spec` |Template for managing the `GitRepo`
 object.
@@ -426,17 +458,16 @@ spec:
       writeAccess: true
   path: bigcorp
   repoName: commodore-config
+  repoType: auto
   tenantRef:
     name: aezoo6
 status:
   phase: created
   type: GitHub
   url: https://github.com/bigcorp/commodore-config.git
-  conditions:
-  - lastTransitionTime: "2019-12-31T10:55:14Z"
-    reason: Git repo is ready to be used
-    status: "True"
-    type: Ready
+  hostKeys: |
+    gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf
+    gitlab.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBFSMqzJeV9rUzU4kWitGjeR4PWSa29SPqJ1fVkhtj3Hw9xjLVXVYrU9QlYWrOLXBpQ6KWjbjTDTdDkoohFzgbEY=
 --
 
 [cols=",",options="header",]
@@ -454,6 +485,7 @@ Reference to secret containing connection information:
 
 * `endpoint`: URL to API endpoint
 * `token`: API token
+* `hostKeys`: SSH host keys of this git server (optional)
 
 |`spec.deployKeys` a|
 _Optional_ dict of SSH deploy keys. If not set, no deploy keys will be
@@ -468,24 +500,19 @@ configured.
 
 |`spec.repoName` |Name of Git repository
 
+|`spec.repoType` |Type of the repo. Can be one of `auto` or `unmanaged`, defaults to `auto`. With a value of `unmanaged` the git operator
+won't manage this object and it's only used as data storage (i.e. for SSH keys).
+
 |`spec.tenantRef` |Reference to `Tenant` object the Git repository belongs to. It needs to be in the same namespace as the cluster object.
-
-|`status.conditions` a|
-Updated by Operator with current conditions.
-
-Available conditions:
-
-* type: Ready
 
 |`status.phase` a|
 Updated by Operator with current phase. Can be:
 
-* creating
 * created
-* updating
-* deleting
-* deleted
 * failed
+* unknown
+
+There's no deleted phase as a deleted repo will be re-created on the next reconcile run.
 
 |`status.type` a|
 Autodiscovered Git repo type. Can be:
@@ -495,6 +522,8 @@ Autodiscovered Git repo type. Can be:
 * Gitea
 
 |`status.url` |Computed Git repository URL
+
+|`status.hostKeys` |SSH host keys of the git server. Will be synced from the `spec.apiSecretRef.data["hostKeys"]` secret.
 |===
 
 ==== Controller: Proxy
