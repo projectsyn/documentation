@@ -1,6 +1,6 @@
 = Project Syn Roadmap
 
-This page lists the high level Roadmap. It will be under constant change.
+This page lists the high level roadmap of Project Syn. It will be under constant change.
 
 > It's done when it's done
 
@@ -22,23 +22,44 @@ With this initial release the focus was to get the basics up and running:
 * Bootstrap Steward and GitOps on the Cluster
 * Generate Cluster Catalogs with Commodore
 
+Announcement blog post: https://vshn.ch/blog/tbd[First Pre-Release of Project Syn Tools].
+
 == v0.2.0
 
 Focus for this release:
 
-* Enable people to work with Commodore Components, "Dev Experience"
-* Decommissioning of Clusters and other Components fully automated
+* Enable people to work with Commodore Components (CC), "Dev Experience".
+** Helper tools to write and test Commodore Components
+** Guidelines and How-Tos to write proper Commodore Components
+** Commodore job runner to completely automated the catalog generation
+* Decommissioning of clusters and other components fully automated
+** Git repository deletion mechanism - including safe-guards
 * Get the bootstrap process fully automated
+** Automate creation of cluster config file in tenant configuration repository
+** Initialize empty catalog Git repository
 * Bring the documentation of Project Syn up to speed
+** Rework existing Syn Design Documentes
+** How-Tos for basic workflows
+** Initial documentation for all released tools
 
 == v0.3.0
 
+NOTE: This is still subject to change
+
 Focus for this release:
 
-* Managed services on top of a Project Syn enabled Kubernetes cluster
+* Enable the usage of managed services on top of a Project Syn enabled Kubernetes cluster
+** Support with Backup and Monitoring
 * GitOps for application deployment on a Project Syn enabled Kubernetes Cluster
 
 == v0.4.0
 
+NOTE: This is still subject to change
+
+Focus for this release:
+
 * Full https://crossplane.io/[Crossplane] integration
 
+== Future releases
+
+A lot of ideas are being worked out.
