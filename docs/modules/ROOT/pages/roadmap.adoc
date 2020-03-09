@@ -50,6 +50,7 @@ Focus for this release:
 
 * Enable the usage of managed services on top of a Project Syn enabled Kubernetes cluster
 ** Support with Backup and Monitoring
+** Enhance Commodore to be used for regular application deployment
 * GitOps for application deployment on a Project Syn enabled Kubernetes Cluster
 
 == v0.4.0
