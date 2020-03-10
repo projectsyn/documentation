@@ -1,9 +1,8 @@
 * xref:index.adoc[Home]
+* xref:roadmap.adoc[Roadmap]
 
 .Tools
 * xref:commodore::index.adoc[Commodore]
 * xref:lieutenant-api::index.adoc[Lieutenant API]
 * xref:lieutenant-operator::index.adoc[Lieutenant Operator]
 * xref:steward::index.adoc[Steward]
-
-* xref:roadmap.adoc[Roadmap]

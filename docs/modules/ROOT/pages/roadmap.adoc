@@ -22,7 +22,7 @@ With this initial release the focus was to get the basics up and running:
 * Bootstrap Steward and GitOps on the Cluster
 * Generate Cluster Catalogs with Commodore
 
-Announcement blog post: https://vshn.ch/blog/tbd[First Pre-Release of Project Syn Tools].
+Announcement blog post: https://vshn.ch/en/blog/first-pre-release-of-project-syn-tools/[First Pre-Release of Project Syn Tools].
 
 == v0.2.0
 
