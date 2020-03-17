@@ -27,11 +27,11 @@ This should only cover maintenance of dependencies tracked in Git repos, not a g
 
 == Design Proposal
 
-Renovate requires two components to be implemented to support a specific dependency type: The datasource and a manager. A datasource is in charge of discovery for new versions of dependencies. It can be reused by multiple managers (i.e. the docker datasource is used by both the Dockerfile and Kubernetes manager). A manager implements the dependency or language specific format in which dependencies are tracked. For example a `package.json` in Node projects or a `go.mod` file for Golang projects. At the very minimum a manager must implement a method to extract the dependencies from such a file and another method to update the dependency in the same file.
+Renovate requires two components to be implemented to support a specific dependency type: The datasource and a manager. A datasource is in charge of discovery for new versions of dependencies. It can be reused by multiple managers (for example the docker datasource is used by both the Dockerfile and Kubernetes manager). A manager implements the dependency or language specific format in which dependencies are tracked. For example a `package.json` in Node projects or a `go.mod` file for Golang projects. At the very minimum a manager must implement a method to extract the dependencies from such a file and another method to update the dependency in the same file.
 
 === Commodore Components
 
-These components are the building blocks for all our infrastructure. It is therefore crucial to keep them up to date and well maintained. Commodore components can have different dependencies which need to be tracked and updated.
+These components are the building blocks for all our infrastructure. It's therefore crucial to keep them up to date and well maintained. Commodore components can have different dependencies which need to be tracked and updated.
 
 ==== Helm Charts
 

@@ -15,7 +15,7 @@ This SDD documents the design of the inventory and management API service which 
 
 == Motivation
 
-A central inventory helps to keep track of all Syn managed Kubernetes clusters, their content and it is the central hub for all operational needs. It provides inventory data to query for all aspects about these clusters. All clusters must be registered in Lieutenant so that they can get recognized by the various components of Syn. It presents itself as a REST API, providing all the needed functionality. This API gets used by frontends like the VSHN Portal, by CLI clients or by other means of automation.
+A central inventory helps to keep track of all Syn managed Kubernetes clusters, their content and it's the central hub for all operational needs. It provides inventory data to query for all aspects about these clusters. All clusters must be registered in Lieutenant so that they can get recognized by the various components of Syn. It presents itself as a REST API, providing all the needed functionality. This API gets used by frontends like the VSHN Portal, by CLI clients or by other means of automation.
 
 === Goals
 
@@ -27,7 +27,7 @@ The API provides several key features for the Syn platform. It's architected aro
 
 === Non-Goals
 
-* Kubernetes cluster provisioning - That's up to external tools like Rancher and/or Crossplane
+* Kubernetes cluster provisioning - That's up to external tools like Rancher or Crossplane
 
 === API Personas
 
@@ -108,7 +108,7 @@ stored in cluster Object: Tenant, SLA, Contact information, Cloud information, K
 ** _Dynamic facts_: Facts collected by an in-cluster agent and regularly
 sent to Lieutenant, stored in Timeseries DB: Kubernetes version, Deployed managed services and their version, Node details (OS, CPU, RAM, labels) and number of nodes, important objects, Syn predefined annotations on objects, per object contact information and responsibilities via annotations, _Ingress_ objects `spec.rules[].host` (helps to find which cluster
 hosts which URL).
-* Facts are not actively collected by polling, they are pushed to the API
+* Facts aren't actively collected by polling, they're pushed to the API
 by Steward.
 * All dynamic facts are versioned (and update generates a new version)
 which allows historical information when has what changed. Facts have
@@ -163,7 +163,7 @@ Authentication to the API is handled via https://kubernetes.io/docs/reference/ac
 
 ===== Bootstrap Token
 
-The `/install/steward.json` endpoint must provide a query parameter `token` which contains the bootstrap token of a cluster. Such a token can only be used once and has a short (e.g. ~30 minutes) expiry time. The API uses it's own service account to authenticate to Kubernetes and search the clusters for the provided bootstrap token. Once a cluster is found and the bootstrap token is still valid, the installation manifests will be returned and the token marked invalid.
+The `/install/steward.json` endpoint must provide a query parameter `token` which contains the bootstrap token of a cluster. Such a token can only be used once and has a short (for example ~30 minutes) expiry time. The API uses it's own service account to authenticate to Kubernetes and search the clusters for the provided bootstrap token. Once a cluster is found and the bootstrap token is still valid, the installation manifests will be returned and the token marked invalid.
 
 ===== API Token
 
@@ -333,7 +333,7 @@ Functionality:
 * Stores the registration key and it's validity for initial Steward
 bootstrapping
 * Admission webhook denies creation of `Cluster` object when the
-referenced `Tenant` object is not available
+referenced `Tenant` object isn't available
 
 .Object Example
 [source,yaml]
@@ -414,7 +414,7 @@ object.
 |`spec.tenantRef` |Reference to `Tenant` object the cluster belongs to. It needs to be in the same namespace as the cluster object.
 
 |`spec.facts` |Key/value pairs of statically configured cluster facts
-which do not change on a cluster.
+which don't change on a cluster.
 
 
 |`spec.status.bootstrapToken` a|
@@ -437,7 +437,7 @@ be changed to `false`.
 * Configures deploy keys on the remote Git repository
 * It's always referenced to the `Tenant` as owner
 * Admission webhook denies creation of `GitRepo` object when the
-referenced `Tenant` object is not available
+referenced `Tenant` object isn't available
 
 [source,yaml]
 --
@@ -501,7 +501,7 @@ configured.
 |`spec.repoName` |Name of Git repository
 
 |`spec.repoType` |Type of the repo. Can be one of `auto` or `unmanaged`, defaults to `auto`. With a value of `unmanaged` the git operator
-won't manage this object and it's only used as data storage (i.e. for SSH keys).
+won't manage this object and it's only used as data storage (for example for SSH keys).
 
 |`spec.tenantRef` |Reference to `Tenant` object the Git repository belongs to. It needs to be in the same namespace as the cluster object.
 
