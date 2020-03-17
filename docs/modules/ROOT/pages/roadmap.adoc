@@ -6,7 +6,7 @@ This page lists the high level roadmap of Project Syn. It will be under constant
 
 == v0.1.0
 
-*Released*: 2020-03-02
+*Released*: 2020–03–02
 
 This is the very first release of Project Syn and contains the following tool releases:
 
@@ -28,7 +28,7 @@ Announcement blog post: https://vshn.ch/en/blog/first-pre-release-of-project-syn
 
 Focus for this release:
 
-* Enable people to work with Commodore Components (CC), "Dev Experience".
+* Enable people to work with Commodore Components (CC), "Dev Experience."
 ** Helper tools to write and test Commodore Components
 ** Guidelines and How-Tos to write proper Commodore Components
 ** Commodore job runner to completely automated the catalog generation

@@ -40,7 +40,7 @@ The values of the `:sdd_status:` attribute above must be the ones described belo
 * [.status-macro .accepted]#accepted# designs will be implemented.
 * [.status-macro .rejected]#rejected# designs won't be implemented.
 * [.status-macro .implemented]#implemented# designs which were accepted and are implemented.
-* [.status-macro .obsolete]#obsolete# designs are kept for historical reasons, but do not reflect the current or impending state of the codebase or project.
+* [.status-macro .obsolete]#obsolete# designs are kept for historical reasons, but don't reflect the current or impending state of the codebase or project.
 
 == Summary
 
@@ -56,7 +56,7 @@ List the specific goals of the SDD. How will we know that this has succeeded?
 
 === Non-Goals
 
-What is out of scope for this SDD? Listing non-goals helps to focus discussion and make progress.
+What's out of scope for this SDD? Listing non-goals helps to focus discussion and make progress.
 
 == Design Proposal
 
