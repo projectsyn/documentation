@@ -108,7 +108,9 @@ parameters:
 
 For the secret reference mentioned above, Commodore generates a Kapitan secret file in `catalog/refs/path/to/secret/thekey` with `path/to/secret:thekey` as the reference to the Vault secret.
 
-Kapitan's `vaultkv` secret engine is configured in the class `global.common` with authentication method `token` and the Vault address and back-end name given in `secret_management`. The configuration in `secret_management` defaults to https://vault.syn.vshn.net and a back-end with name "kv," but this can be overridden at any level of the configuration class hierarchy. The GitOps engine on the cluster uses the Vault Kubernetes authentication (in a sidecar) to lease and renew a token which can be used by Kapitan.
+Kapitan's `vaultkv` secret engine is configured in the class `global.common` under the dict `secret_management`.
+The configuration defaults to https://vault.syn.vshn.net and a back-end with name "kv", but this can be overridden at any level of the inventory.
+The GitOps engine on the cluster uses the Vault Kubernetes authentication (in a sidecar) to lease and renew a token which can be used by Kapitan.
 
 === Implementation Details/Notes/Constraints
 
