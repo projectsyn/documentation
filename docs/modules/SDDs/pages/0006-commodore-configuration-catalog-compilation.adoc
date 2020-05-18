@@ -102,7 +102,7 @@ An example:
 --
 parameters:
   component_versions:
-    flux:
+    argocd:
       version: v1.0.0
 --
 
@@ -113,12 +113,37 @@ Component versions can be any git https://git-scm.com/docs/gitglossary#Documenta
 * Components are versioned as part of the inventory repositories, which comes from global defaults and the cluster / customer specific repository
 * Each component is managed in an individual Git repository, comparable to a Puppet module.
 * Components bundle the Kapitan component templates (for example Jsonnet) with the component class that will be referenced in the Kapitan inventory and optional postprocessing filters which are applied on the compiled Kapitan catalog.
-The engine downloads the component repository into `dependencies` and symlinks the component class into `inventory/classes/components` to make the class available in the Kapitan inventory structure.
+* The engine downloads the component repository into `dependencies` and symlinks the component class into `inventory/classes/components` to make the class available in the Kapitan inventory structure.
 * A component repository must have the file `class/<component-name>.yml` which contains the Kapitan component class which defines how the component is compiled
 * A component repository must define default parameters for the templates in the file `class/defaults.yml` in order to allow components to be included at any level in the configuration hierarchy without overriding component parameters which have been configured in the hierarchy earlier than the component was included.
 The `defaults.yml` file of a component is symlinked to `inventory/classes/defaults/<compoent-name>.yml` and included in the Kapitan target before `global.common`.
 * If a component has postprocessing filters, it must have the file `postprocess/filters.yml` defining which postprocessing filters the compilation engine should apply.
 * A component repository must be named the same as the component.
+
+
+==== Repository Discovery
+
+A default base URL is configurable to define the base path where component repositories will be searched.
+If a component is hosted on a different Git server or namespace, it's full URL can be configured in the global config file.
+If no specific URL is provided for a component, the default base URL and the component name are concatenated to form the Git repository URL:
+
+[source,shell]
+--
+ssh://git@git.example.com/components/ + <component-name> + .git
+--
+
+The inventory can override the URL of a component by configuring the `url` parameter under `component_versions`:
+
+[source,yaml]
+--
+parameters:
+  component_versions:
+    argocd:
+      version: feature/my-pr
+      url: ssh://git@git.example.com/my-user/my-fork.git
+--
+
+This allows for example using forks of components for some part of the hierarchy.
 
 
 === Secrets management
