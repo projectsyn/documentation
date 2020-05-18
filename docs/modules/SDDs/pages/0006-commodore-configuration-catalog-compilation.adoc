@@ -60,10 +60,10 @@ Additionally, Kapitan itself can download dependencies of a component, for examp
 === Overall architecture for the compilation engine
 
 For the catalog compilation engine, we define all of the platform configuration in a single Kapitan target named "cluster," which is constructed from data provided by the Lieutenant API.
-The target pulls in a generic inventory classes for global VSHN configuration (class `global.common` ), cloud-specific configuration (for example class `global.cloud.aws` ) and cluster distribution specific configuration (for example `global.distribution.rancher` ).
-Additionally the target also pulls in a class for the cluster itself (for example class `thecustomer.thecluster` ).
+The target pulls in a generic inventory class for global configuration (named `global.common`), cloud-specific configuration (for example class `global.cloud.aws`) and cluster distribution specific configuration (for example `global.distribution.rancher`).
+Additionally the target also pulls in a class for the cluster itself (for example class `thecustomer.thecluster`).
 Finally, the compilation engine traverses the inventory to gather all the components which are referenced, downloads them, and ensures that a class `components.thecomponentname` and `defaults.thecomponentname` (to define component defaults) is available in the Kapitan inventory.
-See "Component repositories" below for a more detailed description of how we manage Kapitan components.
+See <<Component Repositories>> below for a more detailed description of how we manage Kapitan components.
 
 During compilation, we enable Kapitan's dependency fetching to allow components to use the dependency mechanism to download their internal dependencies.
 We configure Kapitan's search path to include the `dependencies` directory.
@@ -82,13 +82,11 @@ The engine renders the Jsonnet, and collects all the keys of the resulting JSON 
 The engine then writes the content of each key into a file with the same name as the key.
 The component's `filters.yml`  can define an output directory per filter which is used as the base directory for the file names returned by the filter.
 
-Kapitan's secrets management is leveraged to ensure no secrets appear in any git repository (input or output) and the in-cluster GitOps engine is configured to run `kapitan refs --reveal` on the cluster catalog before applying the manifests to the cluster.
+Kapitan's secrets management is leveraged to ensure no secrets appear in any Git repository (input or output) and the in-cluster GitOps engine is configured to run `kapitan refs --reveal` on the cluster catalog before applying the manifests to the cluster.
 The Kapitan secrets management is configured to retrieve the secrets from Vault.
 The Vault instance is configurable in the inventory.
 
-=== Input Repositories
-
-==== Inventory Repositories
+=== Inventory Repositories
 
 The inventory is collected from various configuration Git repositories, which are either global or in the scope of a customer.
 A customer may have one or more configuration repositories for their different SYN platforms.
@@ -110,9 +108,9 @@ parameters:
 
 Component versions can be any git https://git-scm.com/docs/gitglossary#Documentation/gitglossary.txt-aiddeftree-ishatree-ishalsotreeish[tree-ish].
 
-==== Component Repositories
+=== Component Repositories
 
-* Components are versioned as part of the inventory repositories, which comes from VSHN defaults and the cluster / customer specific repository
+* Components are versioned as part of the inventory repositories, which comes from global defaults and the cluster / customer specific repository
 * Each component is managed in an individual Git repository, comparable to a Puppet module.
 * Components bundle the Kapitan component templates (for example Jsonnet) with the component class that will be referenced in the Kapitan inventory and optional postprocessing filters which are applied on the compiled Kapitan catalog.
 The engine downloads the component repository into `dependencies` and symlinks the component class into `inventory/classes/components` to make the class available in the Kapitan inventory structure.
@@ -127,7 +125,7 @@ The `defaults.yml` file of a component is symlinked to `inventory/classes/defaul
 
 Commodore automates the more tedious parts of Kapitan's secret management, allowing users to simply specify Kapitan secret references (denoted by `?{...}`) in the configuration parameters.
 Commodore currently only supports Vault KV as back-end for storing secrets.
-Commodore eliminates the need for users to manually create Kapitan secret files (using `kapitan refs --write ...` ), by scanning the configuration parameters (everything defined under `parameters:` in Kapitan classes) for secret references and generating secret files in `catalog/refs` before running `kapitan compile`.
+Commodore eliminates the need for users to manually create Kapitan secret files (using `kapitan refs --write ...`), by scanning the configuration parameters (everything defined under `parameters:` in Kapitan classes) for secret references and generating secret files in `catalog/refs` before running `kapitan compile`.
 This ensures that the secret files and the catalog are always in sync.
 All secret references MUST be made in the configuration parameters, otherwise Commodore can't discover them.
 Secret references can use reclass references to define dynamic defaults, for example `?{vaultkv:${customer:name}/${cluster:name}/thesecret/thekey}`.
@@ -177,7 +175,7 @@ The current implementation of the engine produces and manages the following dire
 * `inventory` contains the collated Kapitan inventory.
 Configuration repositories are directly cloned into inventory
 ** `inventory/targets/cluster.yml` contains the Kapitan target definition (generated by Commodore)
-** `inventory/classes/global` contains global VSHN-managed configuration classes
+** `inventory/classes/global` contains globally managed configuration classes
 ** `inventory/classes/<customer-name>` contains customer-specific configuration classes
 
 ==== Constraints
