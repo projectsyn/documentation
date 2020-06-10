@@ -7,3 +7,4 @@
 * xref:0007-lieutenant-management-api.adoc[0007 - Lieutenant - Management API]
 * xref:0017-maintenance-with-renovate.adoc[0017 - Maintenance with Renovate]
 * xref:0019-gitops.adoc[0019 - GitOps]
+* xref:0020-openshift-hive.adoc[0020 - OpenShift Hive]

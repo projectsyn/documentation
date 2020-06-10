@@ -1,0 +1,101 @@
+= SDD 0020 - OpenShift Hive
+
+:sdd_author:    Simon Rüegg
+:sdd_owner:
+:sdd_reviewers:
+:sdd_date:      2020-06-10
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This describes how we want to integrate https://github.com/openshift/hive[OpenShift Hive] into Syn to automatically provision OpenShift clusters on supported cloud providers.
+====
+
+== Motivation
+
+The OpenShift Hive operator provides fully automated provisioning of new OpenShift clusters using the https://github.com/openshift/installer[OpenShift installer].
+We want to integrate this into the Syn project in order to provision OpenShift clusters.
+Currently the following cloud providers are supported by Hive:
+* AWS
+* Azure
+* Google Cloud Platform
+
+=== Goals
+
+* Define how Hive can be integrated into Syn
+* Define the process of creating and provisioning a new OpenShift cluster
+
+
+=== Non-Goals
+
+* Support anything else than what Hive provides
+
+
+== Design Proposal
+
+=== Hive Overview
+
+Hive is an operator and works on the following CRDs:
+
+* `ClusterImageSet` to define the OpenShift version
+* `ClusterDeployment` to define a cluster
+* `MachinePool` to define the sizing/scaling of a cluster
+
+In addition to these CRDs the operator needs various secrets for the following information:
+
+* Image pull secret for the OpenShift images
+* Credentials for the cloud provider
+* SSH keypair to access machines of the provisioned cluster
+* An `install-config.yaml` to configure the OpenShift installer
+
+Most of the heavy lifting Hive does is implemented by the OpenShift installer which is also why the `install-config.yaml` file is required.
+This file is the same format as described in the installer https://github.com/openshift/installer/blob/master/docs/user/customization.md#platform-customization[docs].
+It needs to be provided in a secret and is only changed by the operator to set the `pullSecret` property with the referenced image pull secret.
+
+
+=== Implementation Details
+
+A controller is implemented which creates the necessary objects to provide Hive with the necessary information to provision an OpenShift cluster.
+Based on certain conditions the controller creates a set of objects (secrets and Hive CRs).
+For example if a cluster object has the annotation `syn.tools/cluster-provisioner=hive` set, an OpenShift cluster should be provisioned via Hive.
+
+
+==== Provisioning Information
+
+In order for this controller to be able to create the necessary objects, it needs to receive certain information.
+All confidential information (like cloud provider credentials or image pull secrets) should be stored in Kubernetes secrets and referenced.
+In a first PoC phase, all information that's not yet present in a cluster's facts will be provided in annotations on the cluster object:
+
+* `hive.syn.tools/gcp-project*` GCP project name
+* `hive.syn.tools/base-domain*` Base domain
+* `hive.syn.tools/credentials-secret*` Name of the secret containing the cloud credentials
+* `hive.syn.tools/worker-count` Count of worker nodes to provision
+* `hive.syn.tools/worker-type` Instance type to use for worker nodes
+
+`*` are required for provisioning
+
+The reason for using annotations being that we don't have to change the cluster CRD for the PoC.
+In a second step, once this design is validated and accepted, the information can be added as a typed struct to the cluster CRD.
+
+
+=== Risks and Mitigations
+
+With this design we're relatively tightly coupled to the Hive operator as in the created CRs (API) are defined by it.
+If Hive changes it's API we've to implement these changes as well.
+As long as Hive follows the concept of a Kubernetes operator (acting on CRDs), the basic idea of this design should always apply though.
+
+
+== Alternatives
+
+An alternative approach would be to leave the creation of the Hive CRs out of Syn and implement it in another component.
+This could be an option if project Syn shouldn't provide specific provisioning options for Kubernetes distributions.
+The basic idea of this design would still apply though and it could be implemented separate from the Syn project.
+
+
+== References
+
+* OpenShift Hive - https://github.com/openshift/hive
+* OpenShift installer - https://github.com/openshift/installer
+* Hive architecture - https://github.com/openshift/hive/blob/master/docs/architecture.md
