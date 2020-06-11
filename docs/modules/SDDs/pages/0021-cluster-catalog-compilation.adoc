@@ -101,6 +101,7 @@ If configuration in the global inventory repo changes, Quartermaster needs to fi
 ==== Config Change in Tenant Config Repo
 
 If configuration in a tenant inventory repo changes, Quartermaster needs to find all clusters which are affected by the changed configuration.
+This will be the same mechanism as for config changes in the global config repo.
 The set of clusters to consider are the clusters of the respective tenant.
 
 
@@ -137,7 +138,7 @@ The downside would be a longer reaction time for changes to be applied on a clus
 
 An alternative would be to couple the two mentioned parts of the design together.
 This would mean that the same component is responsible to trigger new compiles and run the compiles.
-Such a solution would probably require a centralized
+Such a solution would probably require a centralized job runner.
 
 
 == References
