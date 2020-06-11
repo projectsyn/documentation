@@ -84,6 +84,20 @@ For provisioning we use a default setup of three master and three worker nodes.
 Once a cluster is provisioned, scaling will be implemented via other means for example in a Commodore component.
 
 
+==== Cluster Synfection
+
+Once a cluster is provisioned via Hive the next step is to synfect it (install Steward).
+Hive provides the `SyncSet` CRD to create and patch arbitrary resources on a provisioned cluster.
+While this mechanism could be used to install the Steward agent on a new cluster it also poses some downsides:
+
+* We would need to duplicate the installation manifests (currently implemented in the xref:0007-lieutenant-management-api.adoc[Lieutenant API]) to create a `SyncSet` out of them
+* Once Syn is fully bootstrapped on the cluster, Steward itself will be managed by xref:0019-gitops.adoc[GitOps]. This would end up with two systems managing the same resources (Hive and GitOps)
+
+Instead of using a `SyncSet` we use the credentials of a provisioned cluster and run a job which installs Syn.
+This can be implemented relatively easy since the credentials (Kubeconfig) for a cluster are stored in a secret.
+The controller can create the Kubernetes job which mounts this secret and runs `kubectl apply -f` against the install URL of the respective cluster.
+
+
 === Risks and Mitigations
 
 With this design we're relatively tightly coupled to the Hive operator as in the created CRs (API) are defined by it.
@@ -103,3 +117,4 @@ The basic idea of this design would still apply though and it could be implement
 * OpenShift Hive - https://github.com/openshift/hive
 * OpenShift installer - https://github.com/openshift/installer
 * Hive architecture - https://github.com/openshift/hive/blob/master/docs/architecture.md
+* Hive `SyncSet` - https://github.com/openshift/hive/blob/master/docs/syncset.md
