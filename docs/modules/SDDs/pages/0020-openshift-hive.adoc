@@ -31,6 +31,7 @@ Currently the following cloud providers are supported by Hive:
 === Non-Goals
 
 * Support anything else than what Hive provides
+* Scale a cluster via Hive
 
 
 == Design Proposal
@@ -66,18 +67,21 @@ For example if a cluster object has the annotation `syn.tools/cluster-provisione
 
 In order for this controller to be able to create the necessary objects, it needs to receive certain information.
 All confidential information (like cloud provider credentials or image pull secrets) should be stored in Kubernetes secrets and referenced.
-In a first PoC phase, all information that's not yet present in a cluster's facts will be provided in annotations on the cluster object:
+In a first PoC phase, all information that's not yet present in a cluster's facts must be provided in annotations on the cluster object:
 
-* `hive.syn.tools/gcp-project*` GCP project name
-* `hive.syn.tools/base-domain*` Base domain
-* `hive.syn.tools/credentials-secret*` Name of the secret containing the cloud credentials
-* `hive.syn.tools/worker-count` Count of worker nodes to provision
-* `hive.syn.tools/worker-type` Instance type to use for worker nodes
-
-`*` are required for provisioning
+* `hive.syn.tools/gcp-project` GCP project name
+* `hive.syn.tools/base-domain` Base domain
+* `hive.syn.tools/credentials-secret` Name of the secret containing the cloud credentials
 
 The reason for using annotations being that we don't have to change the cluster CRD for the PoC.
 In a second step, once this design is validated and accepted, the information can be added as a typed struct to the cluster CRD.
+
+
+==== Cluster Scaling
+
+Scaling of a cluster shouldn't be done via Hive.
+For provisioning we use a default setup of three master and three worker nodes.
+Once a cluster is provisioned, scaling will be implemented via other means for example in a Commodore component.
 
 
 === Risks and Mitigations
