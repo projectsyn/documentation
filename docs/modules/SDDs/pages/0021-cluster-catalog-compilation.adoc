@@ -23,7 +23,7 @@ It's therefore crucial to have a robust and scalable system in place to run thes
 
 === Goals
 
-* Define where (in terms of which cluster, namespace, etc.) the jobs are run
+* Define where (in terms of which cluster, namespace, etc.) the jobs run
 * Define what should cause the recompilation of the catalog for a certain cluster
 * Scale to several hundrets and with future changes to thousands of clusters
 
@@ -151,7 +151,7 @@ Providing a cluster or tenant ID can limit the set of clusters to compile.
 ==== Rate Limiting
 
 Since the compilation is a relatively expensive operation resource wise, it might become necessary to implement some kind of rate limiting.
-For example could Quartermaster make sure that a certain amount of compile jobs per amount of time isn't exceeded for a single cluster or tenant.
+For example Quartermaster could make sure that a certain amount of compile jobs per amount of time isn't exceeded for a single cluster or tenant.
 This would mitigate the situation where a lot of changes in various Git repos would result in many compile jobs which could exhaust the resources of a cluster.
 The downside would be a longer reaction time for changes to be applied on a cluster.
 
