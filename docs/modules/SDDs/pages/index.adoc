@@ -1,5 +1,10 @@
-.Syn Design Documents
-* xref:sdd-template.adoc[SDD Template]
+= Syn Design Documents (SDDs)
+
+A Syn Design Document is a working document to document, discuss and decide on design decisions in Project Syn. See xref:0001-sdd-definition.adoc[SDD 0001] for a definition of the SDD itself.
+
+The all are using the xref:sdd-template.adoc[SDD Template].
+
+== List of SDDs
 
 * xref:0001-sdd-definition.adoc[0001 - SDD Definition]
 * xref:0002-naming-scheme.adoc[0002 - Naming Scheme]
