@@ -55,6 +55,20 @@ In a first PoC phase this can be an annotation like `cluster.syn.tools/needs-com
 In a later stage this information should be part of the typed struct and might include further information like the exact version of the various input repos.
 
 
+==== Inventory Parsing
+
+In order for Quartermaster to figure out which clusters are affected by a certain config change, the Kapitan inventory needs to be parsed.
+Kapitan does this by using https://github.com/salt-formulas/reclass[reclass] which is a tool for merging and searching data sources recursively in YAML files.
+
+Quartermaster can use reclass to parse the inventory and search for clusters that are affected by changes in a certain class.
+One issue we've to work around in this approach is, that reclass can only parse the inventory if it's complete and all referenced classes are available.
+This is a problem since creating the whole inventory (with all components) would be too resource and time intensive.
+As a workaround Quartermaster should only have to get the global and tenant parts of the inventory.
+The classes for the different Commodore components should be faked and generated as empty files.
+The only downside to this approach is that if a component class imports another class, this won't be captured by Quartermaster which might result in cluster catalogs not being compiled.
+Since we currently don't allow components to include classes this isn't a problem.
+
+
 ==== Webhooks
 
 Triggering a webhook can be implemented in either a Git repo natively (for example https://developer.github.com/webhooks/[GitHub Webhooks]) or via a CI/CD system (for example a https://docs.gitlab.com/ee/ci/[GitLab CI] job which runs `curl`).
@@ -144,3 +158,4 @@ Such a solution would probably require a centralized job runner.
 == References
 
 * xref:0006-commodore-configuration-catalog-compilation.adoc[Configuration catalog compilation]
+* reclass - https://github.com/salt-formulas/reclass
