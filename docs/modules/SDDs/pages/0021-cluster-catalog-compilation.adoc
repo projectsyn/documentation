@@ -105,6 +105,14 @@ For clusters where this isn't possible due to resource, security or other constr
 These clusters need to be configured in the central system so it will react on the mentioned annotation an create the compile jobs for them.
 
 
+==== Metrics
+
+To properly monitor the compilation jobs, metrics must be generated and stored for each job.
+This can be done by using the Kubernetes metrics already available for the status of each job.
+Additionally, each compilation job pushes detailed metrics about the status to a Prometheus Pushgateway.
+This allows us to create detailed monitoring and alerting rules, even for jobs running on different clusters.
+
+
 === User Stories
 
 ==== Config Change in Global Config Repo
@@ -159,3 +167,4 @@ Such a solution would probably require a centralized job runner.
 
 * xref:0006-commodore-configuration-catalog-compilation.adoc[Configuration catalog compilation]
 * reclass - https://github.com/salt-formulas/reclass
+* Prometheus Pushgateway - https://github.com/prometheus/pushgateway
