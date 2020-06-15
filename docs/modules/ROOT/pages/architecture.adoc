@@ -1,0 +1,7 @@
+= Project Syn Architecture
+
+== High-Level Architecture
+
+The following diagram shows the current high-level architecture (subject to change):
+
+image::syn_highlevel_architecture.png[]

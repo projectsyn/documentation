@@ -20,12 +20,16 @@ ifeq ($(UNAME), Darwin)
 endif
 
 .PHONY: all
-all: docs
+all: docs open
 
 # This will clean the Antora Artifacts, not the npm artifacts
 .PHONY: clean
 clean:
 	rm -rf $(web_dir)
+
+.PHONY: open
+open: $(web_dir)/index.html
+	-$(OPEN) $<
 
 .PHONY: docs
 docs:    $(web_dir)/index.html
