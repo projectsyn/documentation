@@ -1,0 +1,271 @@
+= Getting Started with Project Syn
+
+This guide helps to get started with the various Project Syn tools.
+
+== Requirements
+
+Before you start, please make sure to have these requirements available:
+
+* A local Kubernetes cluster (k3s), managed with https://k3d.io/[k3d]
+* A https://gitlab.com[GitLab.com] account with an https://gitlab.com/profile/keys[SSH key configured]
+* `curl`
+
+== Kickstart Lieutenant
+
+Lieutenant is the central inventory service all Project Syn managed clusters report to, it consists of the Lieutenant _Operator_ and the Lieutenant _API_.
+
+Create a namespace to host the Operator and the API
+[source,shell]
+----
+kubectl create namespace lieutenant
+----
+
+=== Install Lieutenant Operator
+
+Install *Lieutenant Operator* with the following commands:
+
+[source,shell]
+----
+# CRDs (global scope)
+kubectl apply -k github.com/projectsyn/lieutenant-operator/deploy/crds
+
+# Operator deployment
+kubectl -n lieutenant apply -k github.com/projectsyn/lieutenant-operator/deploy
+
+# Configure Lieutenant Operator to not rely on Hashicorp Vault (for now)
+kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator SKIP_VAULT_SETUP=true
+----
+
+=== Install Lieutenant API
+
+Install *Lieutenant API* with the following commands:
+
+[source,shell]
+----
+# API deployment
+kubectl -n lieutenant apply -k github.com/projectsyn/lieutenant-api/deploy
+
+# Ingress
+export K3S_INGRESS_IP=$(kubectl -n kube-system get svc traefik -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+kubectl -n lieutenant apply -f -<<EOF
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: lieutenant-api
+spec:
+  rules:
+  - host: lieutenant.${K3S_INGRESS_IP}.nip.io
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: lieutenant-api
+          servicePort: 80
+EOF
+----
+
+Check that the API is accessible:
+
+[source,shell]
+----
+curl http://lieutenant.${K3S_INGRESS_IP}.nip.io/healthz
+----
+This should return `ok` as the answer to the `curl` command. You can see this is the same API Commodore and Steward will use (in this getting started guide without https and using the nip.io dynamic URL).
+
+TIP: The API documentation can be accessed in your browser under http://lieutenant.${K3S_INGRESS_IP}.nip.io/docs.
+
+=== Prepare Lieutenant Operator access to GitLab.com
+
+For Lieutenant to manage Git repositories for clusters and tenants it needs API access to a GitLab server.
+
+Create a Kubernetes secret which contains the access token for the GitLab.com API, which can be generated here: https://gitlab.com/profile/personal_access_tokens (needs `api` scope).
+
+Replace `MYTOKEN` with the generated GitLab.com API token.
+
+[source,shell]
+----
+export GITLABCOM_TOKEN=MYTOKEN
+kubectl -n lieutenant create secret generic vshn-gitlab \
+  --from-literal=endpoint=https://gitlab.com \
+  --from-literal=hostKeys="gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf" \
+  --from-literal=token=${GITLABCOM_TOKEN}
+----
+
+NOTE: This secret currently needs to be named exactly like that. See https://syn.tools/lieutenant-api/deployment.html#_gitlab[syn.tools] and https://github.com/projectsyn/lieutenant-operator/issues/48[GitHub issue] for more information.
+
+=== Prepare Lieutenant API Authentication and Authorization
+
+As the Lieutenant API uses the underlying Kubernetes cluster for authentication and authorization, the following objects need to be created:
+
+* `Role`
+* `RoleBinding`
+* `ServiceAccount`
+
+[source,shell]
+----
+kubectl -n lieutenant apply -f -<<EOF
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: lieutenant-api-user
+rules:
+- apiGroups:
+  - syn.tools
+  resources:
+  - clusters
+  - tenants
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: lieutenant-api-user
+roleRef:
+  kind: Role
+  name: lieutenant-api-user
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: ServiceAccount
+  name: api-access-synkickstart
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: api-access-synkickstart
+EOF
+----
+
+=== Create Lieutenant Objects: Tenant and Cluster
+
+In this section you will create your first Lieutenant configuration objects using the API to test the deployment and configuration.
+
+. Prepare access to API, replace `MYUSER` with your GitLab.com user id
++
+[source,shell]
+----
+export LIEUTENANT_TOKEN=$(kubectl -n lieutenant get secret $(kubectl -n lieutenant get sa api-access-synkickstart -o go-template='{{(index .secrets 0).name}}') -o go-template='{{.data.token | base64decode}}')
+export LIEUTENANT_AUTH="Authorization: Bearer ${LIEUTENANT_TOKEN}"
+export LIEUTENANT_URL="lieutenant.${K3S_INGRESS_IP}.nip.io"
+export GITLABCOM_USERID="MYUSER"
+----
+
+. Create a *Lieutenant Tenant* via the API
++
+[source,shell]
+----
+TENANT_ID=$(curl -s -H $LIEUTENANT_AUTH -H "Content-Type: application/json" -X POST --data "{\"displayName\":\"My first Tenant\",\"gitRepo\":{\"url\":\"ssh://git@gitlab.com/${GITLABCOM_USERID}/mytenant.git\"}}" http://${LIEUTENANT_URL}/tenants | jq -r ".id")
+echo $TENANT_ID
+----
++
+TIP: If everything went well, the Lieutenant Operator created a new git repository under https://gitlab.com/${GITLABCOM_USERID}/mytenant, which will be used to store the configuration used by Commodore to create a catalog for a cluster.
+
+. Retrieve the registered Tenants via API and directly on the cluster
++
+[source,shell]
+----
+curl -H $LIEUTENANT_AUTH http://${LIEUTENANT_URL}/tenants
+kubectl -n lieutenant get tenant
+kubectl -n lieutenant get gitrepo
+----
+
+. Register a *Lieutenant Cluster* via the API
++
+[source,shell]
+----
+CLUSTER_ID=$(curl -s -H $LIEUTENANT_AUTH -H "Content-Type: application/json" -X POST --data "{ \"tenant\": \"${TENANT_ID}\", \"displayName\": \"My first Project Syn cluster\", \"facts\": { \"cloud\": \"local\", \"distribution\": \"k3s\", \"region\": \"local\" }, \"gitRepo\": { \"url\": \"ssh://git@gitlab.com/${GITLABCOM_USERID}/cluster-gitops1.git\" } }" http://${LIEUTENANT_URL}/clusters | jq -r ".id")
+echo $CLUSTER_ID
+----
++
+TIP: If everything went well, the Lieutenant Operator created a new git repository under https://gitlab.com/${GITLABCOM_USERID}/cluster-gitops1 which will be used to store the generated catalog of deployment files.
+
+. Retrieve the registered Clusters via API and directly on the cluster
++
+[source,shell]
+----
+curl -H $LIEUTENANT_AUTH http://${LIEUTENANT_URL}/clusters
+kubectl -n lieutenant get cluster
+kubectl -n lieutenant get gitrepo
+----
+
+== Kickstart Commodore
+
+Commodore is the configuration generation tool. It will be configured to generate configuration for your Lieutenant cluster $CLUSTER_ID generated above.
+
+Before continuing with this section, make sure that everything went well with the installation and configuration of Lieutenant as Commodore relies on having a working instance of it.
+
+== Run Commodore
+
+The easiest way of executing Commodore is by using the container image provided by Project Syn: https://hub.docker.com/r/projectsyn/commodore[docker.io/projectsyn/commodore]. We run the image directly in the `k3s` instance so that there is no need for having Docker installed.
+
+Execute the following command which will start the properly configured Commodore container inside your local `k3s` instance.
+
+Replace `MYSSHKEYPATH` with the path to your SSH key file, f.e. `~/.ssh/id_rsa`. This SSH key will be used to push the generated configuration catalog to the Git repository managed by Lieutenant.
+
+[source,shell]
+----
+export COMMODORE_SSH_PRIVATE_KEY=MYSSHKEYPATH
+kubectl -n lieutenant run commodore-shell \
+  --image=docker.io/projectsyn/commodore:latest \
+  --env=COMMODORE_API_URL="http://${LIEUTENANT_URL}/" \
+  --env=COMMODORE_API_TOKEN=${LIEUTENANT_TOKEN} \
+  --env=COMMODORE_GLOBAL_GIT_BASE=https://github.com/projectsyn \
+  --env=SSH_PRIVATE_KEY="$(cat ${COMMODORE_SSH_PRIVATE_KEY})" \
+  --env=CLUSTER_ID=${CLUSTER_ID} \
+  --tty --stdin --restart=Never --rm --wait \
+  --image-pull-policy=Always \
+  --command \
+  -- /app/tools/entrypoint.sh bash
+----
+
+If your SSH key is protected by a passphrase (hopefully so!) no command prompt will be displayed and it will look like it halted at `If you don't see a command prompt, try pressing enter`. Don't just press "enter" but enter your SSH key passphrase (an `ssh-agent` is started in the container's entrypoint) and press "enter" after that.
+
+When there is no passphrase on your SSH key, the command prompt should directly show up.
+
+Now run (inside the container):
+
+[source,shell]
+----
+ssh-keyscan gitlab.com > /app/.ssh/known_hosts
+pipenv run commodore compile $CLUSTER_ID --push
+----
+
+The output will look like this:
+
+[source]
+----
+Cleaning working tree
+Updating global config...
+Updating customer config...
+Discovering components...
+Fetching components...
+Updating Kapitan target...
+Updating cluster catalog...
+ > Reference at 'refs/heads/master' does not exist, creating initial commit for catalog
+Updating Jsonnet libraries...
+Cleaning catalog repository...
+ > Converting old-style catalog
+Updating Kapitan secret references...
+Compiling catalog...
+...
+ > Commiting changes...
+ > Pushing catalog to remote...
+Catalog compiled! 🎉
+----
+
+You now have your first Commodore compiled catalog available under `catalog/` and pushed to GitLab.com to the cluster catalog repository.
+
+TIP: This guide uses https://github.com/projectsyn/commodore-defaults/ as the global common configuration repository. If you want to use your own, adapt the `COMMODORE_GLOBAL_GIT_BASE` environment variable. Currently the Git repo needs to be named `commodore-defaults`.
+
+== Getting Started Guide Roadmap
+
+This guide will evolve over time. You're currently looking at the initial release where the focus lies on Lieutenant and Commodore. Planned:
+
+* Add guidelines for Hashicorp Vault
+* Guide how to use Steward
