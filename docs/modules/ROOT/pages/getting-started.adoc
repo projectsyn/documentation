@@ -153,24 +153,24 @@ In this section you will create your first Lieutenant configuration objects usin
 export LIEUTENANT_TOKEN=$(kubectl -n lieutenant get secret $(kubectl -n lieutenant get sa api-access-synkickstart -o go-template='{{(index .secrets 0).name}}') -o go-template='{{.data.token | base64decode}}')
 export LIEUTENANT_AUTH="Authorization: Bearer ${LIEUTENANT_TOKEN}"
 export LIEUTENANT_URL="lieutenant.${K3S_INGRESS_IP}.nip.io"
-export GITLABCOM_USERID="MYUSER"
+export GITLABCOM_USERNAME="MYUSER"
 ----
 
 . Create a *Lieutenant Tenant* via the API
 +
 [source,shell]
 ----
-TENANT_ID=$(curl -s -H $LIEUTENANT_AUTH -H "Content-Type: application/json" -X POST --data "{\"displayName\":\"My first Tenant\",\"gitRepo\":{\"url\":\"ssh://git@gitlab.com/${GITLABCOM_USERID}/mytenant.git\"}}" http://${LIEUTENANT_URL}/tenants | jq -r ".id")
+TENANT_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{\"displayName\":\"My first Tenant\",\"gitRepo\":{\"url\":\"ssh://git@gitlab.com/${GITLABCOM_USERNAME}/mytenant.git\"}}" "http://${LIEUTENANT_URL}/tenants" | jq -r ".id")
 echo $TENANT_ID
 ----
 +
-TIP: If everything went well, the Lieutenant Operator created a new git repository under https://gitlab.com/${GITLABCOM_USERID}/mytenant, which will be used to store the configuration used by Commodore to create a catalog for a cluster.
+TIP: If everything went well, the Lieutenant Operator created a new git repository under https://gitlab.com/${GITLABCOM_USERNAME}/mytenant, which will be used to store the configuration used by Commodore to create a catalog for a cluster.
 
 . Retrieve the registered Tenants via API and directly on the cluster
 +
 [source,shell]
 ----
-curl -H $LIEUTENANT_AUTH http://${LIEUTENANT_URL}/tenants
+curl -H "$LIEUTENANT_AUTH" "http://${LIEUTENANT_URL}/tenants"
 kubectl -n lieutenant get tenant
 kubectl -n lieutenant get gitrepo
 ----
@@ -179,17 +179,17 @@ kubectl -n lieutenant get gitrepo
 +
 [source,shell]
 ----
-CLUSTER_ID=$(curl -s -H $LIEUTENANT_AUTH -H "Content-Type: application/json" -X POST --data "{ \"tenant\": \"${TENANT_ID}\", \"displayName\": \"My first Project Syn cluster\", \"facts\": { \"cloud\": \"local\", \"distribution\": \"k3s\", \"region\": \"local\" }, \"gitRepo\": { \"url\": \"ssh://git@gitlab.com/${GITLABCOM_USERID}/cluster-gitops1.git\" } }" http://${LIEUTENANT_URL}/clusters | jq -r ".id")
+CLUSTER_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{ \"tenant\": \"${TENANT_ID}\", \"displayName\": \"My first Project Syn cluster\", \"facts\": { \"cloud\": \"local\", \"distribution\": \"k3s\", \"region\": \"local\" }, \"gitRepo\": { \"url\": \"ssh://git@gitlab.com/${GITLABCOM_USERNAME}/cluster-gitops1.git\" } }" "http://${LIEUTENANT_URL}/clusters" | jq -r ".id")
 echo $CLUSTER_ID
 ----
 +
-TIP: If everything went well, the Lieutenant Operator created a new git repository under https://gitlab.com/${GITLABCOM_USERID}/cluster-gitops1 which will be used to store the generated catalog of deployment files.
+TIP: If everything went well, the Lieutenant Operator created a new git repository under https://gitlab.com/${GITLABCOM_USERNAME}/cluster-gitops1 which will be used to store the generated catalog of deployment files.
 
 . Retrieve the registered Clusters via API and directly on the cluster
 +
 [source,shell]
 ----
-curl -H $LIEUTENANT_AUTH http://${LIEUTENANT_URL}/clusters
+curl -H "$LIEUTENANT_AUTH" "http://${LIEUTENANT_URL}/clusters"
 kubectl -n lieutenant get cluster
 kubectl -n lieutenant get gitrepo
 ----

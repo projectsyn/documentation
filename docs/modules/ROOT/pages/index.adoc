@@ -7,7 +7,7 @@ image::syn.png[]
 
 > Project Syn is a pre-integrated set of tools to provision, update, backup, observe and react/alert production applications on Kubernetes and in the cloud. It supports DevOps through full self-service and automation using containers, Kubernetes and GitOps.
 
-All code lives on GitHub under https://github.com/projectsyn.
+See xref:features.adoc[features] for a comprehensive description of all the possibilities and xref:architecture.adoc[architecture] for an insight into the Project Syn architecture. You would like to get in touch with us? See xref:community.adoc[community] for ways how to do that.
 
 [discrete]
 == Overview of Project Syn tools

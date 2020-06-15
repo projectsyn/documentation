@@ -1,0 +1,11 @@
+= Community
+
+Connect with the Project Syn community:
+
+https://community.appuio.ch/[Chat]:: We use the _APPUiO Community Chat_ (registration open) and are reachable in the https://community.appuio.ch/channel/projectsyn[#projectsyn] channel.
+https://github.com/projectsyn[GitHub]:: The source code and issue tracking is available on _GitHub_ under the https://github.com/projectsyn[projectsyn] organization.
+
+[discrete]
+== Project sponsor
+
+The project is sponsored by https://vshn.ch/[VSHN AG]. If you ever need support for Project Syn, have a look at https://kb.vshn.ch/products/vss_intro.html[VSHN Syn Support].
