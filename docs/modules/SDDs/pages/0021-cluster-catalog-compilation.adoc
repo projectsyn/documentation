@@ -51,7 +51,7 @@ By using the Kapitan inventory the tool needs to figure out for which clusters t
 In a first step this could be relatively rudimentary and only use the input information from a webhook (cluster/tenant ID) to decide which clusters to compile.
 
 The information if a cluster needs to be compiled is then stored in the cluster object of the Lieutenant API.
-In a first PoC phase this can be an annotation like `cluster.syn.tools/needs-compilation=true`.
+In a first PoC phase this can be an annotation like `cluster.syn.tools/compilation-id=DmpKUlLdCfUD`.
 In a later stage this information should be part of the typed struct and might include further information like the exact version of the various input repos.
 
 
