@@ -101,8 +101,9 @@ To distribute the load this compilation generates and to follow a decentralized 
 The Steward component on a cluster starts a compilation job if the `cluster.syn.tools/needs-compilation` annotation is set to `true` on its own cluster object.
 It will then launch the respective job to compile the cluster catalog.
 
-For clusters where this isn't possible due to resource, security or other constraints, a central system runs the jobs.
+For clusters where this isn't possible due to resource, security, or other constraints, a central system runs the jobs.
 These clusters need to be configured in the central system so it will react on the mentioned annotation an create the compile jobs for them.
+The logic when to run and how exactly the job is run should be the same, no matter if the job is run on the target cluster or in the central system.
 
 
 ==== Metrics
