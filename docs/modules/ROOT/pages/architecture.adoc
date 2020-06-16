@@ -1,7 +1,99 @@
 = Project Syn Architecture
 
-== High-Level Architecture
+[ditaa, cloudscale, svg]
+....
+            /-------------------------\                                         Project Syn enabled Kubernetes cluster
+            +                         |                                         +-------------------------------------+
+       +--->+ Lieutenant API          +<-----+                                  |                                     |
+       |    + cBLU                    |      |  Cluster information             |   /--------------------\            |
+       |    \-+---------------------+-/      |  SSH keys                        |   |                    |            |
+       |      |                     |        +----------------------------------|---+ Steward            |            |
+       |      | Lieutenant Operator +----+                                      |   | cBLU               |            |
+       |      | cBLU                |    |                                      |   \---------+----------/            |
+       |      \---------------------/    |          +--------+                  |             |                       |
+       |                                 |          |        |                  |             |                       |
+       |                                 +--------->+ Vault  +<-----------------|-----+       | Deployment            |
+       |                                            | {s}    |                  |     |       | Reconciliation        |
+       |    Get cluster, tenant and                 +--------+                  |     |       |                       |
+       |    Git repo information                                                |     |       |                       |
+       |                                                                        |     |       v                       |
+       |    /------------------------\  Push compiled +-----------------+       |   +-+-------+----------+            |
+       |    |                        |  catalog       |                 |       |   |                    |            |
+       +----+ Commodore              +--------------->+ Cluster catalog +<------|---+ Argo-CD            |            |
+            | cBLU                   |                | cGRE            |       |   |                    |            |
+            \-----+------+--------+--/                +-----------------+       |   +--------------------+            |
+                  ^      ^        ^                                             |                                     |
+                  |      |        |                                             |                                     |
+          +-------+      +-----+  +--------------------+                        |                                     |
+          |                    |                       |                        |                                     |
++---------------------------------------------+        |                        |                                     |
+|         |                    |              |        |                        |                                     |
+| +-------+-------+ +----------+----------+   |  +-----+------+                 |                                     |
+| |               | |                     |   |  |            |                 |                                     |
+| | Common        | | Tenant and cluster  |   |  | Commodore  |                 |                                     |
+| | configuration | | configuration       |   |  | Components |                 |                                     |
+| | cGRE          | | cGRE                |   |  |            |                 |                                     |
+| +---------------+ +---------------------+   |  +-----+------+                 |                                     |
+|                   Git repo created &        |        ^                        |                                     |
+|                   configured by Lieutenant  |        | Update                 |                                     |
+|                   Operator                  |        |                        +-------------------------------------+
++------------------------------------+--------+        |
+Configuration Git repositories       ^                 |                        Legend
+                                     | Update          |                        +------------------------+
+                                     |                 |                        | Project Syn Tool cBLU  |
+                           +---------+------------+    |                        +------------------------+
+                           |                      |    |
+                           | Renovate             +----+                        +------------------------+
+                           |                      |                             | Git repository cGRE    |
+                           +----------------------+                             +------------------------+
+....
 
-The following diagram shows the current high-level architecture (subject to change):
+[discrete]
+== Main Tools
 
-image::syn_highlevel_architecture.png[]
+[cols=2*,options=header]
+|===
+|Tool
+|Purpose
+
+|xref:commodore:ROOT:index.adoc[Commodore]
+|Configuration generator leveraging a hierarchical configuration model. Uses https://kapitan.dev/[Kapitan] under the hood.
+
+|xref:lieutenant-operator:ROOT:index.adoc[Lieutenant Operator]
+|Manages the CRDs `Cluster`, `Tenant`, `GitRepo`. Implements the business logic for handling all aspects around Git repositories for clusters and tenants. 
+
+|xref:lieutenant-api:ROOT:index.adoc[Lieutenant API]
+|REST API to expose the functionality of the Lieutenant Operator and to enforce some defaults.
+
+|xref:steward:ROOT:index.adoc[Steward]
+|In-cluster agent which bootstraps, configures and starts Argo CD (GitOps operator) and takes care of keeping the Syn cluster tools up and running.
+
+|===
+
+[discrete]
+== Third-party Tools
+
+[cols=2*,options=header]
+|===
+|Tool
+|Purpose
+
+|https://argoproj.github.io/argo-cd/[Argo CD]
+|GitOps operator running on each cluster, taking care of enforcing the defined state.
+
+|https://www.vaultproject.io/[HashiCorp Vault]
+|Stores secrets in a secure way.
+
+|https://kapitan.dev/secrets/[Kapitan]
+|Configuration management engine, the heart of Commodore.
+
+|https://github.com/renovatebot/renovate[Renovate]
+|Version checker which helps to keep tooling up-to-date.
+
+|https://crossplane.io/[Crossplane]
+|Cloud native service provisioning.
+
+|https://gitlab.com[GitLab]
+|Git repository management.
+
+|===

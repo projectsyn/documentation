@@ -4,6 +4,8 @@
 * xref:features.adoc[Features]
 * xref:architecture.adoc[Architecture]
 * xref:roadmap.adoc[Roadmap]
+* xref:community.adoc[Community]
+* xref:contribution_guide.adoc[Contribution Guide]
 
 .Tutorials
 * xref:getting-started.adoc[Getting Started with Project Syn]
