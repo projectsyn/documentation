@@ -9,7 +9,7 @@ image::syn.png[]
 
 See xref:features.adoc[features] for a comprehensive description of all the possibilities and xref:architecture.adoc[architecture] for an insight into the Project Syn architecture. You would like to get in touch with us? See xref:community.adoc[community] for ways how to do that.
 
-TIP: The xref:getting_started.adoc[Getting Started] guide helps to get a glimpse into Project Syn. Give it a try!
+TIP: The xref:getting-started.adoc[Getting Started] gives you a glimpse into Project Syn. Give it a try!
 
 [discrete]
 == Overview of Project Syn tools
