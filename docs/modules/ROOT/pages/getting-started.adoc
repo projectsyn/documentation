@@ -89,7 +89,13 @@ TIP: The API documentation can be accessed in your browser under http://lieutena
 
 === Prepare Lieutenant Operator access to GitLab.com
 
-For Lieutenant to manage Git repositories for clusters and tenants it needs API access to a GitLab server.
+Lieutenant needs API access to a Gitlab server. This is required to create and manage Git repositories for clusters and tenants.
+
+[NOTE]
+.What are tenants?
+====
+A "tenant" is just an entity to assign clusters to. It could be a customer, a department, a team, or anything you want to group clusters with. This concept is also used by Commodore, as every tenant gets his own configuration Git repository to (for example) apply common settings to all clusters belonging to a particular tenant. Any cluster specific configuration values are stored in that tenant's own configuration Git repository.
+====
 
 Create a Kubernetes secret which contains the access token for the GitLab.com API, which can be generated here: https://gitlab.com/profile/personal_access_tokens (needs `api` scope).
 
