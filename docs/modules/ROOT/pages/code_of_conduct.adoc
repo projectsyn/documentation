@@ -23,7 +23,7 @@ community include:
 * Giving and gracefully accepting constructive feedback
 * Accepting responsibility and apologizing to those affected by our mistakes,
   and learning from the experience
-* Focusing on what is best not just for us as individuals, but for the
+* Focusing on what's best not just for us as individuals, but for the
   overall community
 
 Examples of unacceptable behavior include:
@@ -89,7 +89,7 @@ of actions.
 **Consequence**: A warning with consequences for continued behavior. No
 interaction with the people involved, including unsolicited interaction with
 those enforcing the Code of Conduct, for a specified period of time. This
-includes avoiding interactions in community spaces as well as external channels
+includes avoiding interactions in community spaces and external channels
 like social media. Violating these terms may lead to a temporary or
 permanent ban.
 
