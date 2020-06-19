@@ -43,7 +43,7 @@ of which version is used where
 
 === Non-Goals
 
-* Provisioning the Kubernetes cluster (e.g. launching an EKS cluster or
+* Provisioning the Kubernetes cluster (for example launching an EKS cluster or
 spinning up VMs and installing Kubernetes)
 * Maintenance (Upgrades) of the Kubernetes cluster itself
 
@@ -57,7 +57,7 @@ cluster
 * *Input Repo* is where cluster / customer specific overrides can be
 committed to
 * *Config Repo* is where the global configuration is stored
-* *Target Cluster* is the Kubernetes cluster that is managed
+* *Target Cluster* is the Kubernetes cluster that's managed
 * *Commodore* A tool built around Kapitan which uses a Puppet Hiera like approach to fetch configuration and _components_ from different source (_Input
 Repo_, _SYNventory_, _Config repos_ to render jsonnet templates to produce the Kubernetes manifests, the _Catalog_.
 * *Components* are repos containing bundles of Kapitan classes and
@@ -194,7 +194,7 @@ dependencies] and https://kapitan.dev/secrets/[secret references].
 ==== Secret references
 
 Commodore is opinionated in how it supports Kapitan's secret references:
-Only references to secrets in Vault (in the KV v2 backend) are
+Only references to secrets in Vault (in the KV v2 storage) are
 supported, and Commodore uses the path to the Kapitan secret file in the
 reference to determine the name and key in the corresponding Vault
 secret. References to secrets must always be made in the configuration
@@ -212,7 +212,7 @@ multiple Git hosting platforms'
 * *RISK*: The commodore job runner may depend on an existing GitLab CI
 infrastructure
 * *MITIGATION*: It should be possible to migrate the jobs onto other job
-runner infrastructures (e.g. Tekton
+runner infrastructures (for example Tekton
 https://github.com/tektoncd/pipeline[pipelines] and
 https://github.com/tektoncd/triggers[triggers]).
 
@@ -220,10 +220,10 @@ https://github.com/tektoncd/triggers[triggers]).
 
 The heart of the platform configuration management is an external
 dependency, Kapitan, which has the drawback that fixing problems in
-Kapian may be more complicated than in a piece of software that is
+Kapian may be more complicated than in a piece of software that's
 maintained by VSHN. Because Kapitan is implemented in Python, the
 decision was made to implement Commodore itself in Python as well. This
-has the drawback that Python is not particularly containerization
+has the drawback that Python isn't particularly containerization
 friendly. The commodore Docker image is roughly 430MB in size.
 
 == References
