@@ -1,0 +1,41 @@
+= SDD Template
+
+Please use the following Asciidoc code as a template for new SDDs.
+
+[literal]
+....
+= SDD XXXX - Title of the Document
+
+:sdd_author:    Author name
+:sdd_owner:     Owner name
+:sdd_reviewers: Reviewer names
+:sdd_date:      2020-XX-XX
+:sdd_status:    draft
+\include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+Summary of this SDD.
+====
+
+== Motivation
+
+=== Goals
+
+=== Non-Goals
+
+== Design Proposal
+
+=== User Stories [optional]
+
+=== Implementation Details/Notes/Constraints [optional]
+
+=== Risks and Mitigations [optional]
+
+== Drawbacks [optional]
+
+== Alternatives [optional]
+
+== References
+....

@@ -1,0 +1,45 @@
+= Project Syn Features
+
+Project Syn isn't just one tool, it consists of several tools which combined together help teams work with Kubernetes more efficiently.
+
+== Multi-Cluster and Multi-Tenant Management
+
+Keeping track of many Kubernetes clusters and knowing to which tenant each belongs to is the key job of *Lieutenant*. With Lieutenant an inventory service is provided, which not only keeps track of clusters and tenants, but also of other facts about clusters (cloud, location, ...). The information stored in Lieutenant is used by several other Project Syn tools, like Commodore.
+
+== Full GitOps Operations
+
+In order for https://www.gitops.tech/[GitOps] to unfold its full potential, some prerequisites must be met. These include a component actually implementing GitOps, and some accessible Git repositories. Project Syn makes use of https://argoproj.github.io/argo-cd/[Argo CD] as the GitOps controller, running on each Kubernetes cluster. The Project Syn tool *Lieutenant Operator* manages Git repositories (creating, updating, deleting) based on Tenant and Cluster Kubernetes-CRD configuration objects.
+
+== Tooling Bootstrapping
+
+Getting a Kubernetes cluster "Project Syn enabled" should be as easy as possible. And that's exactly the job of *Steward*. This in-cluster agent is installed via Lieutenant. Upon cluster registration in Lieutenant, a one-time install URL is generated, which is easily applicable to any Kubernetes cluster. Once Steward is running on the cluster, it bootstraps Argo CD, generates a deploy SSH key, sends it to Lieutenant and configures Argo CD with the information available in Lieutenant, so that Argo CD can do its job.
+
+== Configuration Management
+
+Generating customized Kubernetes deployment artifacts for deploying (system) applications to many Kubernetes clusters is achieved by the Project Syn tool *Commodore*. It uses https://kapitan.dev/[Kapitan] under the hood, to enable a hierarchical configuration structure. In combination with Lieutenant, Commodore is able to compile a customized catalog per Project Syn-enabled Kubernetes cluster, and can push it to the catalog GitOps Git repository, which is then cared for by Argo CD. As Lieutenant knows exactly everything about the Git repositories, Commodore can get all the needed information from there.
+
+== Reusable Components
+
+Commodore uses so-called *Commodore Components* (akin to modules) to compose the services available to a cluster. Via the hierarchical configuration system of Commodore and Kapitan, Components can be included and configured globally, per tenant, per cluster and more fine-grained, depending on your imagination.
+
+Project Syn already provides a https://github.com/topics/commodore-component[growing set of Commodore Components] and it's very easy to write your own Component.
+
+== Default Toolset
+
+The default Commodore Components provided by Project Syn include a default toolset. This ensure that all Kubernetes clusters managed with Project Syn provide the same set of services.
+
+== Automatically Maintained Components
+
+To keep Commodore Components and services up-to-date, https://github.com/renovatebot/renovate[Renovate] warns about new upstream releases. Open Pull Requests on GitHub inform teams if there is any outdated tool needing an update. Project Syn provides a custom integration for Renovate, compatible with Commodore Components.
+
+== Secret Management
+
+Storing secrets in Git (be it plaintext or encrypted) isn't a good idea. As Project Syn stores everything in Git for leveraging GitOps, secrets must be treated differently. For that we use https://kapitan.dev/secrets/[Kapitan]; this way, only a reference to a secret is actually stored in Git. The real secret is stored securely in https://www.vaultproject.io/[HashiCorp Vault] and only retrieved when the Kubernetes secret is applied directly on the target Kubernetes cluster. This ensures that the secret never leaves the cluster (except being stored in a Vault instance).
+
+Lieutenant is capable of preparing Vault so that no manual interaction is required. Lieutenant's even able to generate secrets per cluster and store them in Vault.
+
+== Service Provisioning
+
+Applications running on a Kubernetes cluster most of the time need some additional services, like databases and caches, to do their job. To ensure full automation, Project Syn integrates with https://crossplane.io/[Crossplane], able to provision services in the cloud, or hosted on the Kubernetes cluster itself.
+
+Project Syn provides Commodore Components taking care of the heavy lifting to provide a perfectly configured Crossplane instance.

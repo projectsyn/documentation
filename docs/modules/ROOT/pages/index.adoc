@@ -2,9 +2,32 @@
 
 image::syn.png[]
 
-This is the documentation of Project Syn.
+[discrete]
+== Introduction
 
-== Components
+> Project Syn is a pre-integrated set of tools to provision, update, backup, observe and react/alert production applications on Kubernetes and in the cloud. It supports DevOps through full self-service and automation using containers, Kubernetes and GitOps.
 
-* xref:commodore::index.adoc[Commodore]
-* xref:steward::index.adoc[Steward]
+See xref:features.adoc[features] for a comprehensive description of all the possibilities and xref:architecture.adoc[architecture] for an insight into the Project Syn architecture. You would like to get in touch with us? See xref:community.adoc[community] for ways how to do that.
+
+TIP: The xref:getting-started.adoc[Getting Started] gives you a glimpse into Project Syn. Give it a try!
+
+[discrete]
+== Overview of Project Syn tools
+
+xref:commodore::index.adoc[Commodore]:: Hierarchical Configuration Management with Kapitan.
+xref:lieutenant-operator::index.adoc[Lieutenant Operator]:: Kubernetes operator providing the business logic for the API.
+xref:lieutenant-api::index.adoc[Lieutenant API]:: REST API for cluster management.
+xref:steward::index.adoc[Steward]:: In-Cluster agent.
+
+[discrete]
+== Documentation
+
+The documentation is inspired by the https://documentation.divio.com/[Divio's documentation structure]:
+
+Tutorials:: _Learning-oriented_: a lesson which teaches you something around Project Syn.
+
+How-to guides:: _Problem-oriented_: step-by-step guides to achieve a goal.
+
+Technical reference:: _Information-oriented_: description about the inner ongoings of Project Syn.
+
+Explanation:: _Understanding-oriented_: explains the background.
