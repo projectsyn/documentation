@@ -1,0 +1,66 @@
+= Project Syn Roadmap
+
+This page lists the high level roadmap of Project Syn. It will be under constant change.
+
+> It's done when it's done
+
+== v0.1.0
+
+*Released*: 2020–03–02
+
+This is the very first release of Project Syn and contains the following tool releases:
+
+* https://github.com/projectsyn/lieutenant-operator/releases/tag/v0.1.0[Lieutenant Operator - v0.1.0]
+* https://github.com/projectsyn/lieutenant-api/releases/tag/v0.1.0[Lieutenant API - v0.1.0]
+* https://github.com/projectsyn/commodore/tree/v0.1.0[Commodore - v0.1.0]
+* https://github.com/projectsyn/steward/releases/tag/v0.1.0[Steward - v0.1.0]
+
+With this initial release the focus was to get the basics up and running:
+
+* Registering Tenants and Clusters in Lieutenant
+* Bootstrap GitOps repositories
+* Bootstrap Steward and GitOps on the Cluster
+* Generate Cluster Catalogs with Commodore
+
+Announcement blog post: https://vshn.ch/en/blog/first-pre-release-of-project-syn-tools/[First Pre-Release of Project Syn Tools].
+
+== v0.2.0
+
+Focus for this release:
+
+* Enable people to work with Commodore Components (CC), "Dev Experience."
+** Helper tools to write and test Commodore Components
+** Guidelines and How-Tos to write proper Commodore Components
+** Commodore job runner to completely automated the catalog generation
+* Decommissioning of clusters and other components fully automated
+** Git repository deletion mechanism - including safe-guards
+* Get the bootstrap process fully automated
+** Automate creation of cluster config file in tenant configuration repository
+** Initialize empty catalog Git repository
+* Bring the documentation of Project Syn up to speed
+** Rework existing Syn Design Documentes
+** How-Tos for basic workflows
+** Initial documentation for all released tools
+
+== v0.3.0
+
+NOTE: This is still subject to change
+
+Focus for this release:
+
+* Enable the usage of managed services on top of a Project Syn enabled Kubernetes cluster
+** Support with Backup and Monitoring
+** Enhance Commodore to be used for regular application deployment
+* GitOps for application deployment on a Project Syn enabled Kubernetes Cluster
+
+== v0.4.0
+
+NOTE: This is still subject to change
+
+Focus for this release:
+
+* Full https://crossplane.io/[Crossplane] integration
+
+== Future releases
+
+A lot of ideas are being worked out.

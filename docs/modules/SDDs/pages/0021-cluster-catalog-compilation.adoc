@@ -1,0 +1,171 @@
+= SDD 0021 - Cluster Catalog Compilation
+
+:sdd_author:    Simon Rüegg
+:sdd_owner:
+:sdd_reviewers:
+:sdd_date:      2020-06-10
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This document describes how, where and when the xref:0006-commodore-configuration-catalog-compilation.adoc[catalog compilation engine] runs.
+====
+
+
+== Motivation
+
+The compilation of a cluster catalog is a central piece of the configuration management within project Syn.
+It generates the actual configuration for a cluster based on various inputs and configurations.
+It's therefore crucial to have a robust and scalable system in place to run these compilation jobs in a secure and reactive manner.
+
+
+=== Goals
+
+* Define where (in terms of which cluster, namespace, etc.) the jobs run
+* Define what should cause the recompilation of the catalog for a certain cluster
+* Scale to several hundrets and with future changes to thousands of clusters
+
+
+=== Non-Goals
+
+* The handling of a compiled catalog (for example merge request automation) is out of scope for this design document
+* Solution to automate the component updates
+
+
+== Design Proposal
+
+The design splits the problem into two parts:
+
+. Figuring out which cluster catalogs need to be compiled
+. Running the actual compilation job
+
+
+=== Quartermaster
+
+A new tool called https://en.wikipedia.org/wiki/Quartermaster#Royal_Navy[Quartermaster] is implemented.
+This tool should solve the problem of figuring out which cluster catalogs need to be recompiled.
+The tool gets input in the form of webhooks which are triggered by Git repositories or other tools.
+By using the Kapitan inventory the tool needs to figure out for which clusters the config changed and therefore needs a recompilation.
+In a first step this could be relatively rudimentary and only use the input information from a webhook (cluster/tenant ID) to decide which clusters to compile.
+
+The information if a cluster needs to be compiled is then stored in the cluster object of the Lieutenant API.
+In a first PoC phase this can be an annotation like `cluster.syn.tools/compilation-id=DmpKUlLdCfUD`.
+In a later stage this information should be part of the typed struct and might include further information like the exact version of the various input repos.
+
+
+==== Inventory Parsing
+
+In order for Quartermaster to figure out which clusters are affected by a certain config change, the Kapitan inventory needs to be parsed.
+Kapitan does this by using https://github.com/salt-formulas/reclass[reclass] which is a tool for merging and searching data sources recursively in YAML files.
+
+Quartermaster can use reclass to parse the inventory and search for clusters that are affected by changes in a certain class.
+One issue we've to work around in this approach is, that reclass can only parse the inventory if it's complete and all referenced classes are available.
+This is a problem since creating the whole inventory (with all components) would be too resource and time intensive.
+As a workaround Quartermaster should only have to get the global and tenant parts of the inventory.
+The classes for the different Commodore components should be faked and generated as empty files.
+The only downside to this approach is that if a component class imports another class, this won't be captured by Quartermaster which might result in cluster catalogs not being compiled.
+Since we currently don't allow components to include classes this isn't a problem.
+
+
+==== Webhooks
+
+Triggering a webhook can be implemented in either a Git repo natively (for example https://developer.github.com/webhooks/[GitHub Webhooks]) or via a CI/CD system (for example a https://docs.gitlab.com/ee/ci/[GitLab CI] job which runs `curl`).
+A webhook can also be called by any other tool or even manually with a `curl` command.
+
+A webhook can include the following optional information:
+
+* Cluster ID for which to compile the catalog.
+This can be used in case where a specific cluster should be compiled
+
+* Tenant ID for which to figure out affected clusters.
+This can be used to limit the set of clusters to be considered
+
+* Set of classes that changed
+
+
+==== Authentication & Authorization
+
+To prevent exsessive resource usage or even DoS attacks, the webhooks need to be authenticated.
+A permission system needs to be in place to decide which entities are allowed to trigger which actions.
+It shouldn't be possible for example for a tenant to trigger compilation for clusters of other tenants.
+
+
+=== Compilation Jobs
+
+To compile the catalog for a cluster, a compilation job is created.
+The compilation job is a https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion[Kubernetes job] resource which executes the xref:0006-commodore-configuration-catalog-compilation.adoc[catalog compilation engine].
+
+To distribute the load this compilation generates and to follow a decentralized approach, these jobs are run on the same cluster as they compile the catalog for.
+The Steward component on a cluster starts a compilation job if the `cluster.syn.tools/needs-compilation` annotation is set to `true` on its own cluster object.
+It will then launch the respective job to compile the cluster catalog.
+
+For clusters where this isn't possible due to resource, security, or other constraints, a central system runs the jobs.
+These clusters need to be configured in the central system so it will react on the mentioned annotation an create the compile jobs for them.
+The logic when to run and how exactly the job is run should be the same, no matter if the job is run on the target cluster or in the central system.
+
+
+==== Metrics
+
+To properly monitor the compilation jobs, metrics must be generated and stored for each job.
+This can be done by using the Kubernetes metrics already available for the status of each job.
+Additionally, each compilation job pushes detailed metrics about the status to a Prometheus Pushgateway.
+This allows us to create detailed monitoring and alerting rules, even for jobs running on different clusters.
+
+
+=== User Stories
+
+==== Config Change in Global Config Repo
+
+If configuration in the global inventory repo changes, Quartermaster needs to find all clusters which are affected by the changed configuration.
+
+
+==== Config Change in Tenant Config Repo
+
+If configuration in a tenant inventory repo changes, Quartermaster needs to find all clusters which are affected by the changed configuration.
+This will be the same mechanism as for config changes in the global config repo.
+The set of clusters to consider are the clusters of the respective tenant.
+
+
+==== Change of Cluster Facts
+
+If the facts of a cluster change the set of clusters to consider already only consists of this cluster.
+Triggering the webhook needs to be implemented in Lieutenant (operator or API).
+
+
+==== New Release of a Commodore Component
+
+The new release of a Commodore component won't trigger anything directly.
+If the specific version for a component is being updated it results in a config change in either the global inventory repo or a tenant repo.
+This in turn results in the recompilation of the affected clusters.
+
+
+==== Manually Trigger a Compile
+
+To manually trigger a compile for developping or debugging purposes the webhook can be called with a tool like `curl`.
+Providing a cluster or tenant ID can limit the set of clusters to compile.
+
+
+=== Risks and Mitigations
+
+==== Rate Limiting
+
+Since the compilation is a relatively expensive operation resource wise, it might become necessary to implement some kind of rate limiting.
+For example Quartermaster could make sure that a certain amount of compile jobs per amount of time isn't exceeded for a single cluster or tenant.
+This would mitigate the situation where a lot of changes in various Git repos would result in many compile jobs which could exhaust the resources of a cluster.
+The downside would be a longer reaction time for changes to be applied on a cluster.
+
+
+== Alternatives
+
+An alternative would be to couple the two mentioned parts of the design together.
+This would mean that the same component is responsible to trigger new compiles and run the compiles.
+Such a solution would probably require a centralized job runner.
+
+
+== References
+
+* xref:0006-commodore-configuration-catalog-compilation.adoc[Configuration catalog compilation]
+* reclass - https://github.com/salt-formulas/reclass
+* Prometheus Pushgateway - https://github.com/prometheus/pushgateway

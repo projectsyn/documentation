@@ -1,0 +1,94 @@
+= SDD 0001 - SDD Definition
+
+== Title
+
+*Format:* `SDD \#### - <summary>`
+
+This is the title of the SDD. Keep it simple and descriptive. A good title can help communicate what the SDD is and should be considered as part of any review.
+
+The number of the SDD is the next available one in the sequence.
+
+IMPORTANT: There is a xref:sdd-template.adoc[SDD Template] to be used for new documents.
+
+== Meta Information Table
+
+:sdd_author:    Tobias Brunner, Marco Fretz
+:sdd_owner:     SIG Documentation
+:sdd_reviewers: Syn Kickstart Group
+:sdd_date:      2019-10-18
+:sdd_status:    accepted
+include::partial$meta-info-table.adoc[]
+
+You can generate the meta information table using the following syntax in your Asciidoc source file:
+
+[literal]
+....
+:sdd_author:    Tobias Brunner, Marco Fretz
+:sdd_owner:     SIG Documentation
+:sdd_reviewers: Syn Kickstart Group
+:sdd_date:      2019-10-18
+:sdd_status:    accepted
+\include::partial$meta-info-table.adoc[]
+....
+
+=== Status
+
+The values of the `:sdd_status:` attribute above must be the ones described below, *always in lowercase*.
+
+* [.status-macro .speculative]#speculative# designs explore an idea without yet explicitly proposing a change be made.
+* [.status-macro .draft]#draft# designs strive toward acceptance. Designs may exist in draft for some time as we experiment and learn, but their ultimate goal is to become an accepted design.
+* [.status-macro .accepted]#accepted# designs will be implemented.
+* [.status-macro .rejected]#rejected# designs won't be implemented.
+* [.status-macro .implemented]#implemented# designs which were accepted and are implemented.
+* [.status-macro .obsolete]#obsolete# designs are kept for historical reasons, but don't reflect the current or impending state of the codebase or project.
+
+== Summary
+
+Mandatory short summary what this is about.
+
+== Motivation
+
+This section is for explicitly listing the motivation, goals and non-goals of this KEP. Describe why the change is important and the benefits to users. The motivation section can optionally provide links to experience reports to demonstrate the interest in a KEP within the wider Kubernetes community.
+
+=== Goals
+
+List the specific goals of the SDD. How will we know that this has succeeded?
+
+=== Non-Goals
+
+What's out of scope for this SDD? Listing non-goals helps to focus discussion and make progress.
+
+== Design Proposal
+
+This is where we get down to the nitty gritty of what the proposal actually is.
+
+This section can be renamed to `Design` once agreed on the design.
+
+=== User Stories [optional]
+
+Detail the things that people will be able to do if this KEP is implemented. Include as much detail as possible so that people can understand the "how" of the system. The goal here is to make this feel real for users without getting bogged down.
+
+==== Story 1
+==== Story 2
+
+=== Implementation Details/Notes/Constraints [optional]
+
+What are the caveats to the implementation? What are some important details that didn't come across above. Go in to as much detail as necessary here. This might be a good place to talk about core concepts and how they releate.
+
+=== Risks and Mitigations [optional]
+
+What are the risks of this proposal and how do we mitigate. Think broadly. For example, consider both security and how this will impact the larger kubernetes ecosystem.
+
+How will security be reviewed and by whom? How will UX be reviewed and by whom?
+
+Consider including folks that also work outside the SIG or subproject.
+
+== Drawbacks [optional]
+
+Why should this KEP not be implemented.
+
+== Alternatives [optional]
+
+Similar to the Drawbacks section the Alternatives section is used to highlight and record other possible approaches to delivering the value proposed by a KEP.
+
+== References

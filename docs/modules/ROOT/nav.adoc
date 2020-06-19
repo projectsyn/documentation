@@ -1,7 +1,99 @@
-.General Documentation
 * xref:index.adoc[Home]
 
-.Project Syn
-* xref:syn::index.adoc[General Documentation]
-* xref:commodore::index.adoc[Commodore]
-* xref:steward::index.adoc[Steward]
+.About
+* xref:features.adoc[Features]
+* xref:architecture.adoc[Architecture]
+* xref:roadmap.adoc[Roadmap]
+* xref:community.adoc[Community]
+* xref:contribution_guide.adoc[Contribution Guide]
+* xref:code_of_conduct.adoc[Code of Conduct]
+
+.Tutorials
+* xref:getting-started.adoc[Getting Started with Project Syn]
+* Commodore
++
+--
+include::commodore:ROOT:partial$nav-tutorials.adoc[]
+--
+* Lieutenant Operator
++
+--
+include::lieutenant-operator:ROOT:partial$nav-tutorials.adoc[]
+--
+* Lieutenant API
++
+--
+include::lieutenant-api:ROOT:partial$nav-tutorials.adoc[]
+--
+* Steward
++
+--
+include::steward:ROOT:partial$nav-tutorials.adoc[]
+--
+
+.How-to guides
+* Commodore
++
+--
+include::commodore:ROOT:partial$nav-howtos.adoc[]
+--
+* Lieutenant Operator
++
+--
+include::lieutenant-operator:ROOT:partial$nav-howtos.adoc[]
+--
+* Lieutenant API
++
+--
+include::lieutenant-api:ROOT:partial$nav-howtos.adoc[]
+--
+* Steward
++
+--
+include::steward:ROOT:partial$nav-howtos.adoc[]
+--
+
+.Technical reference
+* Commodore
++
+--
+include::commodore:ROOT:partial$nav-reference.adoc[]
+--
+* Lieutenant Operator
++
+--
+include::lieutenant-operator:ROOT:partial$nav-reference.adoc[]
+--
+* Lieutenant API
++
+--
+include::lieutenant-api:ROOT:partial$nav-reference.adoc[]
+--
+* Steward
++
+--
+include::steward:ROOT:partial$nav-reference.adoc[]
+--
+
+.Explanation
+* xref:SDDs:index.adoc[Syn Design Documents]
+* Commodore
++
+--
+include::commodore:ROOT:partial$nav-explanation.adoc[]
+--
+* Lieutenant Operator
++
+--
+include::lieutenant-operator:ROOT:partial$nav-explanation.adoc[]
+--
+* Lieutenant API
++
+--
+include::lieutenant-api:ROOT:partial$nav-explanation.adoc[]
+--
+* Steward
++
+--
+include::lieutenant-api:ROOT:partial$nav-explanation.adoc[]
+--
