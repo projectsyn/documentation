@@ -4,7 +4,7 @@
 :sdd_owner:     Marco Fretz
 :sdd_reviewers: 
 :sdd_date:      2019-10-18
-:sdd_status:    draft
+:sdd_status:    obsolete
 include::partial$meta-info-table.adoc[]
 
 [NOTE]
@@ -20,9 +20,7 @@ end when the cluster is up and running. To achieve feature parity with
 the VMSFv1 (Puppet manged world) we need to do more.
 
 We want to have one source of truth when configuring all aspects of a
-VSHN
-https://wiki.vshn.net/pages/viewpage.action?pageId=151914954[Managed
-Platform].
+VSHN Managed Platform.
 
 === Goals
 
@@ -36,7 +34,7 @@ Managed Platform, e.g.:
 running on a Cloud which doesn't provide such services
 ** cert-manager
 ** Vault
-** ... image:test_files/help_16.svg[(question)]
+** ...
 * Have cross customer and cluster sane defaults for all the configured
 services, while still having a easy way to overwrite per provider,
 distribution, cluster, customer, project, etc.
@@ -60,18 +58,13 @@ cluster
 committed to
 * *Config Repo* is where the global configuration is stored
 * *Target Cluster* is the Kubernetes cluster that is managed
-* https://wiki.vshn.net/pages/viewpage.action?pageId=151915099[*Commodore*]
-A tool built around Kapitan which uses a Puppet Hiera like approach to
-fetch configuration and _components_ from different source (_Input
-Repo,_
-https://wiki.vshn.net/pages/viewpage.action?pageId=151914981[SYNventory],
-_Config repos_) to render jsonnet templates to produce the Kubernetes
-manifests, the _Catalog_.
+* *Commodore* A tool built around Kapitan which uses a Puppet Hiera like approach to fetch configuration and _components_ from different source (_Input
+Repo_, _SYNventory_, _Config repos_ to render jsonnet templates to produce the Kubernetes manifests, the _Catalog_.
 * *Components* are repos containing bundles of Kapitan classes and
 templates which define how a piece of software is configured and
 deployed
 * *Catalog* The kubernetes manifests that are produced by _TheMagic_ and
-commited to the _Output Repo._
+commited to the _Output Repo_
 
 === Concept Overview
 
@@ -80,9 +73,9 @@ repository.
 * This git repository is then used for GitOps on the actual cluster.
 GitOps enforces the state independently of whether new config is
 generated or not (no SPOF).
-* [line-through]*This will most likely also generate the configuration
+* This will most likely also generate the configuration
 to initially provision the cluster using things like Rancher, Terraform,
-Crossplane Cluster, etc.*
+Crossplane Cluster, etc.
 ** The provisioning of the Cluster is out-of-scope for the Platform
 Configuration management. A design for generating initial config for
 provisioning will be described in another SDD.
@@ -94,9 +87,7 @@ image::pcm_concept.png[]
 Commodore collects all the required configuration (from the SYNventory
 API and the Input and Config repo) and constructs a
 https://kapitan.dev/inventory/[Kapitan inventory] which is uses to
-produce the cluster catalog. Commodore is defined in its own SDD:
-https://wiki.vshn.net/pages/viewpage.action?pageId=151915099[SDD#2019-10-18
-- Commodore]
+produce the cluster catalog. Commodore is defined in its own xref:0006-commodore-configuration-catalog-compilation.adoc[SDD 0006 - Commodore Configuration Catalog Compilation].
 
 ==== Kapitan class hierarchy
 
@@ -238,8 +229,3 @@ friendly. The commodore Docker image is roughly 430MB in size.
 == References
 
 * Kapitan: https://kapitan.dev/[https://kapitan.dev]
-* https://wiki.vshn.net/pages/viewpage.action?pageId=151915099[SDD#2019-10-18
-- Commodore]
-* https://wiki.vshn.net/pages/viewpage.action?pageId=151914981[SDD#2019-10-18
-- SYNventory]
-
