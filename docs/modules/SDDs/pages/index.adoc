@@ -10,6 +10,7 @@ The all are using the xref:sdd-template.adoc[SDD Template].
 * xref:0002-naming-scheme.adoc[0002 - Naming Scheme]
 * xref:0006-commodore-configuration-catalog-compilation.adoc[0006 - Commodore Configuration Catalog Compilation]
 * xref:0007-lieutenant-management-api.adoc[0007 - Lieutenant - Management API]
+* xref:0008-platform-configuration-management.adoc[0008 - Platform Configuration Management]
 * xref:0009-steward-cluster-agent.adoc[0009 - Steward Cluster Agent]
 * xref:0015-secrets-management.adoc[0015 - Secrets Management]
 * xref:0017-maintenance-with-renovate.adoc[0017 - Maintenance with Renovate]
