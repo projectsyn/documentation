@@ -15,7 +15,7 @@ This defines how we use GitOps to bring configuration to a cluster. It includes 
 
 == Motivation
 
-https://www.weave.works/technologies/gitops/#:~:targetText=GitOps%20is%20a%20way%20to,for%20declarative%20infrastructure%20and%20applications.[GitOps] has many advantages and we decided early on that we want to leverage them to manage Kubernetes clusters. Currently two main tools exist to implement GitOps: https://github.com/fluxcd/flux[Flux] from WeaveWorks and https://github.com/argoproj/argo-cd[Argo CD] from the Argo project. This design document describes which tool we will use and how to do so.
+https://www.weave.works/technologies/gitops/[GitOps] has many advantages and we decided early on that we want to leverage them to manage Kubernetes clusters. Currently two main tools exist to implement GitOps: https://github.com/fluxcd/flux[Flux] from WeaveWorks and https://github.com/argoproj/argo-cd[Argo CD] from the Argo project. This design document describes which tool we will use and how to do so.
 
 === Goals
 
@@ -62,6 +62,6 @@ Also with https://www.weave.works/blog/argo-flux-join-forces[this announcement] 
 == References
 
 * Introduction to GitOps with OpenShift - https://blog.openshift.com/introduction-to-gitops-with-openshift/
-* GitOps - https://www.weave.works/technologies/gitops/#:~:targetText=GitOps%20is%20a%20way%20to,for%20declarative%20infrastructure%20and%20applications.
+* GitOps - https://www.weave.works/technologies/gitops/
 * Argo CD & Flux joining forces - https://www.weave.works/blog/argo-flux-join-forces
 
