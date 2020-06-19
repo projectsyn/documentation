@@ -1,0 +1,129 @@
+= SDD 0023 - Managed Services Controller
+
+:sdd_author:    Tobias Brunner
+:sdd_owner:     
+:sdd_reviewers: 
+:sdd_date:      2020-06-22
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+To automatically manage application services indepent of where the service instance definition is coming from a managed services controller is introduced.
+====
+
+== Motivation
+
+For automatically generating supporting Kubernetes objects to objects which define application service instances - as defined in xref:0022-managed-services-in-cluster.adoc[0022 - Managed Services in Cluster] - a new controller is introduced. This controller watches for known Kubernetes objects and generates supporting Kubernetes objects like backup schedules or monitoring configuration.
+
+=== Goals
+
+* Controller to enable managed services on a Kubernetes cluster
+
+=== Non-Goals
+
+* Define the content of the supporting objects
+
+== Design Proposal
+
+A Kubernetes controller watches for a defined set of Kubernetes objects and acts when they're created, updated or deleted. The controller acts as a templating engine, meaning it can generate a list of Kubernetes object and fill in needed information in placeholders. The templates and the definition which objects to watch are defined as custom resources which configure the controller.
+
+[source,yaml,title=Example]
+--
+apiVersion: syn.tools/v1alpha1
+kind: ConditionalObjects
+metadata:
+  name: KafkaStrimziManagedServiceProd
+spec:
+  applicationInstanceDefinitionObject:
+    apiVersion: kafka.strimzi.io/v1beta1
+    kind: Kafka
+  managedObjectSelector:
+    *metav1.LabelSelector
+  managedObjectNamespaceSelector:
+    *metav1.LabelSelector
+  generateObjects:
+  - apiVersion: monitoring.coreos.com/v1
+    kind: PrometheusRule
+    metadata:
+      name: KafkaMonitoringRules
+    spec:
+      [...]
+  - apiVersion: monitoring.coreos.com/v1
+    kind: ServiceMonitor
+    metadata:
+      name: KafkaServiceMonitor
+    spec:
+      [...]
+--
+
+These `ConditionalObjects` objects are delivered by the Commodore Component which installs the corresponding application instance operator. In this case the Commodore Component `component-kafka-strimzi` would deploy this matching object.
+
+=== User Stories
+
+==== User instantiates an application service instance
+
+A user of the Project Syn enabled Kubernetes cluster creates a `Kafka` object and delivers it to the cluster. The controller is configured to watch these `Kafka` objects and generate a list of supporting objects to enable this service to be a managed service.
+
+=== Implementation Details/Notes/Constraints
+
+==== Opt-Out
+
+With the annotation `syn.tools/managed=false` on a service instance object an opt-out of the managed services controller is possible. No supporting objects will be created if this annotation is set. Default is to be always enabled.
+
+==== Controller CRD
+
+The `ConditionalObjects` custom resource provides the following fields:
+
+[cols="4",options="header"]
+|===
+|Field
+|Description
+|Scheme
+|Required
+
+|`spec.applicationInstanceDefinitionObject.apiVersion`
+|API version of object to watch
+|string
+|true
+
+|`spec.applicationInstanceDefinitionObject.kind`
+|Kind of object to watch
+|string
+|true
+
+|`spec.managedObjectSelector`
+|Label selector to define which application instance definition objects to select.
+|https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#labelselector-v1-meta[*metav1.LabelSelector]
+|true
+
+|`spec.managedObjectNamespaceSelector`
+|Label selector to define in which namespaces to select application instance definition objects.
+|https://v1-18.docs.kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#labelselector-v1-meta[*metav1.LabelSelector]
+|true
+
+|`spec.generateObjects`
+|List of objects to generate when a matching `applicationInstanceDefinitionObject` is found.
+|list of objects
+|true
+
+|===
+
+==== Templating in generateObjects
+
+Values of the object in `spec.applicationInstanceDefinitionObject` are exposed and available in the `generateObjects` struct for variable expansion using JsonPath expression format.
+
+The `generateObjects` struct could also be expanded to support https://golang.org/pkg/text/template/[Go templates].
+
+=== Risks and Mitigations
+
+We're inventing yet another templating engine. However, there is no established controller which implements the features required, it seems unavoidable at this time to implement our own.
+
+== Drawbacks
+
+By generating objects during runtime we work around GitOps as the actual state isn't defined 100% in Git. As the templates are coming from a GitOps managed repository one can consider this as a non-issue.
+
+== Alternatives
+
+Instead of generating objects directly in the cluster, the supporting objects could also be delivered by the processes of the application instance deployment (f.e. CI/CD pipeline of the platform user). In this case the control of the supporting objects isn't given. If they're improved they would have to be changed in all sources and they could easily got forgotten to actually be included.

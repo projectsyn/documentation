@@ -8,19 +8,41 @@ TIP: Have a look at xref:features.adoc[features] and xref:architecture.adoc[arch
 
 Before you start, please make sure to have these requirements available:
 
-* A local Kubernetes cluster (k3s), managed with https://k3d.io/[k3d]
+* A local Kubernetes cluster (`k3s`), managed with https://k3d.io/[k3d] or https://docs.docker.com/docker-for-mac/[Docker Desktop for Mac]
 * A https://gitlab.com[GitLab.com] account with an https://gitlab.com/profile/keys[SSH key configured]
 ** You can use `ssh-keygen` to generate an SSH key if you don't yet have one
 ** Alternatively you could use your own GitLab instance (some adjustments need to be made in the guide)
 * The following commands must work on your shell: `curl`, `jq`, `ssh-keyscan` and `base64`
 
 [TIP]
-.Getting started with k3d
+.Getting started on Linux with k3d
 --
-. Download k3d from https://github.com/rancher/k3d/releases[GitHub]. We're using version 1.x in this guide.
-. Create a new cluster: `k3d create -n projectsyn`
-. Prepare Kubectl to access this cluster: `export KUBECONFIG="$(k3d get-kubeconfig --name='projectsyn')"`
-. Check that you're connected to this cluster: `kubectl cluster-info`
+. Download `k3d` from https://github.com/rancher/k3d/releases[GitHub] (We're using version 1.x in this guide)
+. Create a new cluster
++
+[source,shell]
+----
+k3d create -n projectsyn
+----
+. Prepare Kubectl to access this cluster
++
+[source,shell]
+----
+export KUBECONFIG="$(k3d get-kubeconfig --name='projectsyn')"
+----
+. Check that you're connected to this cluster
++
+[source,shell]
+----
+kubectl cluster-info
+----
+--
+
+[TIP]
+.Getting started on macOS with Docker Desktop for Mac
+--
+. Use https://docs.docker.com/docker-for-mac/[Docker Desktop for Mac] and enable https://docs.docker.com/docker-for-mac/#kubernetes[Kubernetes]
+. Install the https://kubernetes.github.io/ingress-nginx/deploy/#docker-for-mac[Nginx ingress]. This won't work if you have other services running on port 80 and 443 on your macOS.
 --
 
 == Kickstart Lieutenant
@@ -61,7 +83,8 @@ Install *Lieutenant API* with the following commands:
 kubectl -n lieutenant apply -k github.com/projectsyn/lieutenant-api/deploy
 
 # Ingress
-export K3S_INGRESS_IP=$(kubectl -n kube-system get svc traefik -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+if [[ "$OSTYPE" == "darwin"* ]]; then export INGRESS_IP=127.0.0.1; else export INGRESS_IP=$(kubectl -n kube-system get svc traefik -o jsonpath="{.status.loadBalancer.ingress[0].ip}"); fi
+
 kubectl -n lieutenant apply -f -<<EOF
 apiVersion: networking.k8s.io/v1beta1
 kind: Ingress
@@ -69,7 +92,7 @@ metadata:
   name: lieutenant-api
 spec:
   rules:
-  - host: lieutenant.${K3S_INGRESS_IP}.nip.io
+  - host: lieutenant.${INGRESS_IP}.nip.io
     http:
       paths:
       - path: /
@@ -83,12 +106,12 @@ Check that the API is accessible:
 
 [source,shell]
 ----
-echo http://lieutenant.${K3S_INGRESS_IP}.nip.io/healthz
-curl http://lieutenant.${K3S_INGRESS_IP}.nip.io/healthz
+echo http://lieutenant.${INGRESS_IP}.nip.io/healthz
+curl http://lieutenant.${INGRESS_IP}.nip.io/healthz
 ----
 This should return `ok` as the answer to the `curl` command. You can see this is the same API Commodore and Steward will use (in this getting started guide without https and using the nip.io dynamic URL).
 
-TIP: The API documentation can be accessed in your browser under http://lieutenant.${K3S_INGRESS_IP}.nip.io/docs.
+TIP: The API documentation can be accessed in your browser under http://lieutenant.${INGRESS_IP}.nip.io/docs.
 
 === Prepare Lieutenant Operator access to GitLab
 
@@ -176,7 +199,7 @@ In this section you will create your first Lieutenant configuration objects usin
 ----
 export LIEUTENANT_TOKEN=$(kubectl -n lieutenant get secret $(kubectl -n lieutenant get sa api-access-synkickstart -o go-template='{{(index .secrets 0).name}}') -o go-template='{{.data.token | base64decode}}')
 export LIEUTENANT_AUTH="Authorization: Bearer ${LIEUTENANT_TOKEN}"
-export LIEUTENANT_URL="lieutenant.${K3S_INGRESS_IP}.nip.io"
+export LIEUTENANT_URL="lieutenant.${INGRESS_IP}.nip.io"
 export GITLAB_USERNAME="MYUSER"
 ----
 
@@ -255,7 +278,17 @@ If your SSH key is protected by a passphrase (hopefully so!) no command prompt w
 
 When there is no passphrase on your SSH key, the command prompt should directly show up.
 
-Now run (inside the container):
+
+Now execute (inside the container):
+
+[NOTE]
+.On macOS
+--
+[source,shell]
+----
+export COMMODORE_API_URL=http://${LIEUTENANT_API_SERVICE_HOST}/
+----
+--
 
 [source,shell]
 ----
