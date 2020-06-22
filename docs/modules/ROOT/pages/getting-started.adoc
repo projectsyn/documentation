@@ -252,7 +252,7 @@ Now run (inside the container):
 [source,shell]
 ----
 ssh-keyscan gitlab.com > /app/.ssh/known_hosts
-pipenv run commodore compile $CLUSTER_ID --push
+commodore compile $CLUSTER_ID --push
 ----
 
 The output will look like this:
