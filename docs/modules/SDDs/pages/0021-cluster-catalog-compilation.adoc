@@ -92,14 +92,14 @@ A permission system needs to be in place to decide which entities are allowed to
 It shouldn't be possible for example for a tenant to trigger compilation for clusters of other tenants.
 
 
-=== Compilation Jobs
+=== Compilation Engine
 
 To compile the catalog for a cluster, a compilation job is created.
 The compilation job is a https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion[Kubernetes job] resource which executes the xref:0006-commodore-configuration-catalog-compilation.adoc[catalog compilation engine].
+The compilation engine starts a compilation job if the `cluster.syn.tools/compilation-id` annotation has changed on a cluster object.
 
-To distribute the load this compilation generates and to follow a decentralized approach, these jobs are run on the same cluster as they compile the catalog for.
-The Steward component on a cluster starts a compilation job if the `cluster.syn.tools/needs-compilation` annotation is set to `true` on its own cluster object.
-It will then launch the respective job to compile the cluster catalog.
+To distribute the load the compilation generates and to follow a decentralized approach, these jobs are run on the same cluster as they compile the catalog for.
+By default the compilation engine creates the compile jobs on the respective target clusters (for example via Steward).
 
 For clusters where this isn't possible due to resource, security, or other constraints, a central system runs the jobs.
 These clusters need to be configured in the central system so it will react on the mentioned annotation an create the compile jobs for them.
