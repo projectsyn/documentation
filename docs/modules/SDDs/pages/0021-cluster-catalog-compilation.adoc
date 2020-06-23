@@ -98,8 +98,8 @@ To compile the catalog for a cluster, a compilation job is created.
 The compilation job is a https://kubernetes.io/docs/concepts/workloads/controllers/jobs-run-to-completion[Kubernetes job] resource which executes the xref:0006-commodore-configuration-catalog-compilation.adoc[catalog compilation engine].
 The compilation engine starts a compilation job if the `cluster.syn.tools/compilation-id` annotation has changed on a cluster object.
 
-By default the compilation engine creates the compile jobs on the respective target clusters (for example via Steward).
-With the goal to distribute the load the compilation generates and to follow a decentralized approach.
+Following a decentralized approach, the compilation engine creates the compile jobs on the respective target clusters (for example via Steward).
+This removes the need for a central infrastructure which would do nothing most of the time.
 
 For clusters where this isn't possible due to resource, security, or other constraints, a central system runs the jobs.
 These clusters need to be configured in the central system so it will react on the mentioned annotation an create the compile jobs for them.
