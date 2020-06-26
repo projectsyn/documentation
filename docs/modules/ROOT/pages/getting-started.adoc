@@ -10,7 +10,9 @@ Before you start, please make sure to have these requirements available:
 
 * A local Kubernetes cluster (k3s), managed with https://k3d.io/[k3d]
 * A https://gitlab.com[GitLab.com] account with an https://gitlab.com/profile/keys[SSH key configured]
-* `curl`
+** You can use `ssh-keygen` to generate an SSH key if you don't yet have one
+** Alternatively you could use your own GitLab instance (some adjustments need to be made in the guide)
+* The following commands must work on your shell: `curl`, `jq`, `ssh-keyscan` and `base64`
 
 [TIP]
 .Getting started with k3d
@@ -81,33 +83,35 @@ Check that the API is accessible:
 
 [source,shell]
 ----
+echo http://lieutenant.${K3S_INGRESS_IP}.nip.io/healthz
 curl http://lieutenant.${K3S_INGRESS_IP}.nip.io/healthz
 ----
 This should return `ok` as the answer to the `curl` command. You can see this is the same API Commodore and Steward will use (in this getting started guide without https and using the nip.io dynamic URL).
 
 TIP: The API documentation can be accessed in your browser under http://lieutenant.${K3S_INGRESS_IP}.nip.io/docs.
 
-=== Prepare Lieutenant Operator access to GitLab.com
+=== Prepare Lieutenant Operator access to GitLab
 
-Lieutenant needs API access to a Gitlab server. This is required to create and manage Git repositories for clusters and tenants.
+Lieutenant needs API access to a GitLab server. This is required to create and manage Git repositories for clusters and tenants.
 
 [NOTE]
 .What are tenants?
 ====
-A "tenant" is just an entity to assign clusters to. It could be a customer, a department, a team, or anything you want to group clusters with. This concept is also used by Commodore, as every tenant gets his own configuration Git repository to (for example) apply common settings to all clusters belonging to a particular tenant. Any cluster specific configuration values are stored in that tenant's own configuration Git repository.
+A "tenant" is an entity to assign clusters to. This entity could be a customer, a department, a team, or anything you want to group clusters with. This concept is also used by Commodore, as every tenant gets his own configuration Git repository to (for example) apply common settings to all clusters belonging to a particular tenant. Any cluster specific configuration values are stored in that tenant's own configuration Git repository.
 ====
 
-Create a Kubernetes secret which contains the access token for the GitLab.com API, which can be generated here: https://gitlab.com/profile/personal_access_tokens (needs `api` scope).
+Create a Kubernetes secret which contains the access token for the GitLab API, which can be generated here: https://gitlab.com/profile/personal_access_tokens (needs `api` scope, amend gitlab.com with your own GitLab instance URL if needed).
 
-Replace `MYTOKEN` with the generated GitLab.com API token.
+Replace `MYTOKEN` with the generated GitLab API token. If you're using your own GitLab instance, amend `GITLAB_ENDPOINT`.
 
 [source,shell]
 ----
-export GITLABCOM_TOKEN=MYTOKEN
+export GITLAB_TOKEN=MYTOKEN
+export GITLAB_ENDPOINT=gitlab.com
 kubectl -n lieutenant create secret generic vshn-gitlab \
-  --from-literal=endpoint=https://gitlab.com \
-  --from-literal=hostKeys="gitlab.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIAfuCHKVTjquxvt6CM6tdG4SLp1Btn/nOeHHE5UOzRdf" \
-  --from-literal=token=${GITLABCOM_TOKEN}
+  --from-literal=endpoint="https://${GITLAB_ENDPOINT}" \
+  --from-literal=hostKeys="$(ssh-keyscan ${GITLAB_ENDPOINT})" \
+  --from-literal=token=${GITLAB_TOKEN}
 ----
 
 NOTE: This secret currently needs to be named exactly like that. See https://syn.tools/lieutenant-api/deployment.html#_gitlab[syn.tools] and https://github.com/projectsyn/lieutenant-operator/issues/48[GitHub issue] for more information.
@@ -132,6 +136,7 @@ rules:
   - syn.tools
   resources:
   - clusters
+  - clusters/status
   - tenants
   verbs:
   - create
@@ -165,25 +170,26 @@ EOF
 
 In this section you will create your first Lieutenant configuration objects using the API to test the deployment and configuration.
 
-. Prepare access to API, replace `MYUSER` with your GitLab.com user id
+. Prepare access to API, replace `MYUSER` with your GitLab user id
 +
 [source,shell]
 ----
 export LIEUTENANT_TOKEN=$(kubectl -n lieutenant get secret $(kubectl -n lieutenant get sa api-access-synkickstart -o go-template='{{(index .secrets 0).name}}') -o go-template='{{.data.token | base64decode}}')
 export LIEUTENANT_AUTH="Authorization: Bearer ${LIEUTENANT_TOKEN}"
 export LIEUTENANT_URL="lieutenant.${K3S_INGRESS_IP}.nip.io"
-export GITLABCOM_USERNAME="MYUSER"
+export GITLAB_USERNAME="MYUSER"
 ----
 
 . Create a *Lieutenant Tenant* via the API
 +
 [source,shell]
 ----
-TENANT_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{\"displayName\":\"My first Tenant\",\"gitRepo\":{\"url\":\"ssh://git@gitlab.com/${GITLABCOM_USERNAME}/mytenant.git\"}}" "http://${LIEUTENANT_URL}/tenants" | jq -r ".id")
+TENANT_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{\"displayName\":\"My first Tenant\",\"gitRepo\":{\"url\":\"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant.git\"}}" "http://${LIEUTENANT_URL}/tenants" | jq -r ".id")
 echo $TENANT_ID
+echo https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant
 ----
 +
-TIP: If everything went well, the Lieutenant Operator created a new git repository under https://gitlab.com/${GITLABCOM_USERNAME}/mytenant, which will be used to store the configuration used by Commodore to create a catalog for a cluster.
+TIP: If everything went well, the Lieutenant Operator created a new git repository under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant, which will be used to store the configuration used by Commodore to create a catalog for a cluster.
 
 . Retrieve the registered Tenants via API and directly on the cluster
 +
@@ -198,11 +204,12 @@ kubectl -n lieutenant get gitrepo
 +
 [source,shell]
 ----
-CLUSTER_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{ \"tenant\": \"${TENANT_ID}\", \"displayName\": \"My first Project Syn cluster\", \"facts\": { \"cloud\": \"local\", \"distribution\": \"k3s\", \"region\": \"local\" }, \"gitRepo\": { \"url\": \"ssh://git@gitlab.com/${GITLABCOM_USERNAME}/cluster-gitops1.git\" } }" "http://${LIEUTENANT_URL}/clusters" | jq -r ".id")
+CLUSTER_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{ \"tenant\": \"${TENANT_ID}\", \"displayName\": \"My first Project Syn cluster\", \"facts\": { \"cloud\": \"local\", \"distribution\": \"k3s\", \"region\": \"local\" }, \"gitRepo\": { \"url\": \"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1.git\" } }" "http://${LIEUTENANT_URL}/clusters" | jq -r ".id")
 echo $CLUSTER_ID
+echo https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1
 ----
 +
-TIP: If everything went well, the Lieutenant Operator created a new git repository under https://gitlab.com/${GITLABCOM_USERNAME}/cluster-gitops1 which will be used to store the generated catalog of deployment files.
+TIP: If everything went well, the Lieutenant Operator created a new git repository under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1 which will be used to store the generated catalog of deployment files.
 
 . Retrieve the registered Clusters via API and directly on the cluster
 +
@@ -215,17 +222,17 @@ kubectl -n lieutenant get gitrepo
 
 == Kickstart Commodore
 
-Commodore is the configuration generation tool. It will be configured to generate configuration for your Lieutenant cluster $CLUSTER_ID generated above. With all the information available in Lieutenant, Commodore is able to figure out what to actually compile for the cluster in question.
+Commodore is the configuration generation tool. It will be configured to generate configuration for your Lieutenant cluster `$CLUSTER_ID` generated above. With all the information available in Lieutenant, Commodore is able to figure out what to actually compile for the cluster in question and where to Git push the compiled catalog to.
 
 Before continuing with this section, make sure that everything went well with the installation and configuration of Lieutenant as Commodore relies on having a working instance of it.
 
-== Run Commodore
+=== Run Commodore
 
-The easiest way of executing Commodore is by using the container image provided by Project Syn: https://hub.docker.com/r/projectsyn/commodore[docker.io/projectsyn/commodore]. We run the image directly in the `k3s` instance so that there is no need for having Docker installed.
+The easiest way of executing Commodore is by using the container image provided by Project Syn: https://hub.docker.com/r/projectsyn/commodore[docker.io/projectsyn/commodore]. We run the image directly in the local `k3s` instance so that there is no need for having another container runtime installed.
 
 Execute the following command which will start the properly configured Commodore container inside your local `k3s` instance.
 
-Replace `MYSSHKEYPATH` with the path to your SSH key file, f.e. `~/.ssh/id_rsa`. This SSH key will be used to push the generated configuration catalog to the Git repository managed by Lieutenant.
+Replace `MYSSHKEYPATH` with the path to your SSH key file, for example `~/.ssh/id_rsa`. This SSH key will be used to push the generated configuration catalog to the Git repository managed by Lieutenant.
 
 [source,shell]
 ----
@@ -237,13 +244,14 @@ kubectl -n lieutenant run commodore-shell \
   --env=COMMODORE_GLOBAL_GIT_BASE=https://github.com/projectsyn \
   --env=SSH_PRIVATE_KEY="$(cat ${COMMODORE_SSH_PRIVATE_KEY})" \
   --env=CLUSTER_ID=${CLUSTER_ID} \
+  --env=GITLAB_ENDPOINT=${GITLAB_ENDPOINT} \
   --tty --stdin --restart=Never --rm --wait \
   --image-pull-policy=Always \
   --command \
-  -- /app/tools/entrypoint.sh bash
+  -- /usr/local/bin/entrypoint.sh bash
 ----
 
-If your SSH key is protected by a passphrase (hopefully so!) no command prompt will be displayed and it will look like it halted at `If you don't see a command prompt, try pressing enter`. Don't just press "enter" but enter your SSH key passphrase (an `ssh-agent` is started in the container's entrypoint) and press "enter" after that.
+If your SSH key is protected by a passphrase (hopefully so!) no command prompt will be displayed and it will look like it halted at `If you don't see a command prompt, try pressing enter`. Don't just press "enter" but type your SSH key passphrase (an `ssh-agent` is started in the container's entrypoint) and press "enter" after that.
 
 When there is no passphrase on your SSH key, the command prompt should directly show up.
 
@@ -251,7 +259,7 @@ Now run (inside the container):
 
 [source,shell]
 ----
-ssh-keyscan gitlab.com > /app/.ssh/known_hosts
+ssh-keyscan ${GITLAB_ENDPOINT} >> /app/.ssh/known_hosts
 commodore compile $CLUSTER_ID --push
 ----
 
@@ -278,22 +286,94 @@ Compiling catalog...
 Catalog compiled! 🎉
 ----
 
-You now have your first Commodore compiled catalog available under `catalog/` and pushed to GitLab.com to the cluster catalog repository.
+You now have your first Commodore compiled catalog available under `catalog/` and pushed to GitLab to the cluster catalog repository.
 
-To see what was just generated, browse to https://gitlab.com/${GITLABCOM_USERNAME}/cluster-gitops1 (or do a `find catalog/`) to see the Git commit (and Git push) Commodore created and all the generated Kubernetes objects. These objects will then actually be applied to the cluster by Argo CD (we've not installed Argo CD in this guide).
+To see what was just generated, browse to https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1 (or do a `find catalog/`) to see the Git commit (and Git push) Commodore created and all the generated Kubernetes objects. These objects will then actually be applied to the cluster by Argo CD (we've not installed Argo CD in this guide).
 
 TIP: This guide uses https://github.com/projectsyn/commodore-defaults/ as the global common configuration repository. If you want to use your own, adapt the `COMMODORE_GLOBAL_GIT_BASE` environment variable. Currently the Git repo needs to be named `commodore-defaults`.
+
+Now exit the Commodore container by typing `exit`. This also deletes the Pod on the local `k3s` instance.
+
+== Kickstart Steward
+
+With Lieutenant running and having a compiled cluster catalog by Commodore available, it's now time to enable Syn on the local `k3s` instance and get it GitOps managed. This is the job of Steward, the in-cluster agent of Project Syn.
+
+The installation of Steward is done via a cluster specific install URL which contains a one-time bootstrap token. This token is only valid once and only for 30 minutes after cluster registration.
+
+. Check the validity of the bootstrap token
++
+[source,shell]
+----
+kubectl -n lieutenant get cluster ${CLUSTER_ID} -o jsonpath="{.status.bootstrapToken.tokenValid}"
+kubectl -n lieutenant get cluster ${CLUSTER_ID} -o jsonpath="{.status.bootstrapToken.validUntil}"
+----
+If this doesn't return `true`, have a look at the tip below about how to reset the token.
+. Retrieve the Steward install URL
++
+[source,shell]
+----
+export STEWARD_INSTALL=$(curl -H "$LIEUTENANT_AUTH" -s "http://${LIEUTENANT_URL}/clusters/${CLUSTER_ID}" | jq -r ".installURL")
+echo $STEWARD_INSTALL
+----
+. Install Steward in the local `k3s` instance
++
+[source,shell]
+----
+kubectl apply -f $STEWARD_INSTALL
+----
+. Check the validity of the bootstrap token
++
+[source,shell]
+----
+kubectl -n lieutenant get cluster ${CLUSTER_ID} -o jsonpath="{.status.bootstrapToken.tokenValid}"
+----
+This command should return `false`.
+. Check that Steward is running and that Argo CD Pods are appearing
++
+[source,shell]
+----
+kubectl -n syn get pod
+----
+This should list 5 Pods, maybe still in `ContainerCreating`.
+. Check that an SSH deploy key has been added to the catalog repository by browsing to https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1/-/settings/repository. Click on `Expand` next to `Deploy Keys`, there you should find one deploy key called `steward`.
+. Check that Argo CD was able to sync the changes
++
+[source,shell]
+----
+kubectl -n syn get app root -o jsonpath="{.status.sync.status}"
+----
+This command should return `Synced`.
+. Retrieve the admin password for Argo CD
++
+[source,shell]
+----
+kubectl -n syn get secret steward -o json | jq -r .data.token | base64 --decode
+----
+. Now you can access Argo CD by forwarding the port and opening it in your browser with http://localhost:8443. Login with the username `admin` and the password retrieved in the previous step.
++
+[source,shell]
+----
+kubectl -n syn port-forward svc/argocd-server 8443:443
+----
+
+With these steps, the local `k3s` instance is now Syn enabled, has Argo CD running and automatically syncs the manifests found in the cluster catalog Git repository which was generated by Commodore and is stored in GitLab under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1/.
+
+[TIP]
+====
+If you want or need to reset the bootstrap token, this is the way to go:
+[source,shell]
+----
+curl -k -H "${LIEUTENANT_AUTH}" -H "Content-Type: application/json-patch+json" -X PATCH -d '[{ "op": "remove", "path": "/status/bootstrapToken" }]' "https://localhost:6443/apis/syn.tools/v1alpha1/namespaces/lieutenant/clusters/${CLUSTER_ID}/status"
+----
+====
 
 == Cleaning Up
 
 Once you've gone through all these steps, you can cleanup all generated stuff using the following steps:
 
 . Delete the k3d cluster: `k3d delete -n projectsyn`
-. Delete the two Git repositories on GitLab.com
+. Delete the two Git repositories on GitLab
 
-== Getting Started Guide Roadmap
+== Next Steps
 
-This guide will evolve over time. You're currently looking at the initial release where the focus lies on Lieutenant and Commodore. Planned:
-
-* Add guidelines for Hashicorp Vault
-* Guide how to use Steward
+...
