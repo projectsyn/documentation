@@ -1,0 +1,175 @@
+= SDD 0022 - Managed Services in Cluster
+
+:sdd_author:    Tobias Brunner
+:sdd_owner:
+:sdd_reviewers:
+:sdd_date:      2020-06-19
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+Besides the system services Project Syn also provides services to the user of the platform. This SDD describes how some kind of managed services on Kubernetes can be achieved with Project Syn. It's considered to be the initial version of this concept.
+====
+
+== Motivation
+
+While the current state of Project Syn focuses on delivering system services to Kubernetes clusters, it should also take application services into consideration. There needs to be a way to install, configure and maintain application services and make them available to the user of the platform.
+
+As application services are considered services like databases, caches, queues and other similar applications (sometimes called "Middleware"). They're usually used by the end user application running on a Kubernetes cluster, but could also be used by applications running outside of the cluster (for example in another cluster or even a VM).
+
+=== Goals
+
+* Offer application services to applications running in or outside of the cluster
+* Maintenance processes to maintain these application services, making them a managed service
+* Definition of how the end user application instantiates and consumes an application service
+* Integration into backup and restore processes
+* Automatic monitoring and alerting of service instances
+
+=== Non-Goals
+
+* All plumbing and system services aren't discussed in this SDD
+* Application instance object definition (custom resource) object management
+
+== Design Proposal
+
+It's assumed that all application services are managed by a specialized Kubernetes Operator, which brings the domain knowledge about the specific service. Each application service Kubernetes Operator will be installed and configured by a Commodore Component. The Commodore Component will be responsible for:
+
+* Installing the Kubernetes Operator
+* Pre-configuring the Kubernetes Operator with best practices, if applicable
+* Deploy additional objects like monitoring definition, backup definition or any other object needed to make the application service a managed service
+* Deploy objects for the managed services controller, discussed in xref:0023-managed-services-controller.adoc[SDD 0023 - Managed Services Controller]
+
+Once the Kubernetes Operator is installed and operational, the user of the platform requests an instance of the application service by creating an Operator specific Kubernetes object (Custom Resource). The job of the Kubernetes Operator is to instantiate the service and provide information to the user for actually connecting to the service.
+
+This SDD doesn't define how this application service instance object is handled and managed. It could come together with the application deployment objects of the customer but could also be stored in a separate GitOps repository, just for these objects.
+
+A Kubernetes Operator could also be responsible to manage different kinds of application services, it's not strictly necessary that each Operator is only responsible for exactly one service (examples are KubeDB or Crossplane).
+
+Each provided service will be documented in a dedicated documentation repo for all services.
+
+=== Terminology
+
+Application Service:: A third party service used and accessed by the main application. This can be a database, cache, queue or the like (sometimes also calle Middleware).
+
+Application Service Instance:: An instance of an application service, like a database instance, represented by a Kubernetes Object in the target Kubernetes Cluster.
+
+Kubernetes Operator:: A piece of software which is tightly integrated into Kubernetes, acting on `CustomResourceDefinition` Kubernetes Object.
+
+=== User Stories
+
+==== Kafka with Strimzi Operator - Application in Cluster
+
+_As the user of the platform I want to use Apache Kafka for my application running in the same Kubernetes cluster as a managed service._
+
+* Project Syn Commodore Component `component-kafka-strimzi` deploys Strimzi to the cluster and configures it according to best practices.
+* The user of the platform creates a `Kafka` object and puts in parameters as needed. The object is stored at the same place as the other application deployment objects and deployed to the cluster with the same mechanisms (for example GitOps).
+* The Strimzi Kubernetes Operator deploys Kafka and creates a secret with the connection parameters for the users application to consume.
+* Via the xref:0023-managed-services-controller.adoc[Managed Services Controller] configuration objects deployed by the Commodore Component the application service is automatically monitored and backed up.
+* For keeping the Strimzi Kubernetes Operator up-to-date, Project Syn mechanisms are used. See xref:0017-maintenance-with-renovate.adoc[SDD 0017 - Maintenance with Renovate] for details.
+* For keeping Kafka up-to-date the user of the platform has to maintain the `Kafka` object.
+
+==== Kafka with Strimzi Operator - Application outside Cluster
+
+_As an application owner I want to use Apache Kafka from my application running outside of the cluster._
+
+Similar to first use case, but:
+
+* The `Kafka` object is stored in _a_ GitOps repository and deployed with the Project Syn provided Argo CD.
+* The connection parameters are handed over to the application owner.
+* To access Kafka the Kubernetes services are configured in a way so that Kafka is reachable from outside of the cluster.
+
+=== Implementation Details/Notes/Constraints
+
+==== Kubernetes Operator Implementation
+
+It's possible that multiple Kubernetes Operator implementations exists for an application service. It's perfectly possible that the user could choose between several Kubernetes Operators for the same application service - depending on the customers needs.
+
+==== Storage location of Instance Definitions - Application-Service-Only Cluster
+
+In the case of having a Kubernetes Cluster which only provides an application service (without running the users application), a central GitOps repository can be used which stores all application instance objects (Kubernetes Custom Resource objects for the Kubernetes Operator). The Argo CD app will be configured to only apply the subdirectory which applies to this Cluster.
+
+As the user of the application service doesn't get access to the cluster, there is no way of tampering with the Argo CD application definition configuration (which would allow to instantiate different instances).
+
+An alternative could be to create a GitOps repository per customer which contains all the service instance objects and allow the customer to do some kind of self-service. This GitOps repository is only used for storing the Custom Resources to instantiate application service instances. A mechanisms must exist that only allowed objects are stored in this GitOps repository when the customer has access to it.
+
+==== Storage location of Instance Definitions - Customer Application Cluster
+
+When the application service runs on the same cluster as the customer application, it's preferred that the Custom Resource object is stored alongside the application deployment definitions. If this isn't the case, the same storage location can be applied as described above.
+
+==== GitOps Integration
+
+A separate Argo CD project will be created for deploying the application services, this way there is a grouping and clear boundary available.
+
+==== Backup/Restore Integration
+
+Each application service needs its own customized backup and restore process. The default is to use https://k8up.io/[K8up] which is usually provided by the default Project Syn tooling.
+
+The K8up objects are usually needed per service instance.
+
+When the application specific Kubernetes Operator already brings native Backup/Restore functionality which can't be easily integrated into K8up, it's to be considered to use this one.
+
+==== Monitoring and Alerting Integration
+
+NOTE: This section is still subject to change, depending on how the main monitoring concept will actually look like.
+
+Each application service should bring its own `ServiceMonitor`, `PodMonitor` and `PrometheusRule` definitions for the Prometheus Operator. These objects are distributed by the Commodore Component which manages the Kubernetes Operator. 
+
+If there are any Grafana Dashboards available, they should also be distributed by the Commodore Component.
+
+==== Enabling of Managed Service
+
+For each application service instance some supporting objects are needed, as described in the sections above. This can be objects for backup, monitoring or others. As it's not always possible to control the creation of such objects, for example when the service instance object is delivered by the customers CI/CD process or GitOps repository, a tool is needed which is able to create them. This tool is described in xref:0023-managed-services-controller.adoc[SDD 0023 - Managed Services Controller].
+
+==== Enforcing Configuration with Admission Controllers
+
+To be able to enforce configuration best practices and policies on instance definition manifests the https://www.openpolicyagent.org/docs/latest/kubernetes-introduction/[Open Policy Agent Gatekeeper] is used which provides validating and mutating webhooks. The Commodore Component which manages the application service Operator can deploy Rego policies which are then picked up by Open Policy Agent.
+
+Example of policies which could be enforced:
+
+* Supported version in `Kafka` to only allow version `>=2.5` and `<3.0`: `spec.kafka.version`.
+* Enforce minimum number of replicas in `Kafka`: `spec.kafka.replicas`
+
+=== Risks and Mitigations
+
+==== Operator Updates and Upgrades
+
+There is a risk when upgrading a Kubernetes Operator that the service instance could get restarted, redeployed, deleted, destroyed, reconfigured, misconfigured or anything else you could imagine as the Kubernetes Operator is the tool which is responsible for taking care of the application service.
+
+To mitigate the risks posed by Kubernetes Operator upgrades, a test procedure which ensures that these upgrades are safe is required. This also includes figuring out if the managed object definitions have changed and whether objects created for the old version are compatible with the new object definition.
+
+It could also be that objects need to be converted before a Kubernetes Operator can be upgraded. This situation would require additional tooling which orchestrates the conversion.
+
+==== Version mismatch
+
+As the service instance object is managed in a different way and not in the reach of the Commodore Component for the Kubernetes Operator, it could happen that the instance object requests a service instance version which isn't supported by the Kubernetes Operator. Additionally, service instance objects may request versions (or options) which aren't supported anymore after a Kubernetes Operator upgrade.
+
+Therefore, it's important to keep track of the service instances and their versions and keep them in sync and comparison to the Kubernetes Operator supported service instance version (for example Strimzi operator version _a_ only supports Kafka versions _x_ and _y_). This is something which might be done via the Lieutenant API and it's inventory capabilities.
+
+== Drawbacks
+
+=== Service instantiation
+
+With this approach, Project Syn currently only handles the Kubernetes Operator itself including some plumbing, but it doesn't handle the actual service instantiation.
+
+== Alternatives
+
+=== Deployment using Helm
+
+Application service instances could be deployed by using Helm charts, instead of using Kubernetes Operators. This way many advanced functionality and domain knowledge would be missing and would have to be implemented otherwise as deployed Helm Charts are static. That means that no active component takes care of the deployed service (for example initialization or reconciliation) and also day-2 operations tasks like upgrades would have to be carried out manually.
+
+=== Deployment using Commodore Components
+
+Commodore Components could be used to generate application service instances by leveraging Jsonnet functionality, not using the Kubernetes Operator. This would make the whole process much more dependent on external tools and also not tightly integrated into the cloud native way of deploying applications. This is comparable to the alternative described above.
+
+=== Other Kubernetes Operators
+
+Some Operators do exist which are also able to generate objects based on conditions:
+
+* https://github.com/vshn/espejo[Espejo]: This operator is able to keep a set of objects available and up-to-date over the whole cluster. It isn't able to generate objects based on conditions or other objects.
+* https://github.com/redhat-cop/resource-locker-operator[Resource Locker Operator]: The main goal of resource locker is to keep objects in place or patch existing objects. It isn't possible to define objects or patches based on conditions or other objects.
+
+== References
+
+* https://strimzi.io[Strimzi Kubernetes Operator]
