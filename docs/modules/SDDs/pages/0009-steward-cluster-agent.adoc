@@ -4,7 +4,7 @@
 :sdd_owner:     Simon Rüegg
 :sdd_reviewers: 
 :sdd_date:      2019-10-18
-:sdd_status:    draft
+:sdd_status:    accepted
 include::partial$meta-info-table.adoc[]
 
 [NOTE]
