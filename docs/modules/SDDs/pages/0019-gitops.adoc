@@ -4,7 +4,7 @@
 :sdd_owner:
 :sdd_reviewers:
 :sdd_date:      2019-11-20
-:sdd_status:    accepted
+:sdd_status:    implemented
 include::partial$meta-info-table.adoc[]
 
 [NOTE]

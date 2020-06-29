@@ -4,7 +4,7 @@
 :sdd_owner:     Simon Gerber
 :sdd_reviewers:
 :sdd_date:      2019-10-18
-:sdd_status:    accepted
+:sdd_status:    implemented
 include::partial$meta-info-table.adoc[]
 
 [NOTE]
