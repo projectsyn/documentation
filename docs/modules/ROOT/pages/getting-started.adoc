@@ -293,7 +293,7 @@ export COMMODORE_API_URL=http://${LIEUTENANT_API_SERVICE_HOST}/
 [source,shell]
 ----
 ssh-keyscan ${GITLAB_ENDPOINT} >> /app/.ssh/known_hosts
-commodore compile $CLUSTER_ID --push
+commodore catalog compile $CLUSTER_ID --push
 ----
 
 The output will look like this:
