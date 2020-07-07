@@ -1,0 +1,97 @@
+= SDD 0024 - Billing Automation based on Prometheus
+
+:sdd_author:    Tobias Brunner
+:sdd_owner:     SIG Syn
+:sdd_reviewers: 
+:sdd_date:      2020-07-07
+:sdd_status:    draft
+\include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+Automated billing of services is a crucial part of doing business. This SDD describes a way for automated billing based on data collected by Prometheus.
+====
+
+== Motivation
+
+Service billing must be fully automated and be able to bill services based on the defined products. It must be reliable and secure and flexible enough to support different billing models. As Prometheus is already available on all clusters and billing is defined to be based on metrics, the already collected data can be reused to bill based on that data. By making this concept flexible enough, it should be usable for most billing needs.
+
+=== Goals
+
+* Process for automated billing
+* Fully based on Prometheus for data gathering and storing
+* Long-term and secure billing data storage
+* Plugable data sources
+
+=== Non-Goals
+
+* Invention of new ways of data storage
+* Support for a particular billing system
+* Define a billing model
+
+== Design Proposal
+
+The key part of the design is to use core functionality of Prometheus and the PromQL query language. This means that all data is present as metrics in Prometheus TSDB. As an overview, the following parts are involved:
+
+* Data is collected on the source cluster using the in-cluster Prometheus
+* Metric series which are needed for billing purposes are sent via the https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write[remote_write] functionality to a central billing service. Sent samples are limited using the `write_relabel_configs` configuration option.
+* The central billing service consists of a Thanos setup, data is received by the https://thanos.io/components/receive.md/[Thanos receiver].
+* An authentication and authorization component in front of the Thanos receiver makes sure the received data is sane and it adds an identifying label to the metric, for example the Lieutenant cluster ID.
+* A price exporter exports all pricing information which it collected from Lieutenant and and product database, mainly an ERP. This metrics are also labeled with an identifier for later PromQL matching.
+* Price calculation and suming up is done in pure PromQL.
+* An invoice creator queries the TSDB to generate invoice lines and write them either directly into the ERP or in a portable data format for import into billing system.
+
+This design allows to implement different billing models even for the same Kubernetes cluster, for example for reselling models.
+
+=== User Stories
+
+==== Private Kubernetes Cluster Billing
+
+==== Services on shared Kubernetes Cluster Billing
+
+=== Implementation Details/Notes/Constraints [optional]
+
+==== Data collection
+
+While the metrics needed depends on the product unit being billed, in general metrics are collected from various metrics exporter like https://github.com/kubernetes/kube-state-metrics[kube-state-metrics] directly on the source Kubernetes cluster. Which exporters will be needed have to be defined per unit to be billed in the product definition, it could even be that a specific exporter has to be written. There is no special requirement to the exported metrics.
+
+==== Data transport
+
+Billing metrics will be transported over a secure and authenticated connection to a central billing metric store as these metrics are considered very important. Only metrics needed for the billing system are transported.
+
+To _send_ the metrics to the central billing metric store the https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write[remote_write] functionality of Prometheus is used. This configuration needs to be https://prometheus.io/docs/practices/remote_write/[tuned] accordingly so that no metrics can get lost should the central metric store be unavailable for a period of time (>2h downtime).
+
+To _filter_ the sent metrics, a matching `write_relabel_configs` configuration needs to be created. The intention is to only send metrics for billing purposes to the central metric store.
+
+==== Central billing metric store
+
+Billing metrics will be received by https://thanos.io/components/receive.md/[Thanos receiver]. In front of the Thanos receiver is the central billing metric store authentication proxy.
+
+==== Central billing metric store authentication
+
+* Authenticate cluster with bearer token
+* Add identifying labels
+* No identifying labels are allowed - depending on the cluster type (shared/private) or trust level of the cluster (who controls the configuration)
+
+==== Price exporter
+
+==== Invoice generator
+
+==== PromQL
+
+==== Terminology
+
+Source cluster:: Kubernetes cluster containing resources to be billed
+Billing unit:: Invoice line, a unit which will appear on the invoice
+
+=== Risks and Mitigations [optional]
+
+== Drawbacks [optional]
+
+== Alternatives [optional]
+
+* Cyclops
+* Commercial tool
+
+== References
