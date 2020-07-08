@@ -111,55 +111,92 @@ The following labels are recommended to be used:
 
 These labels need special treatment in regards to tampering protection, mainly if metrics are coming from untrusted source clusters. See section about the metric store proxy for more details.
 
-==== The role of the product definition
+==== The Price Model
 
-==== Billing data exporter(s)
+For being able to apply billing rules to metrics and generate invoices, the price model has to be defined:
 
-Pricing, product and customer information must be available as metrics in Prometheus to calculate the billing units. These metrics must contain a defined set of labels so that label joining and calculation will be possible.
+* Rating frequency.
+* Billed unit.
+* Properties to define the price per billed unit.
+* Price per rating frequency.
 
-These exporters will have to be custom made, depending on the available source data store, for example the ERP. The example here is using Odoo as the source of product, price and customer information.
+An example:
 
-It is important that the produced metric is exactly ...
+* Rating frequency: hourly (maximum).
+* Billed unit: per vCPU per Kubernetes worker node.
+* Properties: Cloud, Distribution, Service Level
+* Price: CHF 1.10 for the property values `cloud=gcp,distribution=openshift4,service_level=standard`
 
-[cols=",,",options="header",]
-|===
-|Exporter
-|Description
-|Metric Example
+This means in words: Each vCPU per worker node on a cluster with the defined properties is counted and the maximum over the last full hour is multiplied with the price of CHF 1.10 per vCPU. This will then be summed up over the invoicing period, for example monthly for the last full month.
 
-|Lieutenant
-|Exporting of all information about clusters and tenants.
-a|
+==== Price Model, Cluster Metadata and Tenants as Metrics
+
+The price model, cluster metadata and tenant information must be available in Prometheus as metrics with defined labels for being able to do correlation, counting and summing up.
+
+It is important that these metrics contain a defined set of labels so that metric matching is possible, this is key of the concept.
+
+===== Lieutenant Metrics
+
+The Lieutenant Operator exposes the available clusters and tenants with all the available metadata as metrics. These metrics always have the value 1 to be able to use it for PromQL label correlation.
+
+.Example: Cluster
 ----
-lieutenant_cluster{lieutenant_cluster_id="cluster-42",lieutenant_tenant_id="tenant-42",cloud="gcp",distribution="openshift4",region="eu-central-1",service_level="premium"} 1
-lieutenant_tenant{lieutenant_tenant_id="tenant-42",display_name="Acme Corp"} 1
+lieutenant_cluster{lieutenant_cluster_id="cluster-42",lieutenant_tenant_id="tenant-42",cloud="gcp",distribution="openshift4",service_level="standard"} 1
 ----
 
-|Product and Price
-|Information about products and prices, coming from the source data store, for example from the ERP.
-a|
+.Example: Tenant
 ----
-erp_product{cloud="gcp",distribution="openshift4",service_level="premium",product_id="ComputeOpenShiftHyperscalerPremium"} 2.20
+lieutenant_tenant{lieutenant_tenant_id="tenant-42",display_name="Acme Corp",customer_id="2354334"} 1
 ----
 
-|Customer
-|tbd
-a|tbd
+===== Price Metrics
 
-|===
+The price metric must:
 
-==== Price calculation
+* Contain the labels for the property matching to find the price per billed unit
+* Be named `billed_unit_price`.
+* Contain the label `product_id` for the invoice generator.
 
-* PromQL
+.Example
+----
+billed_unit_price{cloud="gcp",distribution="openshift4",service_level="standard",product_id="ComputeOpenShiftHyperscalerPremium"} 1.10
+----
+
+Usually this information comes out of the ERP which usually needs a specific exporter, but could also made available for example from a static text file via node-exporter when this is relatively static.
+
+==== Price Calculation
+
+To calculate the amount to pay, the metrics `lieutenant_cluster`, `billed_unit_price` and the metric for the unit (for example number of vCPUs) is needed.
+
+With the labels in `lieutenant_cluster` which define the product property a matching with the metric in `billed_unit_price` is possible.
+
+.Example
+----
+sum by (lieutenant_cluster_id) (billed_unit_price * on(cloud,distribution,service_level) group_left(lieutenant_cluster_id) lieutenant_cluster{})
+----
+
+This gives us the amount per billed unit per rating frequency for this particular cluster with the label of the cluster ID. Note that `on(cloud,distribution,service_level)` contains exactly the defined properties from the price model.
+
+We can now multiply this with the input metric:
+
+----
+sum by (lieutenant_cluster_id) (max_over_time(kube_node_status_capacity_cpu_cores[60m])) * on (lieutenant_cluster_id) (billed_unit_price * on(cloud,distribution,service_level) group_left(lieutenant_cluster_id) lieutenant_cluster{})
+----
+
+This query contains the rating `kube_node_status_capacity_cpu_cores[60m]` and the rule to select the maximum over this timeframe `max_over_time`. This is grouped by `lieutenant_cluster_id` and will be multiplied by the price figured out by matching the labels in `billed_unit_price`.
+
 * Recording rules
 * Billing unit
-* Mark end of service
+* What happens when the timeline just ends or has a gap?
+* Generalize example for other price models
 
-==== Invoice generator
+==== Invoice Generator
 
 * Invoice line
 * Grouping
 * Iterate over available series for the timeframe, get customer and cluster ids -> not from Lieutenant
+* Customer matching: Tenant -> ERP customer? `customer_id` label from tenant?
+* Mark end of service
 
 ==== Handling disconnected clusters
 
