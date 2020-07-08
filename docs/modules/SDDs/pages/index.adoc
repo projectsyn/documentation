@@ -19,3 +19,4 @@ The all are using the xref:sdd-template.adoc[SDD Template].
 * xref:0021-cluster-catalog-compilation.adoc[0021 - Cluster Catalog Compilation]
 * xref:0022-managed-services-in-cluster.adoc[0022 - Managed Services in Cluster]
 * xref:0023-managed-services-controller.adoc[0023 - Managed Services Controller]
+* xref:0024-automated-billing.adoc[0024 - Billing Automation based on Prometheus]
