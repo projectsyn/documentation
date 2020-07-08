@@ -65,7 +65,7 @@ In this story the cluster itself belongs to a service provider which resells ser
 ...
 
 
-=== Implementation Details/Notes/Constraints [optional]
+=== Implementation Details/Notes/Constraints
 
 ==== Billing metrics collection with Prometheus
 
@@ -159,12 +159,22 @@ The price metric must:
 
 .Example
 ----
-billed_unit_price{cloud="gcp",distribution="openshift4",service_level="standard",product_id="ComputeOpenShiftHyperscalerPremium"} 1.10
+billed_unit_price{cloud="gcp",distribution="openshift4",service_level="standard",product_id="ComputeOpenShiftHyperscalerStandard"} 1.10
 ----
 
 Usually this information comes out of the ERP which usually needs a specific exporter, but could also made available for example from a static text file via node-exporter when this is relatively static.
 
 ==== Price Calculation
+
+Each price model must be described in a series of PromQL queries for Prometheus to be able to do the calculation. The following queries are needed:
+
+* Correlation of billed unit with its properties to the price per unit
+* Multiplication of billed metric with price per unit, according to rating frequency
+
+The query outcome must contain the identifying label (cluster ID and tenant ID).
+These queries are executed as recording rule according to the rating frequency, the outcome is a new metric storing the price per unit per rating frequency which then can be summed up by the invoice generator.
+
+==== Private Cluster
 
 To calculate the amount to pay, the metrics `lieutenant_cluster`, `billed_unit_price` and the metric for the unit (for example number of vCPUs) is needed.
 
@@ -185,10 +195,20 @@ sum by (lieutenant_cluster_id) (max_over_time(kube_node_status_capacity_cpu_core
 
 This query contains the rating `kube_node_status_capacity_cpu_cores[60m]` and the rule to select the maximum over this timeframe `max_over_time`. This is grouped by `lieutenant_cluster_id` and will be multiplied by the price figured out by matching the labels in `billed_unit_price`.
 
-* Recording rules
-* Billing unit
-* What happens when the timeline just ends or has a gap?
-* Generalize example for other price models
+The recording rule contains this metric and is named after the product ID:
+
+----
+groups:
+  - name: billing
+    interval: 60m
+    rules:
+    - record: ComputeOpenShiftHyperscalerStandard
+      expr: sum by (lieutenant_cluster_id) (max_over_time(kube_node_status_capacity_cpu_cores[60m])) * on (lieutenant_cluster_id) (billed_unit_price * on(cloud,distribution,service_level) group_left(lieutenant_cluster_id) lieutenant_cluster{})
+----
+
+==== Shared Cluster
+
+TODO
 
 ==== Invoice Generator
 
@@ -198,6 +218,20 @@ This query contains the rating `kube_node_status_capacity_cpu_cores[60m]` and th
 * Customer matching: Tenant -> ERP customer? `customer_id` label from tenant?
 * Mark end of service
 
+.Variant Subquery
+----
+sum_over_time(((sum by (lieutenant_cluster_id) (kube_node_status_capacity_cpu_cores)) * on (lieutenant_cluster_id) (billed_unit_price * on(cloud,distribution,service_level) group_left(lieutenant_cluster_id) lieutenant_cluster{}))[30d:])
+----
+
+or
+
+.Variant Recording Rule
+----
+sum_over_time(ComputeOpenShiftHyperscalerStandard[30d])
+----
+
+Drawback: Correct things? Recording rule could be executed manually
+
 ==== Handling disconnected clusters
 
 https://prometheus.io/docs/prometheus/latest/querying/api/#snapshot
@@ -205,6 +239,8 @@ https://prometheus.io/docs/prometheus/latest/querying/api/#snapshot
 ==== Solve missing metrics
 
 ==== Testing
+
+* https://www.robustperception.io/unit-testing-rules-with-prometheus
 
 ==== Terminology
 
@@ -234,3 +270,4 @@ Service Reselling:: One service provider provides a private cluster to another s
 == TODO
 
 * Include cloud costs / cloud costs exporter
+* What happens when the timeline just ends or has a gap?
