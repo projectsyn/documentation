@@ -39,7 +39,7 @@ The key part of the design is to use core functionality of Prometheus and the Pr
 * The central billing service consists of a Thanos setup, data is received by the https://thanos.io/components/receive.md/[Thanos receiver].
 * An authentication and authorization component in front of the Thanos receiver makes sure the received data is sane and it adds an identifying label to the metric, for example the Lieutenant cluster ID.
 * A price exporter exports all pricing information which it collected from Lieutenant and and product database, mainly an ERP. This metrics are also labeled with an identifier for later PromQL matching.
-* Price calculation and suming up is done in pure PromQL.
+* Price calculation and summing up is done in pure PromQL.
 * An invoice creator queries the TSDB to generate invoice lines and write them either directly into the ERP or in a portable data format for import into billing system.
 
 This design allows to implement different billing models even for the same Kubernetes cluster, for example for reselling models.
@@ -62,22 +62,43 @@ In this story the cluster itself doesn't belong to one tenant and it hosts many 
 
 In this story the cluster itself belongs to a service provider which resells services on top of the cluster to its end-user.
 
+...
+
 
 === Implementation Details/Notes/Constraints [optional]
 
-==== Billing metrics collection
+==== Billing metrics collection with Prometheus
 
 While the metrics needed depends on the product unit being billed, in general metrics are collected from various metrics exporter like https://github.com/kubernetes/kube-state-metrics[kube-state-metrics] directly on the source Kubernetes cluster. Which exporters will be needed have to be defined per unit to be billed in the product definition, it could even be that a specific exporter has to be written. There is no special requirement to the exported metrics.
 
-==== Billing metrics transport
+==== Billing metrics transport with Telemeter
 
 Billing metrics will be transported over a secure and authenticated connection to a central billing metric store as these metrics are considered very important. Only metrics needed for the billing system are transported.
 
-To _send_ the metrics to the central billing metric store the https://prometheus.io/docs/prometheus/latest/configuration/configuration/#remote_write[remote_write] functionality of Prometheus is used. This configuration needs to be https://prometheus.io/docs/practices/remote_write/[tuned] accordingly so that no metrics can get lost should the central metric store be unavailable for a period of time (>2h downtime).
+Metrics from the source cluster must have cluster or tenant identifying labels, otherwise they are not allowed.
 
-To _filter_ the sent metrics, a matching `write_relabel_configs` configuration needs to be created. The intention is to only send metrics for billing purposes to the central metric store.
+Metric transport is achieved by making use of https://github.com/openshift/telemeter[Telemeter], which describes the process like this:
 
-==== Billing metrics identifier
+[quote, github.com/openshift/telemeter/README.md]
+____
+. The local client scrapes `/federate` on a given Prometheus instance.
+. The local client performs cleanup and anonymization and then pushes the metrics to the server.
+. The server authenticates the client, validates and verifies that the metrics are "safe", and then ensures they have a label uniquely identifying the source client.
+. The server holds the metrics in a local disk store until scraped.
+. A centralized Prometheus scrapes each server instance and aggregates all the metrics.
+____
+
+TODO:
+
+* Research configuration details of Telemeter
+* Describe authentication (idea: install Telemeter server on the same cluster as Lieutenant and use a Kubernetes service account as authentication token)
+* Who scrapes the telemeter server? Thanos receive via forward-url? Or Prometheus scraper which also scrapes price exporters?
+
+==== Central billing metric store with Thanos
+
+Billing metrics will be received by https://thanos.io/components/receive.md/[Thanos receiver]. In front of the Thanos receiver is the central billing metric store authentication proxy.
+
+==== Billing metrics identifier labels
 
 For being able to generate invoices billing metrics must be identifiable for example by the cluster or tenant ID.
 
@@ -90,27 +111,15 @@ The following labels are recommended to be used:
 
 These labels need special treatment in regards to tampering protection, mainly if metrics are coming from untrusted source clusters. See section about the metric store proxy for more details.
 
-==== Central billing metric store
-
-Billing metrics will be received by https://thanos.io/components/receive.md/[Thanos receiver]. In front of the Thanos receiver is the central billing metric store authentication proxy.
-
-==== Central billing metric store authentication proxy
-
-Incoming connections from the source cluster must be authenticated and labeled. 
-
-For each source cluster a token is generated by Lieutenant and stored in Vault. The Commodore Component which configures `remote_write` will add the cluster-specific authentication settings to the configuration. This way a cluster can be identified by the proxy. The proxy will add an identifying metric label to every incoming sample, for example `lieutenant_cluster_id`.
-
-To support private and shared Kubernetes clusters (private belongs to one tenant, shared contains billed services for many tenants), the proxy can either allow or strip identifying labels. A cluster can be considered trusted or untrusted, configured in Lieutenant. A trusted cluster already transports identifying labels, like the cluster and tenant ID whereas an untrusted cluster isn't allowed to include identifying labels (they will get stripped).
-
-The list of labels considered to be identifying are an application configuration value.
-
-No such proxy already exists, so it must be developed as part of this SDD.
+==== The role of the product definition
 
 ==== Billing data exporter(s)
 
 Pricing, product and customer information must be available as metrics in Prometheus to calculate the billing units. These metrics must contain a defined set of labels so that label joining and calculation will be possible.
 
 These exporters will have to be custom made, depending on the available source data store, for example the ERP. The example here is using Odoo as the source of product, price and customer information.
+
+It is important that the produced metric is exactly ...
 
 [cols=",,",options="header",]
 |===
@@ -128,7 +137,7 @@ lieutenant_tenant{lieutenant_tenant_id="tenant-42",display_name="Acme Corp"} 1
 
 |Product and Price
 |Information about products and prices, coming from the source data store, for example from the ERP.
-a|This example is from Odoo
+a|
 ----
 erp_product{cloud="gcp",distribution="openshift4",service_level="premium",product_id="ComputeOpenShiftHyperscalerPremium"} 2.20
 ----
@@ -150,7 +159,7 @@ a|tbd
 
 * Invoice line
 * Grouping
-* Iterate over availabable series for the timeframe, get customer and cluster ids -> not from Lieutenant
+* Iterate over available series for the timeframe, get customer and cluster ids -> not from Lieutenant
 
 ==== Handling disconnected clusters
 
@@ -169,9 +178,14 @@ Billing Unit:: Invoice line, a unit which will appear on the invoice
 Billing Metric:: Metrics used to bill units
 Service Reselling:: One service provider provides a private cluster to another service provider which in turn sells services running on this private cluster to its own customers.
 
-=== Risks and Mitigations [optional]
+=== Risks and Mitigations
+
+* Missing metrics / gaps
+* Tampering with source metrics labels
 
 == Drawbacks [optional]
+
+* Correct wrong invoices?
 
 == Alternatives [optional]
 
