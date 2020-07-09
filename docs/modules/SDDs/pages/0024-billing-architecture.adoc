@@ -1,0 +1,189 @@
+= SDD 0024 - Billing Architecture based on Prometheus
+
+:sdd_author:    Tobias Brunner
+:sdd_owner:     SIG Syn
+:sdd_reviewers: 
+:sdd_date:      2020-07-07
+:sdd_status:    draft
+\include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+Automated billing of services is a crucial part of doing business. This SDD describes a way for automated billing based on data collected by Prometheus.
+
+It is split in to two SDDs, this one lays out the overall architecture and xref:0025-billing-calculation.adoc[SDD 0025] discusses the metrics details and calculation process.
+====
+
+== Motivation
+
+Service billing must be fully automated and be able to bill services based on the defined products. It must be reliable, secure and flexible enough to support different billing models. As Prometheus is already available on all clusters and billing is defined to be based on metrics, the already collected data can be reused to bill based on that data. By making this concept flexible enough, it should be usable for most billing needs.
+
+=== Goals
+
+* Process for automated billing
+* Fully based on Prometheus for data gathering and storing
+* Long-term and secure billing data storage
+* Plugable data sources
+
+=== Non-Goals
+
+* Invention of new ways of data storage
+* Support for a particular billing system
+* Define a billing model
+
+== Design Proposal
+
+[ditaa, cloudscale, svg]
+....
+                                          +
+                                          |
++--------------------------------------+  |
+|                                      |  |
+|          +--------------------+      |  |     +--------------------+
+|          |                    |      |  |     |                    |
+|          | Telemeter client   +-------------->+ Telemeter server   |
+|          |                    |      |  |     |                    |
+|          +---------+----------+      |  |     +---------+----------+
+|                    |                 |  |               |
+|                    | scrape /federate|  |               |
+|                    v                 |  |               v
+|          +---------+----------+      |  |     +---------+----------+      +-----+      +-------------------+
+|          |                    |      |  |     |                    |      |     |      |                   |
+|     +----+ Prometheus         |      |  |     | Thanos Receiver    +----->+ S3  +<-----+ Thanos Store GW   |
+|     |    |                    |      |  |     |                    |      | {s} |      |                   |
+|     |    +--------------------+      |  |     +---------+------+---+      +-----+      +---+---------------+
+|     |                                |  |               ^      ^                           ^
+|     |    /--------------------+      |  |               |      |                           |
+|     |    | kube state metrics |      |  |               |      +-------------+             |
+|     +--->+                    |      |  |               |                    |             |
+|     |    +--------------------/      |  |     +---------+----------+      +--+-------------+--+
+|     |                                |  |     |                    |      |                   |
+|     |    /--------------------+      |  |     | Prometheus         |      | Thanos Querier    +<---------------+
+|     |    | Other (existing)   |      |  |     |                    |      |                   |                |
+|     +--->+ exporter           |      |  |     +---------+------+---+      +-------------------+                |
+|     |    +--------------------/      |  |               |      |                                      +--------+---------+
+|     |                                |  |               |      +-------------------+                  |                  |
+|     |    /--------------------+      |  |               |                          |                  | Invoice Creator  |
+|     |    | Custom exporter    |      |  |               v                          v                  | cBLU             |
+|     +--->+                    |      |  |     /---------+----------+     /---------+----------+       +--------+---------+
+|          +--------------------/      |  |     | Lieutenant exporter|     | Price model        |                |
+|                                      |  |     |                    |     | exporter      cBLU |                |
++-=------------------------------------+  |     +--------------------/     +---------+----------/                |
+      1-n Kubernetes cluster              |                                          ^                           |
+                                          |                                          |                           |
+                                          |                                       /--+--\                        |
+                                          |                                       |     |                        |
+                                          |                                       | ERP +<-----------------------v
+                                          |                                       |     |
+                                          |                                       \-----/
+                                          |
+                                          +
+....
+
+The key part of the design is to use core functionality of Prometheus and the PromQL query language. This means that all data is present as metrics in Prometheus TSDB. As an overview, the following parts are involved:
+
+* Data is collected on the source cluster using the in-cluster Prometheus
+* Metric series which are needed for billing purposes are sent via https://github.com/openshift/telemeter[Telemeter] to the central billing TSDB. Telemeter takes care of authentication and data sanity.
+* The central billing service consists of a Thanos setup, data is received by the https://thanos.io/components/receive.md/[Thanos Receiver].
+* A Prometheus exporter exposes all price model information, ready to be used for calculation.
+* Price calculation and summing up is done in pure PromQL.
+* An invoice creator queries the TSDB to generate invoice lines and write them either directly into the ERP or in a portable data format for import into billing system.
+
+This design allows to implement different billing models even for the same Kubernetes cluster, for example for reselling models.
+
+=== User Stories
+
+==== Private Kubernetes Cluster Billing
+
+In this story the whole cluster belongs to one tenant, all services running on this cluster and the cluster itself is being billed to the same tenant.
+
+...
+
+==== Services on shared Kubernetes Cluster Billing
+
+In this story the cluster itself doesn't belong to one tenant and it hosts many services belonging to different tenants.
+
+...
+
+==== Service Reselling
+
+In this story the cluster itself belongs to a service provider which resells services on top of the cluster to its end-user.
+
+...
+
+
+=== Implementation Details/Notes/Constraints
+
+==== Billing metrics collection with Prometheus
+
+While the metrics needed depends on the product unit being billed, in general metrics are collected from various metrics exporter like https://github.com/kubernetes/kube-state-metrics[kube-state-metrics] directly on the source Kubernetes cluster. Which exporters will be needed have to be defined per unit to be billed in the product definition, it could even be that a specific exporter has to be written. There is no special requirement to the exported metrics.
+
+==== Billing metrics transport with Telemeter
+
+Billing metrics will be transported over a secure and authenticated connection to a central billing metric store as these metrics are considered very important. Only metrics needed for the billing system are transported.
+
+Metrics from the source cluster must have cluster or tenant identifying labels, otherwise they are not allowed.
+
+Metric transport is achieved by making use of https://github.com/openshift/telemeter[Telemeter], which describes the process like this:
+
+[quote, github.com/openshift/telemeter/README.md]
+____
+. The local client scrapes `/federate` on a given Prometheus instance.
+. The local client performs cleanup and anonymization and then pushes the metrics to the server.
+. The server authenticates the client, validates and verifies that the metrics are "safe", and then ensures they have a label uniquely identifying the source client.
+. The server holds the metrics in a local disk store until scraped.
+. A centralized Prometheus scrapes each server instance and aggregates all the metrics.
+____
+
+TODO:
+
+* Research configuration details of Telemeter
+* Describe authentication (idea: install Telemeter server on the same cluster as Lieutenant and use a Kubernetes service account as authentication token)
+* Who scrapes the telemeter server? Thanos receive via forward-url? Or Prometheus scraper which also scrapes price exporters?
+
+==== Central billing metric store with Thanos
+
+Billing metrics will be received by https://thanos.io/components/receive.md/[Thanos receiver]. In front of the Thanos receiver is the central billing metric store authentication proxy.
+
+==== Handling disconnected clusters
+
+https://prometheus.io/docs/prometheus/latest/querying/api/#snapshot
+
+==== Solve missing metrics
+
+==== Testing
+
+* https://www.robustperception.io/unit-testing-rules-with-prometheus
+
+==== Terminology
+
+Source Cluster:: Kubernetes cluster containing resources to be billed
+Private Cluster:: Kubernetes cluster belonging to one tenant
+Shared Cluster:: Kubernetes cluster which hosts services for several tenants
+Billing Unit:: Invoice line, a unit which will appear on the invoice
+Billing Metric:: Metrics used to bill units
+Service Reselling:: One service provider provides a private cluster to another service provider which in turn sells services running on this private cluster to its own customers.
+
+=== Risks and Mitigations
+
+* Missing metrics / gaps
+* Tampering with source metrics labels
+
+== Drawbacks [optional]
+
+* Correct wrong invoices?
+
+== Alternatives [optional]
+
+* Cyclops
+* Commercial tool
+
+== References
+
+== TODO
+
+* Include cloud costs / cloud costs exporter? Maybe not in this SDD(s) but in a follow-up
+* What happens when the timeline just ends or has a gap?
+* Diagram to show metrics how they work together
+* How to fill missing metrics?

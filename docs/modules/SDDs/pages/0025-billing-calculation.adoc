@@ -1,0 +1,234 @@
+= SDD 0024 - Billing Calculation based on Prometheus
+
+:sdd_author:    Tobias Brunner
+:sdd_owner:     SIG Syn
+:sdd_reviewers: 
+:sdd_date:      2020-07-07
+:sdd_status:    draft
+\include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This SDD is describing the methods for price calculation and invoice generation and is a based on the architecture described in xref:0024-billing-architecture.adoc[SDD 0024].
+====
+
+== Motivation
+
+=== Goals
+
+=== Non-Goals
+
+== Design Proposal
+
+=== User Stories [optional]
+
+=== Implementation Details/Notes/Constraints
+
+==== Billing Metrics Identifier Labels
+
+For being able to generate invoices, billing metrics must be identifiable for example by the cluster or tenant ID.
+
+This identifier is used throughout the system, be that for PromQL queries or by the invoice generator.
+
+Label `lieutenant_cluster_id`:: The Lieutenant Cluster ID, _mandatory_ on every source metric.
+Label `lieutenant_tenant_id`:: The Lieutenant Tenant ID, will be added in the billing Prometheus by matching the labels in the metric `lieutenant_tenant`. It is not allowed to be set in the source metric and will be overwritten on the receiver if present.
+Label `customer_id`:: An optional label identifying an enduser on a shared Kubernetes cluster. This label must be set on the source metric and isn't checked by the billing system.
+
+These labels need special treatment in regards to tampering protection, mainly if metrics are coming from untrusted source clusters. See section about the metric store proxy for more details.
+
+==== The Price Model
+
+For being able to apply billing rules to metrics and generate invoices, the price model has to be defined:
+
+Rating frequency::  The rating defines in which frequency units are counted and summed up. For example the rating of the units can be per hour.
+Billed unit:: The unit which will billed. For example the number of vCPUs, number of nodes or number of clusters. This defines the source metric which will be multiplied with the defined price.
+Properties to define the price per billed unit:: Properties which describe various variants of the billed unit. An example could be to define different prices depending on the Kubernetes distribution.
+Price per rating frequency:: The actual price which is used to mulitply the billed unit per rating frequency. For example the price per hour per vCPU on a Kubernetes cluster.
+
+.Example
+* Rating frequency: hourly (maximum used per hour).
+* Billed unit: per vCPU per Kubernetes worker node.
+* Properties: Cloud, Distribution, Service Level
+* Price:
+** Property values `cloud=gcp,distribution=openshift4,service_level=standard`: CHF 1.10
+** Property values `cloud=vmware,distribution=openshift4,service_level=premium`: CHF 5.30
+
+This means: Each vCPU per worker node on a cluster with the defined properties is counted and the maximum over the last full hour is multiplied with the price of CHF 1.10 per vCPU. This will then be summed up over the invoicing period, for example monthly for the last full month.
+
+==== All the data as Metrics
+
+The price model, cluster metadata, tenant information and everything needed to calculate must be available in Prometheus as metrics with defined labels for being able to do correlation, counting and summing up.
+
+It is important that these metrics contain a defined set of labels so that metric matching is possible, this is key of the concept.
+
+===== Lieutenant Metrics
+
+The Lieutenant Operator exposes the available clusters and tenants with all the available metadata as metrics. The metadata must contain all the values to match the price model properties to identify which product to match. These metrics always have the value 1 to be able to use it for PromQL label correlation.
+
+.Example: Cluster
+----
+lieutenant_cluster{lieutenant_cluster_id="cluster-42",lieutenant_tenant_id="tenant-42",cloud="gcp",distribution="openshift4",service_level="standard"} 1
+----
+
+.Example: Tenant
+----
+lieutenant_tenant{lieutenant_tenant_id="tenant-42",display_name="Acme Corp",customer_id="2354334"} 1
+----
+
+===== Price Model Metrics
+
+The price model metric must:
+
+* Contain the labels for the property matching to find the price per billed unit
+* Be named `billed_unit_price`.
+
+.Example
+----
+billed_unit_price{cloud="gcp",distribution="openshift4",service_level="standard",billing_unit="compute",product_id="1208",product_slug="ComputeOpenShift4HyperScalerStandard"} 1.10
+----
+
+Usually this information comes out of the ERP which usually needs a specific exporter, but could also made available for example from a static text file via node-exporter when this information relatively static.
+
+==== Price Calculation
+
+Each price model must be described in a series of PromQL queries for Prometheus to be able to do the calculation. The following queries are needed:
+
+* Correlation of billed unit with its properties to the price per unit
+* Multiplication of billed metric with price per unit, according to rating frequency
+
+The query outcome must contain the identifying label (cluster ID and tenant ID).
+These queries are executed as recording rule according to the rating frequency, the outcome is a new metric storing the price per unit per rating frequency which then can be summed up by the invoice generator.
+
+===== Example 1: Private Cluster per vCPU per Hour
+
+.Price Model
+* Rating frequency: hourly (maximum used per hour).
+* Billed unit: per vCPU per Kubernetes worker node. The billed unit is called `compute`.
+* Properties: Cloud, Distribution, Service Level
+* Price:
+** Property values `cloud=gcp,distribution=openshift4,service_level=standard`: CHF 1.10
+
+.Source Metric
+----
+kube_node_status_capacity_cpu_cores{lieutenant_cluster_id="cluster-42",node="node1"} 2
+kube_node_status_capacity_cpu_cores{lieutenant_cluster_id="cluster-42",node="node2"} 2
+kube_node_status_capacity_cpu_cores{lieutenant_cluster_id="cluster-42",node="node3"} 2
+----
+
+.Lieutenant Metric
+----
+lieutenant_cluster{lieutenant_cluster_id="cluster-42",lieutenant_tenant_id="tenant-42",cloud="gcp",distribution="openshift4",service_level="standard"} 1
+----
+
+.Price Model Metric
+----
+billed_unit_price{cloud="gcp",distribution="openshift4",service_level="standard",billing_unit="compute",product_id="1208",product_slug="ComputeOpenShift4HyperScalerStandard"} 1.10
+----
+
+Data exploration:
+
+.Sum of vCPUs to bill for including the rating
+----
+sum(max_over_time(kube_node_status_capacity_cpu_cores{lieutenant_cluster_id="cluster-42"}[60m])) = 6
+----
+
+.Get price per billed unit
+----
+billed_unit_price{billing_unit="compute"} * on(cloud,distribution,service_level) group_left(lieutenant_cluster_id) lieutenant_cluster{lieutenant_cluster_id="cluster-42"} = 1.10
+----
+Here we're filtering on the label `billing_unit` because there is a very similar variant in the metrics for another billing unit.
+
+.Multiply the billed unit with the price
+----
+sum by (lieutenant_cluster_id) (max_over_time(kube_node_status_capacity_cpu_cores[60m])) * on (lieutenant_cluster_id) (billed_unit_price{billing_unit="compute"} * on(cloud,distribution,service_level) group_left(lieutenant_cluster_id) lieutenant_cluster{}) = 6.60
+----
+
+This can now be summed up using the `sum_over_time` function:
+
+.Sum over time
+----
+sum_over_time((sum by (lieutenant_cluster_id) (max_over_time(kube_node_status_capacity_cpu_cores[60m])) * on (lieutenant_cluster_id) (billed_unit_price{billing_unit="compute"} * on(cloud,distribution,service_level) group_left(lieutenant_cluster_id) lieutenant_cluster{}))[30d:])
+----
+
+===== Example 2: Private Cluster per Node
+
+TODO
+
+===== Example 3: Shared Cluster per Namespace
+
+TODO
+
+==== Invoice Generator
+
+It is assumed that an invoice is constructed like this:
+
+* One invoice per customer / tenant
+* Invoice lines grouped by cluster
+* Each invoice line contains 1 billed unit and an amount of units to pay
+
+.Example Invoice for Customer 1
+[cols=",,,",options="header"]
+|===
+|Description
+|Amount
+|Price
+|Total
+
+4+|*Cluster 1*
+
+|Managed Cluster (per Cluster)
+|1
+|CHF 500.00
+|CHF 500.00
+
+|Managed Nodes (per Node)
+|10
+|CHF 20.00
+|CHF 200.00
+
+4+|*Cluster 2*
+
+|Managed Cluster (per Cluster)
+|1
+|CHF 500.00
+|CHF 500.00
+
+|Managed Nodes (per Node)
+|10
+|CHF 20.00
+|CHF 200.00
+
+|===
+
+To generate invoices, the data which is present in the TSDB is queried for a defined timeframe (can be specified when the invoice generator runs).
+
+Figuring out for which customers an invoice will be created is done with the data available in the TSDB for the timeframe in question. It is not meant to check external systems for available customers as for example a Lieutenant tenant could already be deleted by the time the invoice generator is executed.
+
+The customers are identified by the labels on the final metric.
+
+* Iterate over available series for the timeframe, get customer and cluster ids -> not from Lieutenant
+* Customer matching: Tenant -> ERP customer? `customer_id` label from tenant?
+* Mark end of service
+
+.Variant Subquery
+----
+sum_over_time(((sum by (lieutenant_cluster_id) (kube_node_status_capacity_cpu_cores)) * on (lieutenant_cluster_id) (billed_unit_price * on(cloud,distribution,service_level) group_left(lieutenant_cluster_id) lieutenant_cluster{}))[30d:])
+----
+
+or
+
+.Variant Recording Rule
+----
+sum_over_time(ComputeOpenShiftHyperscalerStandard[30d])
+----
+
+Drawback: Correct things? Recording rule could be executed manually
+
+=== Risks and Mitigations [optional]
+
+== Drawbacks [optional]
+
+== Alternatives [optional]
+
+== References
