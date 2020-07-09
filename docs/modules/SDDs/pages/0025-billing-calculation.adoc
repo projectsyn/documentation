@@ -167,7 +167,7 @@ It is assumed that an invoice is constructed like this:
 * Invoice lines grouped by cluster
 * Each invoice line contains 1 billed unit and an amount of units to pay
 
-.Example Invoice for Customer 1
+.Example Invoice for a Customer
 [cols=",,,",options="header"]
 |===
 |Description
@@ -182,8 +182,8 @@ It is assumed that an invoice is constructed like this:
 |CHF 500.00
 |CHF 500.00
 
-|Managed Nodes (per Node)
-|10
+|Managed Nodes (per vCPU)
+|100
 |CHF 20.00
 |CHF 200.00
 
@@ -202,6 +202,17 @@ It is assumed that an invoice is constructed like this:
 |===
 
 To generate invoices, the data which is present in the TSDB is queried for a defined timeframe (can be specified when the invoice generator runs).
+
+Labels needed to generate the invoice:
+
+* `lieutenant_tenant_id` or `customer_id`: For each of them an invoice is being generated.
+* `lieutenant_cluster_id`: To group invoice lines by cluster.
+
+Metrics needed to generate the invoice:
+
+* Sum over timeframe for billed unit for the amount
+* Sum over timeframe multiplied by price per unit per rating frequency
+* ...
 
 Figuring out for which customers an invoice will be created is done with the data available in the TSDB for the timeframe in question. It is not meant to check external systems for available customers as for example a Lieutenant tenant could already be deleted by the time the invoice generator is executed.
 
