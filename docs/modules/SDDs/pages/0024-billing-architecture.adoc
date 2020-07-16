@@ -5,7 +5,7 @@
 :sdd_reviewers: 
 :sdd_date:      2020-07-07
 :sdd_status:    draft
-\include::partial$meta-info-table.adoc[]
+include::partial$meta-info-table.adoc[]
 
 [NOTE]
 .Summary
@@ -59,7 +59,7 @@ Service billing must be fully automated and be able to bill services based on th
 |     +--->+                    |      |  |               |                    |             |
 |     |    +--------------------/      |  |     +---------+----------+      +--+-------------+--+
 |     |                                |  |     |                    |      |                   |
-|     |    /--------------------+      |  |     | Prometheus         |      | Thanos Querier    +<---------------+
+|     |    /--------------------+      |  |     | Prometheus         |<-----+ Thanos Querier    +<---------------+
 |     |    | Other (existing)   |      |  |     |                    |      |                   |                |
 |     +--->+ exporter           |      |  |     +---------+------+---+      +-------------------+                |
 |     |    +--------------------/      |  |               |      |                                      +--------+---------+
@@ -74,7 +74,7 @@ Service billing must be fully automated and be able to bill services based on th
                                           |                                          |                           |
                                           |                                       /--+--\                        |
                                           |                                       |     |                        |
-                                          |                                       | ERP +<-----------------------v
+                                          |                                       | ERP +<-----------------------+
                                           |                                       |     |
                                           |                                       \-----/
                                           |
@@ -119,11 +119,11 @@ In this story the cluster itself belongs to a service provider which resells ser
 
 While the metrics needed depends on the product unit being billed, in general metrics are collected from various metrics exporter like https://github.com/kubernetes/kube-state-metrics[kube-state-metrics] directly on the source Kubernetes cluster. Which exporters will be needed have to be defined per unit to be billed in the product definition, it could even be that a specific exporter has to be written. There is no special requirement to the exported metrics.
 
-==== Billing metrics transport with Telemeter
+==== Secure billing metrics transport
 
 Billing metrics will be transported over a secure and authenticated connection to a central billing metric store as these metrics are considered very important. Only metrics needed for the billing system are transported.
 
-Metrics from the source cluster must have cluster or tenant identifying labels, otherwise they are not allowed.
+Metrics from the source cluster must have identifying labels, otherwise they are not allowed.
 
 Metric transport is achieved by making use of https://github.com/openshift/telemeter[Telemeter], which describes the process like this:
 
@@ -136,25 +136,41 @@ ____
 . A centralized Prometheus scrapes each server instance and aggregates all the metrics.
 ____
 
-TODO:
-
+.TODO
+[WARNING]
+--
 * Research configuration details of Telemeter
 * Describe authentication (idea: install Telemeter server on the same cluster as Lieutenant and use a Kubernetes service account as authentication token)
 * Who scrapes the telemeter server? Thanos receive via forward-url? Or Prometheus scraper which also scrapes price exporters?
+--
 
 ==== Central billing metric store with Thanos
 
-Billing metrics will be received by https://thanos.io/components/receive.md/[Thanos receiver]. In front of the Thanos receiver is the central billing metric store authentication proxy.
+Billing metrics will be received by https://thanos.io/components/receive.md/[Thanos receiver] and stored in S3 for long-term storage.
 
 ==== Handling disconnected clusters
 
+.TODO
+[WARNING]
+--
 https://prometheus.io/docs/prometheus/latest/querying/api/#snapshot
+--
 
 ==== Solve missing metrics
 
+.TODO
+[WARNING]
+--
+TODO
+--
+
 ==== Testing
 
-* https://www.robustperception.io/unit-testing-rules-with-prometheus
+.TODO
+[WARNING]
+--
+https://www.robustperception.io/unit-testing-rules-with-prometheus
+--
 
 ==== Terminology
 
@@ -167,23 +183,44 @@ Service Reselling:: One service provider provides a private cluster to another s
 
 === Risks and Mitigations
 
+.TODO
+[WARNING]
+--
 * Missing metrics / gaps
 * Tampering with source metrics labels
+--
 
-== Drawbacks [optional]
+== Drawbacks
 
-* Correct wrong invoices?
+.TODO
+[WARNING]
+--
+* Correct wrong data?
+--
+== Alternatives
 
-== Alternatives [optional]
-
+.TODO
+[WARNING]
+--
 * Cyclops
 * Commercial tool
+--
 
 == References
 
+.TODO
+[WARNING]
+--
+TODO
+--
+
 == TODO
 
+.TODO
+[WARNING]
+--
 * Include cloud costs / cloud costs exporter? Maybe not in this SDD(s) but in a follow-up
 * What happens when the timeline just ends or has a gap?
 * Diagram to show metrics how they work together
 * How to fill missing metrics?
+--

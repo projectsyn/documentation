@@ -1,11 +1,11 @@
-= SDD 0024 - Billing Calculation based on Prometheus
+= SDD 0025 - Billing Calculation based on Prometheus
 
 :sdd_author:    Tobias Brunner
 :sdd_owner:     SIG Syn
 :sdd_reviewers: 
 :sdd_date:      2020-07-07
 :sdd_status:    draft
-\include::partial$meta-info-table.adoc[]
+include::partial$meta-info-table.adoc[]
 
 [NOTE]
 .Summary
@@ -27,7 +27,7 @@ This SDD is describing the methods for price calculation and invoice generation 
 
 ==== Billing Metrics Identifier Labels
 
-For being able to generate invoices, billing metrics must be identifiable for example by the cluster or tenant ID.
+For being able to generate invoices, billing metrics *must* be identifiable for example by the cluster or tenant ID.
 
 This identifier is used throughout the system, be that for PromQL queries or by the invoice generator.
 
@@ -43,7 +43,7 @@ For being able to apply billing rules to metrics and generate invoices, the pric
 
 Rating frequency::  The rating defines in which frequency units are counted and summed up. For example the rating of the units can be per hour.
 Billed unit:: The unit which will billed. For example the number of vCPUs, number of nodes or number of clusters. This defines the source metric which will be multiplied with the defined price.
-Properties to define the price per billed unit:: Properties which describe various variants of the billed unit. An example could be to define different prices depending on the Kubernetes distribution.
+Properties to define the price per billed unit (variants):: Properties which describe various variants of the billed unit. An example could be to define different prices depending on the Kubernetes distribution or service level.
 Price per rating frequency:: The actual price which is used to mulitply the billed unit per rating frequency. For example the price per hour per vCPU on a Kubernetes cluster.
 
 .Example
@@ -163,11 +163,17 @@ TODO
 
 It is assumed that an invoice is constructed like this:
 
-* One invoice per customer / tenant
+* One invoice per customer (tenant, client, ...)
 * Invoice lines grouped by cluster
 * Each invoice line contains 1 billed unit and an amount of units to pay
 
-.Example Invoice for a Customer
+Columns on the invoice
+
+Amount:: Sum of the value of all billing metrics
+Price:: Price per unit
+Total:: Multiplication of amount and price. TBD: Could be added by invoicing system (ERP)?
+
+.Example Invoice for a Customer (30 days / 720 hours)
 [cols=",,,",options="header"]
 |===
 |Description
@@ -178,41 +184,41 @@ It is assumed that an invoice is constructed like this:
 4+|*Cluster 1*
 
 |Managed Cluster (per Cluster)
-|1
-|CHF 500.00
-|CHF 500.00
+|720
+|CHF 0.70
+|CHF 504.00
 
 |Managed Nodes (per vCPU)
-|100
-|CHF 20.00
-|CHF 200.00
+|5760
+|CHF 0.035
+|CHF 201.60
 
 4+|*Cluster 2*
 
 |Managed Cluster (per Cluster)
-|1
-|CHF 500.00
-|CHF 500.00
+|720
+|CHF 0.50
+|CHF 360.00
 
 |Managed Nodes (per Node)
-|10
-|CHF 20.00
-|CHF 200.00
+|7200
+|CHF 0.014
+|CHF 100.80
 
+3+|*Total*
+|*CHF 1'166.40*
 |===
 
-To generate invoices, the data which is present in the TSDB is queried for a defined timeframe (can be specified when the invoice generator runs).
+To generate invoices, the data which is present in the TSDB is queried for a defined timeframe / interval (can be specified when the invoice generator runs).
 
-Labels needed to generate the invoice:
+We assume the following information is needed for the invoice to be further processed by an invoicing system (ERP):
 
-* `lieutenant_tenant_id` or `customer_id`: For each of them an invoice is being generated.
-* `lieutenant_cluster_id`: To group invoice lines by cluster.
+Customer ID:: Stored in label `customer_id`
+Product ID:: Per billed unit / invoice line, stored in label `product_id`
 
-Metrics needed to generate the invoice:
+And the following information is dependent on invoice system possibilities:
 
-* Sum over timeframe for billed unit for the amount
-* Sum over timeframe multiplied by price per unit per rating frequency
-* ...
+Cluster ID:: Used for grouping in the invoice, stored in label `lieutenant_cluster_id`
 
 Figuring out for which customers an invoice will be created is done with the data available in the TSDB for the timeframe in question. It is not meant to check external systems for available customers as for example a Lieutenant tenant could already be deleted by the time the invoice generator is executed.
 
@@ -235,6 +241,98 @@ sum_over_time(ComputeOpenShiftHyperscalerStandard[30d])
 ----
 
 Drawback: Correct things? Recording rule could be executed manually
+
+.Example sample
+----
+billed_unit_amount{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 8
+billed_unit_price{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 0.10
+----
+
+[ditaa, cloudscale, svg]
+....
++-------------------------+
+|Billed unit source metric|
++-----------+-------------+
+            |
+            |
+            |
+            |
+            |                 +--------------------------+
+            |         +-------+Product identifier metric |
+            v         |       +-=------------------------+
+       +----+----+    |
+       |Label    |    |       +--------------------------+
+       |matching +<---+-------+Customer identifier metric|
+       |     {io}|    |       +-=------------------------+
+       +----+----+    |
+            |         |       +--------------------------+
+            |         +-------+Price model metric        |
+            |                 +--------------------------+
+            |
+            |
+            v
+  +---------+---------+
+  |Invoice line sample|
+  +-------------------+
+....
+
+Billed unit source metric:: Billed unit metric
+Product identifier metric:: (optional) Metric to find product details and product id
+Customer identifier metric:: (optional) Metric to find customer id
+Price model metric:: Metric which contains price for matching product for the billed unit metric
+
+.Kubernetes cluster billed by the number of vCPUs used per hour (untrusted source)
+====
+Billed unit source metric::
+
+`kube_node_status_capacity_cpu_cores` with the identifier label `lieutenant_cluster_id`
+
+Product identifier metric::
+
+`lieutenant_cluster` matching via label `lieutenant_cluster_id`. `lieutenant_cluster` contains all labels to match with the price model metric.
+
+Customer identifier metric::
+
+`lieutenant_tenant` matching via label `lieutenant_cluster_id`, contains label `customer_id`
+
+Price model metric::
+
+`billed_unit_price` matching via labels from the result of the above matching, contains label `product_id`.
+
+Invoice line sample::
+
+----
+billed_unit_amount{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 8
+billed_unit_price{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 0.10
+----
+====
+
+.Managed database on a shared cluster billed by the vCPU used per hour (trusted source)
+====
+Billed unit source metric::
+
+`managed_database_cpus` with the identifier label `lieutenant_cluster_id`, `customer_id` and all needed labels for price matching.
+
+Product identifier metric::
+
+n/a (contained in source metric)
+
+Customer identifier metric::
+
+n/a (contained in source metric)
+
+Price model metric::
+
+`billed_unit_price` matching via labels from the source metric, contains label `product_id`.
+
+Invoice line sample::
+
+----
+billed_unit_amount{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 10
+billed_unit_price{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 0.20
+----
+====
+
 
 === Risks and Mitigations [optional]
 
