@@ -69,9 +69,18 @@ kubectl apply -k github.com/projectsyn/lieutenant-operator/deploy/crds
 # Operator deployment
 kubectl -n lieutenant apply -k github.com/projectsyn/lieutenant-operator/deploy
 
-# Configure Lieutenant Operator to not rely on Hashicorp Vault (for now)
-kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator SKIP_VAULT_SETUP=true
+# Operator configuration
+kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator \
+  SKIP_VAULT_SETUP=true \
+  DEFAULT_DELETION_POLICY=Delete \
+  LIEUTENANT_DELETE_PROTECTION=false
 ----
+
+The environment variables will configure Lieutenant Operator to:
+
+* not use Hashicorp Vault (don't do this for production deployments)
+* delete external resources by default (good for cleaning up after this guide is finished)
+* not set deletion protection annotations
 
 === Install Lieutenant API
 
@@ -404,9 +413,25 @@ curl -k -H "${LIEUTENANT_AUTH}" -H "Content-Type: application/json-patch+json" -
 
 Once you've gone through all these steps, you can cleanup all generated stuff using the following steps:
 
-. Delete the k3d cluster: `k3d delete -n projectsyn`
-. Delete the two Git repositories on GitLab
+. Delete the `Cluster` object
++
+[source,shell]
+----
+kubectl -n lieutenant delete cluster ${CLUSTER_ID}
+----
+This will also delete the associated `GitRepo` object and with that the cluster configuration file in the tenant configuration repository and the cluster catalog Git repository on GitLab.
 
-== Next Steps
+. Delete the `Tenant` object
++
+[source,shell]
+----
+kubectl -n lieutenant delete tenant ${TENANT_ID}
+----
+This will also delete the associated `GitRepo` object and with that the tenant configuration Git repository on GitLab.
 
-...
+. Delete the k3d cluster
++
+[source,shell]
+----
+k3d delete -n projectsyn
+----
