@@ -419,7 +419,8 @@ Once you've gone through all these steps, you can cleanup all generated stuff us
 ----
 kubectl -n lieutenant delete cluster ${CLUSTER_ID}
 ----
-This will also delete the associated `GitRepo` object and with that the cluster configuration file in the tenant configuration repository as well as the cluster catalog Git repository on GitLab.
+This will also delete the associated `GitRepo` object and with that the cluster configuration file in the tenant configuration repository and the cluster catalog Git repository on GitLab.
+
 . Delete the `Tenant` object
 +
 [source,shell]
@@ -427,6 +428,7 @@ This will also delete the associated `GitRepo` object and with that the cluster 
 kubectl -n lieutenant delete tenant ${TENANT_ID}
 ----
 This will also delete the associated `GitRepo` object and with that the tenant configuration Git repository on GitLab.
+
 . Delete the k3d cluster
 +
 [source,shell]
