@@ -221,6 +221,6 @@ TODO
 --
 * Include cloud costs / cloud costs exporter? Maybe not in this SDD(s) but in a follow-up
 * What happens when the timeline just ends or has a gap?
-* Diagram to show metrics how they work together
 * How to fill missing metrics?
+* How to apply discounts?
 --

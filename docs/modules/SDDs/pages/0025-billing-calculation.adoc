@@ -33,7 +33,7 @@ This identifier is used throughout the system, be that for PromQL queries or by 
 
 Label `lieutenant_cluster_id`:: The Lieutenant Cluster ID, _mandatory_ on every source metric.
 Label `lieutenant_tenant_id`:: The Lieutenant Tenant ID, will be added in the billing Prometheus by matching the labels in the metric `lieutenant_tenant`. It is not allowed to be set in the source metric and will be overwritten on the receiver if present.
-Label `customer_id`:: An optional label identifying an enduser on a shared Kubernetes cluster. This label must be set on the source metric and isn't checked by the billing system.
+Label `external_customer_id`:: An optional label identifying an enduser on a shared Kubernetes cluster. This label must be set on the source metric and isn't checked by the billing system.
 
 These labels need special treatment in regards to tampering protection, mainly if metrics are coming from untrusted source clusters. See section about the metric store proxy for more details.
 
@@ -73,7 +73,7 @@ lieutenant_cluster{lieutenant_cluster_id="cluster-42",lieutenant_tenant_id="tena
 
 .Example: Tenant
 ----
-lieutenant_tenant{lieutenant_tenant_id="tenant-42",display_name="Acme Corp",customer_id="2354334"} 1
+lieutenant_tenant{lieutenant_tenant_id="tenant-42",display_name="Acme Corp",external_customer_id="2354334"} 1
 ----
 
 ===== Price Model Metrics
@@ -85,7 +85,7 @@ The price model metric must:
 
 .Example
 ----
-billed_unit_price{cloud="gcp",distribution="openshift4",service_level="standard",billing_unit="compute",product_id="1208",product_slug="ComputeOpenShift4HyperScalerStandard"} 1.10
+billed_unit_price{cloud="gcp",distribution="openshift4",service_level="standard",billing_unit="compute",external_product_id="1208",product_slug="ComputeOpenShift4HyperScalerStandard"} 1.10
 ----
 
 Usually this information comes out of the ERP which usually needs a specific exporter, but could also made available for example from a static text file via node-exporter when this information relatively static.
@@ -123,7 +123,7 @@ lieutenant_cluster{lieutenant_cluster_id="cluster-42",lieutenant_tenant_id="tena
 
 .Price Model Metric
 ----
-billed_unit_price{cloud="gcp",distribution="openshift4",service_level="standard",billing_unit="compute",product_id="1208",product_slug="ComputeOpenShift4HyperScalerStandard"} 1.10
+billed_unit_price{cloud="gcp",distribution="openshift4",service_level="standard",billing_unit="compute",external_product_id="1208",product_slug="ComputeOpenShift4HyperScalerStandard"} 1.10
 ----
 
 Data exploration:
@@ -183,24 +183,24 @@ Total:: Multiplication of amount and price. TBD: Could be added by invoicing sys
 
 4+|*Cluster 1*
 
-|Managed Cluster (per Cluster)
+|Managed Cluster (per Cluster/hour)
 |720
 |CHF 0.70
 |CHF 504.00
 
-|Managed Nodes (per vCPU)
+|Managed Nodes (per vCPU/hour)
 |5760
 |CHF 0.035
 |CHF 201.60
 
 4+|*Cluster 2*
 
-|Managed Cluster (per Cluster)
+|Managed Cluster (per Cluster/hour)
 |720
 |CHF 0.50
 |CHF 360.00
 
-|Managed Nodes (per Node)
+|Managed Nodes (per Node/hour)
 |7200
 |CHF 0.014
 |CHF 100.80
@@ -213,8 +213,8 @@ To generate invoices, the data which is present in the TSDB is queried for a def
 
 We assume the following information is needed for the invoice to be further processed by an invoicing system (ERP):
 
-Customer ID:: Stored in label `customer_id`
-Product ID:: Per billed unit / invoice line, stored in label `product_id`
+Customer ID:: Stored in label `external_customer_id`
+Product ID:: Per billed unit / invoice line, stored in label `external_product_id`
 
 And the following information is dependent on invoice system possibilities:
 
@@ -225,7 +225,7 @@ Figuring out for which customers an invoice will be created is done with the dat
 The customers are identified by the labels on the final metric.
 
 * Iterate over available series for the timeframe, get customer and cluster ids -> not from Lieutenant
-* Customer matching: Tenant -> ERP customer? `customer_id` label from tenant?
+* Customer matching: Tenant -> ERP customer? `external_customer_id` label from tenant?
 * Mark end of service
 
 .Variant Subquery
@@ -244,8 +244,8 @@ Drawback: Correct things? Recording rule could be executed manually
 
 .Example sample
 ----
-billed_unit_amount{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 8
-billed_unit_price{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 0.10
+billed_unit_amount{external_customer_id="2354334",lieutenant_cluster_id="cluster-42",external_product_id="35345"} 8
+billed_unit_price{external_customer_id="2354334",lieutenant_cluster_id="cluster-42",external_product_id="35345"} 0.10
 ----
 
 [ditaa, cloudscale, svg]
@@ -285,33 +285,45 @@ Price model metric:: Metric which contains price for matching product for the bi
 ====
 Billed unit source metric::
 
-`kube_node_status_capacity_cpu_cores` with the identifier label `lieutenant_cluster_id`
+`kube_node_status_capacity_cpu_cores`. Identifier label `lieutenant_cluster_id`.
 
 Product identifier metric::
 
-`lieutenant_cluster` matching via label `lieutenant_cluster_id`. `lieutenant_cluster` contains all labels to match with the price model metric.
+`lieutenant_cluster`. Matching via label `lieutenant_cluster_id`. `lieutenant_cluster` contains all labels to match with the price model metric.
 
 Customer identifier metric::
 
-`lieutenant_tenant` matching via label `lieutenant_cluster_id`, contains label `customer_id`
+`lieutenant_tenant`. Matching via label `lieutenant_cluster_id`, contains label `external_customer_id`.
 
 Price model metric::
 
-`billed_unit_price` matching via labels from the result of the above matching, contains label `product_id`.
+`billed_unit_price` matching via labels from the result of the above matching, contains label `external_product_id`, used for invoice generator.
+====
 
-Invoice line sample::
+.Managed database on a private cluster billed by the vCPU used per hour (untrusted source)
+====
+Billed unit source metric::
 
-----
-billed_unit_amount{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 8
-billed_unit_price{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 0.10
-----
+`managed_database_cpus`. Identifier label `lieutenant_cluster_id` and all needed labels for product matching.
+
+Product identifier metric::
+
+n/a (contained in source metric)
+
+Customer identifier metric::
+
+`lieutenant_tenant`. Matching via label `lieutenant_cluster_id`, contains label `external_customer_id`
+
+Price model metric::
+
+`billed_unit_price`. Matching via labels from the source metric, contains label `external_product_id`.
 ====
 
 .Managed database on a shared cluster billed by the vCPU used per hour (trusted source)
 ====
 Billed unit source metric::
 
-`managed_database_cpus` with the identifier label `lieutenant_cluster_id`, `customer_id` and all needed labels for price matching.
+`managed_database_cpus`. Identifier label `lieutenant_cluster_id`, `external_customer_id` and all needed labels for price matching.
 
 Product identifier metric::
 
@@ -323,13 +335,14 @@ n/a (contained in source metric)
 
 Price model metric::
 
-`billed_unit_price` matching via labels from the source metric, contains label `product_id`.
+`billed_unit_price`. Matching via labels from the source metric, contains label `external_product_id`.
+====
 
-Invoice line sample::
-
+.Invoice line sample
+====
 ----
-billed_unit_amount{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 10
-billed_unit_price{customer_id="2354334",lieutenant_cluster_id="cluster-42",product_id="35345"} 0.20
+billed_unit_amount{external_customer_id="2354334",lieutenant_cluster_id="cluster-42",external_product_id="35345"} 8
+billed_unit_price{external_customer_id="2354334",lieutenant_cluster_id="cluster-42",external_product_id="35345"} 0.10
 ----
 ====
 
