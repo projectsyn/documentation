@@ -17,18 +17,12 @@ Before you start, please make sure to have these requirements available:
 [TIP]
 .Getting started on Linux with k3d
 --
-. Download `k3d` from https://github.com/rancher/k3d/releases[GitHub] (We're using version 1.x in this guide)
+. Download `k3d` (version >= 3.x) from https://github.com/rancher/k3d/releases[GitHub]
 . Create a new cluster
 +
 [source,shell]
 ----
-k3d create -n projectsyn
-----
-. Prepare Kubectl to access this cluster
-+
-[source,shell]
-----
-export KUBECONFIG="$(k3d get-kubeconfig --name='projectsyn')"
+k3d cluster create projectsyn
 ----
 . Check that you're connected to this cluster
 +
@@ -64,10 +58,10 @@ Install *Lieutenant Operator* with the following commands:
 [source,shell]
 ----
 # CRDs (global scope)
-kubectl apply -k github.com/projectsyn/lieutenant-operator/deploy/crds
+kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.2.0"
 
 # Operator deployment
-kubectl -n lieutenant apply -k github.com/projectsyn/lieutenant-operator/deploy
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.2.0"
 
 # Operator configuration
 kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator \
@@ -89,7 +83,7 @@ Install *Lieutenant API* with the following commands:
 [source,shell]
 ----
 # API deployment
-kubectl -n lieutenant apply -k github.com/projectsyn/lieutenant-api/deploy
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.2.0"
 
 # Ingress
 if [[ "$OSTYPE" == "darwin"* ]]; then export INGRESS_IP=127.0.0.1; else export INGRESS_IP=$(kubectl -n kube-system get svc traefik -o jsonpath="{.status.loadBalancer.ingress[0].ip}"); fi
@@ -270,7 +264,7 @@ Replace `MYSSHKEYPATH` with the path to your SSH key file, for example `~/.ssh/i
 ----
 export COMMODORE_SSH_PRIVATE_KEY=MYSSHKEYPATH
 kubectl -n lieutenant run commodore-shell \
-  --image=docker.io/projectsyn/commodore:latest \
+  --image=docker.io/projectsyn/commodore:v0.2.0 \
   --env=COMMODORE_API_URL="http://${LIEUTENANT_URL}/" \
   --env=COMMODORE_API_TOKEN=${LIEUTENANT_TOKEN} \
   --env=COMMODORE_GLOBAL_GIT_BASE=https://github.com/projectsyn \
@@ -433,5 +427,5 @@ This will also delete the associated `GitRepo` object and with that the tenant c
 +
 [source,shell]
 ----
-k3d delete -n projectsyn
+k3d cluster delete projectsyn
 ----
