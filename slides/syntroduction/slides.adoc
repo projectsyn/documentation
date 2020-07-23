@@ -1,0 +1,274 @@
+:author: SIG Syn
+:doctitle: Introduction
+:email: ahoy@syn.tools
+:producer: VSHN AG
+:creator: VSHN AG
+:revnumber: 1.0
+:revdate: {docdate}
+:copyright: CC-BY-SA 3.0
+:title-image: project-syn.png
+
+= Title
+
+image::{title-image}[width=750]
+
+== Project Syn! Syn?
+
+TIP: Syn is a Swedish word and translates to "vision"
+
+> Project Syn is a pre-integrated set of tools to provision, update, backup, observe and react/alert production applications on Kubernetes and in the cloud. It supports DevOps through full self-service and automation using containers, Kubernetes and GitOps.
+
+== Why?
+
+Managing a fleet of Kubernetes clusters is hard - let's automate that!
+
+[.notes]
+--
+* No such integrated thing existed
+* Don't reinvent the wheel wherever possible
+--
+
+== Features
+
+Multi-Cluster and Multi-Tenant Management:: Keeping track of a fleet of Kubernetes clusters, Multi-Tenant aware.
+
+[.notes]
+--
+* Inventory Service
+* Facts
+* Central information service for other Syn tools
+--
+
+== Features
+
+Full GitOps Operations:: GitOps automation with Argo CD and Git repo management.
+
+[.notes]
+--
+* Argo CD as key utility
+* Lieutenant Operator to manage repositories
+--
+
+== Features
+
+Tooling Bootstrapping:: Getting a cluster part of Syn.
+
+[.notes]
+--
+* Steward to bootstrap GitOps tooling into cluster
+* One-time install URL with bootstrap token
+* SSH deploy key automation
+--
+
+== Features
+
+Configuration Management:: Customized manifests per cluster and tenant.
+
+[.notes]
+--
+* Commodore with Kapitan
+* Hierarchical configuration values
+* Tight integration with Lieutenant e.g. for Git repo location
+--
+
+== Features
+
+Reusable Components:: Open Source Commodore Components.
+
+[.notes]
+--
+* Commodore Components as modules
+* Growing set of Open Source components
+--
+
+== Features
+
+Default Toolset:: Set of composed Commodore Components.
+
+[.notes]
+--
+Project Syn provided default toolset.
+--
+
+== Features
+
+Automatically Maintained Components:: Component maintenance automation thanks to Renovate.
+
+[.notes]
+--
+Renovate to leverage GitOps to automatically update Commodore Components
+--
+
+== Features
+
+Secret Management:: Deep integration into Vault with Kapitan.
+
+[.notes]
+--
+* Secrets stored in Vault
+* References in GitOps
+* Revealed during apply phase on cluster
+* Doesn't leave cluster
+* Deep integration in Lieutenant
+--
+
+== Features
+
+Service Provisioning:: Application service provisioning fully integrated with Crossplane.
+
+[.notes]
+--
+Crossplane to enable Kubernetes native service provisioning
+--
+
+== Architecture
+
+[ditaa, Project Syn, svg]
+....
+            /-------------------------\                                         Project Syn enabled Kubernetes cluster
+            +                         |                                         +-------------------------------------+
+       +--->+ Lieutenant API          +<-----+                                  |                                     |
+       |    + cBLU                    |      |  Cluster information             |   /--------------------\            |
+       |    \-+---------------------+-/      |  SSH keys                        |   |                    |            |
+       |      |                     |        +----------------------------------|---+ Steward            |            |
+       |      | Lieutenant Operator +----+                                      |   | cBLU               |            |
+       |      | cBLU                |    |                                      |   \---------+----------/            |
+       |      \---------------------/    |          +--------+                  |             |                       |
+       |                                 |          |        |                  |             |                       |
+       |                                 +--------->+ Vault  +<-----------------|-----+       | Deployment            |
+       |                                            | {s}    |                  |     |       | Reconciliation        |
+       |    Get cluster, tenant and                 +--------+                  |     |       |                       |
+       |    Git repo information                                                |     |       |                       |
+       |                                                                        |     |       v                       |
+       |    /------------------------\  Push compiled +-----------------+       |   +-+-------+----------+            |
+       |    |                        |  catalog       |                 |       |   |                    |            |
+       +----+ Commodore              +--------------->+ Cluster catalog +<------|---+ Argo CD            |            |
+            | cBLU                   |                | cGRE            |       |   |                    |            |
+            \-----+------+--------+--/                +-----------------+       |   +--------------------+            |
+                  ^      ^        ^                                             |                                     |
+                  |      |        |                                             |                                     |
+          +-------+      +-----+  +--------------------+                        |                                     |
+          |                    |                       |                        |                                     |
++---------------------------------------------+        |                        |                                     |
+|         |                    |              |        |                        |                                     |
+| +-------+-------+ +----------+----------+   |  +-----+------+                 |                                     |
+| |               | |                     |   |  |            |                 |                                     |
+| | Common        | | Tenant and cluster  |   |  | Commodore  |                 |                                     |
+| | configuration | | configuration       |   |  | Components |                 |                                     |
+| | cGRE          | | cGRE                |   |  |            |                 |                                     |
+| +---------------+ +---------------------+   |  +-----+------+                 |                                     |
+|                   Git repo created &        |        ^                        |                                     |
+|                   configured by Lieutenant  |        | Update                 |                                     |
+|                   Operator                  |        |                        +-------------------------------------+
++------------------------------------+--------+        |
+Configuration Git repositories       ^                 |                        Legend
+                                     | Update          |                        +------------------------+
+                                     |                 |                        | Project Syn Tool cBLU  |
+                           +---------+------------+    |                        +------------------------+
+                           |                      |    |
+                           | Renovate             +----+                        +------------------------+
+                           |                      |                             | Git repository cGRE    |
+                           +----------------------+                             +------------------------+
+....
+
+== Core Project Syn Tools
+
+Lieutenant API:: REST API to easily work with cluster and tenant objects.
+Lieutenant Operator:: Automation of cluster and tenant handling. Git repo management.
+Commodore:: Cluster catalog compilation engine using Kapitan.
+Steward:: In-cluster agent.
+
+== Third-party Tooling
+
+Important tools - integral part of Project Syn:
+
+* Argo CD
+* HashiCorp Vault
+* Kapitan
+* Renovate
+* Crossplane
+* GitLab
+
+== Demo
+
+The demo is based on the https://syn.tools/syn/getting-started.html[Getting Started] guide.
+
+== !
+
+asciinema::assets/casts/lieutenant.cast[poster="data:text/plain,Lieutenant Demo",speed="0.4"]
+
+[.notes]
+--
+* Tenants: An entity to assign clusters to.
+* GitRepos are created via their own objects
+* The API is an easy way to access the operators functionality
+--
+
+== Lieutenant - Tenant Repo
+
+image::gitlab_tenant_repo.png[width=750]
+
+[.notes]
+--
+* Some files are boostrapped in the repo already
+--
+
+== !
+
+asciinema::assets/casts/commodore.cast[poster="data:text/plain,Commodore Demo",speed="0.4"]
+
+[.notes]
+--
+This demo show Commodore running in a Pod
+--
+
+== Commodore - Catalog Repo
+
+image::gitlab_catalog_repo.png[width=750]
+
+[.notes]
+--
+* Content of Commodore compile command
+--
+
+== !
+
+asciinema::assets/casts/steward.cast[poster="data:text/plain,Steward Demo",speed="0.4"]
+
+[.notes]
+--
+* Enabling a cluster for Project Syn
+* A SSH deploy key has been added to the GitLab catalog repo by Lieutenant Operator
+--
+
+== Steward - Argo CD UI
+
+image::argocd_state.png[width=750]
+
+[.notes]
+--
+Shows the Argo CD web UI right after the initial boostrapping
+--
+
+== Do It Yourself
+
+Browse to
+
+https://syn.tools/syn/getting-started.html
+
+and try it out for yourself
+
+== Further resources
+
+* Project site: https://syn.tools
+* GitHub: https://github.com/projectsyn
+
+== Thanks!
+
+image::{title-image}[width=750]
+
+{author} – {email}
+
+[.small]
+Sponsored by: VSHN AG – Neugasse 10 – CH-8005 Zürich – +41 44 545 53 00 – https://vshn.ch – info@vshn.ch
+
