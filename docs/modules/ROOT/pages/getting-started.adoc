@@ -17,18 +17,12 @@ Before you start, please make sure to have these requirements available:
 [TIP]
 .Getting started on Linux with k3d
 --
-. Download `k3d` from https://github.com/rancher/k3d/releases[GitHub] (We're using version 1.x in this guide)
+. Download `k3d` (version >= 3.x) from https://github.com/rancher/k3d/releases[GitHub]
 . Create a new cluster
 +
 [source,shell]
 ----
-k3d create -n projectsyn
-----
-. Prepare Kubectl to access this cluster
-+
-[source,shell]
-----
-export KUBECONFIG="$(k3d get-kubeconfig --name='projectsyn')"
+k3d cluster create projectsyn
 ----
 . Check that you're connected to this cluster
 +
@@ -433,5 +427,5 @@ This will also delete the associated `GitRepo` object and with that the tenant c
 +
 [source,shell]
 ----
-k3d delete -n projectsyn
+k3d cluster delete projectsyn
 ----
