@@ -26,41 +26,71 @@ Announcement blog post: https://vshn.ch/en/blog/first-pre-release-of-project-syn
 
 == v0.2.0
 
+*Released*: 2020–07–23
+
+This is the second release of Project Syn and contains the following tool releases:
+
+* https://github.com/projectsyn/lieutenant-operator/releases/tag/v0.2.0[Lieutenant Operator - v0.2.0]
+* https://github.com/projectsyn/lieutenant-api/releases/tag/v0.2.0[Lieutenant API - v0.2.0]
+* https://github.com/projectsyn/commodore/tree/v0.2.0[Commodore - v0.2.0]
+* https://github.com/projectsyn/steward/releases/tag/v0.2.0[Steward - v0.2.0]
+* https://github.com/orgs/projectsyn/projects/1[GitHub Project]
+
 Focus for this release:
 
 * Enable people to work with Commodore Components (CC), "Dev Experience."
-** Helper tools to write and test Commodore Components
-** Guidelines and How-Tos to write proper Commodore Components
-** Commodore job runner to completely automated the catalog generation
+** Helper tools to write Commodore Components (https://cookiecutter.readthedocs.io[Cookiecutter] template)
 * Decommissioning of clusters and other components fully automated
 ** Git repository deletion mechanism - including safe-guards
 * Get the bootstrap process fully automated
 ** Automate creation of cluster config file in tenant configuration repository
 ** Initialize empty catalog Git repository
 * Bring the documentation of Project Syn up to speed
-** Rework existing Syn Design Documentes
+** Rework existing Syn Design Documents
 ** How-Tos for basic workflows
-** Initial documentation for all released tools
 
-== v0.3.0
+Announcement blog post: https://vshn.ch/blog/second-beta-release-of-project-syn-tools/[Second Beta Release of Project Syn Tools].
 
-NOTE: This is still subject to change
+== v1.0.0
 
-Focus for this release:
+The following topics will be part of the first one-point-zero release:
 
-* Enable the usage of managed services on top of a Project Syn enabled Kubernetes cluster
-** Support with Backup and Monitoring
-** Enhance Commodore to be used for regular application deployment
+* Commodore automated catalog generation
+** Implementation of https://syn.tools/syn/SDDs/0021-cluster-catalog-compilation.html[SDD 0021 - Cluster Catalog Compilation]
+* Enhancements for Commodore Component developers
+** Component testing framework and automation
+** Component documentation automation and integration into syn.tools
+* Automated secret generation in Vault on cluster creation
+* Automated Component maintenance with Renovate
+** Renovate enhancements to support components on GitHub
+** Pull / Merge Request dashboard showing open maintenance requests
+* Implementation of https://syn.tools/syn/SDDs/0023-managed-services-controller.html[SDD 0023 - Managed Services Controller]
+* Automated cluster provisioning object generator, supporting OpenShift Hive and Crossplane
 * GitOps for application deployment on a Project Syn enabled Kubernetes Cluster
 
-== v0.4.0
+New tools appearing in this release:
+
+* _Quartermaster_: Catalog compilation decision engine
+* _Carpenter_: Conditional object generator
+
+https://github.com/orgs/projectsyn/projects/2[GitHub Project]
+
+== v1.1.0
 
 NOTE: This is still subject to change
 
 Focus for this release:
 
+* Enhance Commodore to be used for regular application deployment
 * Full https://crossplane.io/[Crossplane] integration
+* Enable Commodore to create merge requests on catalog generation (policy-based, similar to Renovate)
+* Integration of Open Policy Agent into Lieutenant Operator
+* Git commit signing of Commodore catalogs and only allow properly signed catalogs on clusters
 
-== Future releases
+== v1.2.0
 
-A lot of ideas are being worked out.
+NOTE: This is still subject to change
+
+Focus for this release:
+
+* Cluster inventory enhancements (reports via Lieutenant inventory)
