@@ -1,0 +1,45 @@
+= Project Syn Tools Release Process
+
+All Project Syn Tools follow this release process:
+
+. Create a release branch
++
+[source,shell]
+----
+git checkout -b prepare-release
+----
+
+. Edit the `CHANGELOG.md` for the release
+
+. Where appropriate, edit `deploy/kustomization.yaml` to point to the to-be-released version
+.. On Lieutenant API also update the Steward tag in `deploy/deployment.yaml`: Environment variable `STEWARD_IMAGE`.
+
+. Commit and push the changes and create a Pull Request
++
+[source,shell]
+----
+git commit -a -m "Prepare release vX.Y.Z"
+git push -u
+----
+
+. After the Pull Request is reviewed and merged, create a new GitHub release
+
+.. Go to https://github.com/projectsyn/$tool/releases/new
+.. Fill in the form:
++
+----
+Tag version: "v0.2.0"
+Release title: "v0.2.0"
+Describe this release: copy most recent CHANGELOG.md entries (remove square brackets)
+----
+.. Publish the release
+
+After the release is done, switch back the deployment artifacts to point to `latest` again.
+
+== Additional work for full release
+
+If a "major" release is being done, the following additional work needs to be done:
+
+* Update the https://github.com/projectsyn/documentation/blob/master/docs/modules/ROOT/pages/roadmap.adoc[Roadmap]
+* Write a blogpost and spread it on social media
+* Close the associated GitHub project and internal Jira project (if applicable)
