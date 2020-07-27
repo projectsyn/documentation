@@ -1,0 +1,80 @@
+= Labels Guide
+
+This guide describes a set of labels which _may_ be used on Kubernetes objects.
+It's considered best practise to adhere to this guide but is in no way required or enforced.
+
+
+== Recommended Labels
+
+The following labels are https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels[recommended] to be set on objects of a Commodore component:
+
+.From the https://kubernetes.io/docs/concepts/overview/working-with-objects/common-labels[Kubernetes documentation]
+[caption=,cols="2,2,1"]
+|===
+| Key                                 | Description                 | Example
+
+| `app.kubernetes.io/name`            | The name of the application | `steward`
+| `app.kubernetes.io/instance`        | A unique name identifying the instance of an application | `steward-cluster`
+| `app.kubernetes.io/version`         | The current version of the application (for example a semantic version, revision hash, etc.) | `v0.2.1`
+| `app.kubernetes.io/component`       | The component within the architecture | `steward`
+| `app.kubernetes.io/part-of`         | The name of a higher level application this one is part of | `syn`
+| `app.kubernetes.io/managed-by`      | The tool being used to manage the operation of an application, usually `commodore` | `commodore`
+|===
+
+At the very minimum it's _recommended_ to set the `app.kubernetes.io/name` label on all resources of a component.
+
+.Example Deployment
+[source,yaml]
+----
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: steward
+  labels:
+    app.kubernetes.io/name: steward
+    app.kubernetes.io/instance: steward-cluster
+    app.kubernetes.io/version: v0.2.0
+    app.kubernetes.io/part-of: syn
+    app.kubernetes.io/managed-by: commodore
+spec:
+  selector:
+    app.kubernetes.io/name: steward
+    app.kubernetes.io/instance: steward-cluster
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: steward
+        app.kubernetes.io/instance: steward-cluster
+----
+
+[CAUTION]
+====
+Make sure not to set the `app.kubernetes.io/version` label on pod resources.
+This might lead to unnecessary redpeloyments on version changes.
+====
+
+
+== Label Selectors
+
+For some resources it's necessary to specify label selectors (for example `Deployment`, `Service`).
+In these cases it's especially important to not have colliding selectors since this might lead to unintended behavior.
+In general the following labels are recommended to be used in label selectors:
+
+[source]
+----
+app.kubernetes.io/name
+app.kubernetes.io/instance
+----
+
+
+== Restricted Labels
+
+The only label that's restricted and _must not_ be used is the following:
+
+[source]
+----
+argocd.argoproj.io/instance
+----
+
+This label is being https://argoproj.github.io/argo-cd/faq/#why-is-my-app-out-of-sync-even-after-syncing[used by Argo CD] to track the objects it's managing.
+Using this label for anything else might result in undefined behavior.

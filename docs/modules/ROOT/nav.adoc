@@ -1,15 +1,15 @@
 * xref:index.adoc[Home]
 
 .About
-* xref:features.adoc[Features]
-* xref:architecture.adoc[Architecture]
-* xref:roadmap.adoc[Roadmap]
-* xref:community.adoc[Community]
-* xref:contribution_guide.adoc[Contribution Guide]
-* xref:code_of_conduct.adoc[Code of Conduct]
+* xref:about/features.adoc[Features]
+* xref:about/architecture.adoc[Architecture]
+* xref:about/roadmap.adoc[Roadmap]
+* xref:about/community.adoc[Community]
+* xref:about/contribution_guide.adoc[Contribution Guide]
+* xref:about/code_of_conduct.adoc[Code of Conduct]
 
 .Tutorials
-* xref:getting-started.adoc[Getting Started with Project Syn]
+* xref:tutorials/getting-started.adoc[Getting Started with Project Syn]
 * Commodore
 +
 --
@@ -32,7 +32,7 @@ include::steward:ROOT:partial$nav-tutorials.adoc[]
 --
 
 .How-to guides
-* xref:release-process.adoc[Release Process]
+* xref:how-tos/release-process.adoc[Release Process]
 * Commodore
 +
 --
@@ -55,6 +55,7 @@ include::steward:ROOT:partial$nav-howtos.adoc[]
 --
 
 .Technical reference
+* xref:references/labels-guide.adoc[Labels Guide]
 * Commodore
 +
 --
