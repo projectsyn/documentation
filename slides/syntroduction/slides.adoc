@@ -218,16 +218,16 @@ Steward:: In-cluster agent.
 
 Important tools - integral part of Project Syn:
 
-* Argo CD
-* HashiCorp Vault
-* Kapitan
-* Renovate
-* Crossplane
-* GitLab
+* [Argo CD](https://argoproj.github.io/argo-cd/)
+* [HashiCorp Vault](https://www.vaultproject.io/)
+* [Kapitan](https://kapitan.dev/)
+* [Renovate](https://renovate.whitesourcesoftware.com/)
+* [Crossplane](https://crossplane.io/)
+* [GitLab](https://about.gitlab.com/)
 
 == Demo
 
-The demo is based on the https://syn.tools/syn/getting-started.html[Getting Started] guide.
+The demo is based on the https://syn.tools/syn/tutorials/getting-started.html[Getting Started] guide.
 
 == !
 
@@ -338,7 +338,7 @@ image::commodore-defaults-parameters.png[width=750]
 
 Browse to
 
-https://syn.tools/syn/getting-started.html
+https://syn.tools/syn/tutorials/getting-started.html
 
 and try it out for yourself
 
