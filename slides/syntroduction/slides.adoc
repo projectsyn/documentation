@@ -121,7 +121,7 @@ Service Provisioning:: Application service provisioning fully integrated with Cr
 Crossplane to enable Kubernetes native service provisioning
 --
 
-== Architecture
+== Architecture: Big Picture
 
 [ditaa, Project Syn, svg]
 ....
@@ -170,6 +170,42 @@ Configuration Git repositories       ^                 |                        
                            |                      |                             | Git repository cGRE    |
                            +----------------------+                             +------------------------+
 ....
+
+== Architecture: Operator
+
+[ditaa, Lieutenant Operator, svg]
+....
+                   +--------------+
+                   |Lieutenant API|
+                   +-------+------+
+                           |
+Lieutenant Operator        v
+/--------------------------+------------------------------\
+|                                                         |
+|                 +-----------------+              c1AB   |
+|                 |Tenant     cBLU  |                     |
+|                 +----+-------+----+                     |
+|                      ^       |                          |
+|                      |       |                          |
+|          +-----------+       +--------+                 |
+|          |Belongs to                  |                 |
+|          |                            |                 |
+|          |                            | Generates       |
+|  +-------+---------+                  | Tenant          |
+|  |Cluster   cBLU   |                  | configuration   |
+|  +-------+---------+                  | Git repository  |
+|          |                            |                 |
+|          | Generates                  |                 |
+|          | Cluster Catalog            |                 |
+|          | Git repository             |                 |
+|          v                            v                 |
+|  +-------+--------+          +--------+-------+         |
+|  |GitRepo   cBLU  |          |GitRepo    cBLU |         |
+|  +----------------+          +----------------+         |
+|                                                         |
+\---------------------------------------------------------/
+....
+
 
 == Core Project Syn Tools
 
@@ -249,6 +285,54 @@ image::argocd_state.png[width=750]
 --
 Shows the Argo CD web UI right after the initial boostrapping
 --
+
+== Deep Dive: Commodore Hierarchy
+
+* Component parameter
+* Global generic
+* Kubernetes distribution
+* Cloud provider
+* Cloud provider region
+* Customer- and cluster-specific configuration
+
+(currently hard-coded)
+
+== Deep Dive: Defaults Repo
+
+image::commodore-defaults-repo.png[width=750]
+
+(source: https://github.com/projectsyn/commodore-defaults)
+
+== Deep Dive: Source of Components
+
+image::commodore-defaults-components.png[width=750]
+
+== Deep Dive: Include Components
+
+image::commodore-defaults-classes.png[width=750]
+
+== Deep Dive: Parameters for Components
+
+image::commodore-defaults-parameters.png[width=750]
+
+== Deep Dive: Commodore Component
+
+----
+├── class
+│   ├── defaults.yml // <1>
+│   └── my-component.yml // <2>
+├── component
+│   ├── app.jsonnet
+│   └── main.jsonnet
+├── docs
+├── lib
+│   └── my-component.libjsonnet
+└── postprocess
+    └── filters.yml
+----
+
+<1> Default values
+<2> Kapitan configuration
 
 == Do It Yourself
 
