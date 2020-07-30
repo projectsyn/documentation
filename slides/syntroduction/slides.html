@@ -78,17 +78,17 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script><!--[if 
 <aside class="notes"><div class="ulist"><ul><li><p>Inventory Service</p></li><li><p>Facts</p></li><li><p>Central information service for other Syn tools</p></li></ul></div></aside></section>
 <section id="_features_2"><h2>Features</h2><div class="dlist"><dl><dt class="hdlist1">Full GitOps Operations</dt><dd><p>GitOps automation with Argo CD and Git repo management.</p></dd></dl></div>
 <aside class="notes"><div class="ulist"><ul><li><p>Argo CD as key utility</p></li><li><p>Lieutenant Operator to manage repositories</p></li></ul></div></aside></section>
-<section id="_features_3"><h2>Features</h2><div class="dlist"><dl><dt class="hdlist1">Tooling Bootstrapping</dt><dd><p>Getting a cluster part of Syn.</p></dd></dl></div>
+<section id="_features_3"><h2>Features</h2><div class="dlist"><dl><dt class="hdlist1">Tools Bootstrapping</dt><dd><p>Getting a cluster part of Syn.</p></dd></dl></div>
 <aside class="notes"><div class="ulist"><ul><li><p>Steward to bootstrap GitOps tooling into cluster</p></li><li><p>One-time install URL with bootstrap token</p></li><li><p>SSH deploy key automation</p></li></ul></div></aside></section>
 <section id="_features_4"><h2>Features</h2><div class="dlist"><dl><dt class="hdlist1">Configuration Management</dt><dd><p>Customized manifests per cluster and tenant.</p></dd></dl></div>
-<aside class="notes"><div class="ulist"><ul><li><p>Commodore with Kapitan</p></li><li><p>Hierarchical configuration values</p></li><li><p>Tight integration with Lieutenant e.g. for Git repo location</p></li></ul></div></aside></section>
+<aside class="notes"><div class="ulist"><ul><li><p>Commodore with Kapitan</p></li><li><p>Hierarchical configuration parameters</p></li><li><p>Tight integration with Lieutenant e.g. for Git repo location</p></li></ul></div></aside></section>
 <section id="_features_5"><h2>Features</h2><div class="dlist"><dl><dt class="hdlist1">Reusable Components</dt><dd><p>Open Source Commodore Components.</p></dd></dl></div>
 <aside class="notes"><div class="ulist"><ul><li><p>Commodore Components as modules</p></li><li><p>Growing set of Open Source components</p></li></ul></div></aside></section>
 <section id="_features_6"><h2>Features</h2><div class="dlist"><dl><dt class="hdlist1">Default Toolset</dt><dd><p>Set of composed Commodore Components.</p></dd></dl></div>
 <aside class="notes"><div class="paragraph"><p>Project Syn provided default toolset.</p></div></aside></section>
 <section id="_features_7"><h2>Features</h2><div class="dlist"><dl><dt class="hdlist1">Automatically Maintained Components</dt><dd><p>Component maintenance automation thanks to Renovate.</p></dd></dl></div>
 <aside class="notes"><div class="paragraph"><p>Renovate to leverage GitOps to automatically update Commodore Components</p></div></aside></section>
-<section id="_features_8"><h2>Features</h2><div class="dlist"><dl><dt class="hdlist1">Secret Management</dt><dd><p>Deep integration into Vault with Kapitan.</p></dd></dl></div>
+<section id="_features_8"><h2>Features</h2><div class="dlist"><dl><dt class="hdlist1">Secrets Management</dt><dd><p>Deep integration into Vault with Kapitan.</p></dd></dl></div>
 <aside class="notes"><div class="ulist"><ul><li><p>Secrets stored in Vault</p></li><li><p>References in GitOps</p></li><li><p>Revealed during apply phase on cluster</p></li><li><p>Doesn&#8217;t leave cluster</p></li><li><p>Deep integration in Lieutenant</p></li></ul></div></aside></section>
 <section id="_features_9"><h2>Features</h2><div class="dlist"><dl><dt class="hdlist1">Service Provisioning</dt><dd><p>Application service provisioning fully integrated with Crossplane.</p></dd></dl></div>
 <aside class="notes"><div class="paragraph"><p>Crossplane to enable Kubernetes native service provisioning</p></div></aside></section>
@@ -96,8 +96,8 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script><!--[if 
 <section id="_architecture_operator"><h2>Architecture: Operator</h2><div class="imageblock kroki" style=""><img src="assets/images/5672afcfa53c4f7ecefd571110f8a592e8a47700.svg" alt="Lieutenant Operator"></div></section>
 <section id="_core_project_syn_tools"><h2>Core Project Syn Tools</h2><div class="dlist"><dl><dt class="hdlist1">Lieutenant API</dt><dd><p>REST API to easily work with cluster and tenant objects.</p></dd><dt class="hdlist1">Lieutenant Operator</dt><dd><p>Automation of cluster and tenant handling. Git repo management.</p></dd><dt class="hdlist1">Commodore</dt><dd><p>Cluster catalog compilation engine using Kapitan.</p></dd><dt class="hdlist1">Steward</dt><dd><p>In-cluster agent.</p></dd></dl></div></section>
 <section id="_third_party_tooling"><h2>Third-party Tooling</h2><div class="paragraph"><p>Important tools - integral part of Project Syn:</p></div>
-<div class="ulist"><ul><li><p>Argo CD</p></li><li><p>HashiCorp Vault</p></li><li><p>Kapitan</p></li><li><p>Renovate</p></li><li><p>Crossplane</p></li><li><p>GitLab</p></li></ul></div></section>
-<section id="_demo"><h2>Demo</h2><div class="paragraph"><p>The demo is based on the <a href="https://syn.tools/syn/getting-started.html">Getting Started</a> guide.</p></div></section>
+<div class="ulist"><ul><li><p><a href="https://argoproj.github.io/argo-cd">Argo CD</a></p></li><li><p><a href="https://www.vaultproject.io">HashiCorp Vault</a></p></li><li><p><a href="https://kapitan.dev">Kapitan</a></p></li><li><p><a href="https://renovate.whitesourcesoftware.com">Renovate</a></p></li><li><p><a href="https://crossplane.io">Crossplane</a></p></li><li><p><a href="https://about.gitlab.com">GitLab</a></p></li></ul></div></section>
+<section id="_demo"><h2>Demo</h2><div class="paragraph"><p>The demo is based on the <a href="https://syn.tools/syn/tutorials/getting-started.html">Getting Started</a> guide.</p></div></section>
 <section><asciinema-player
   src="assets/casts/lieutenant.cast"
   cols="86"
@@ -121,7 +121,7 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script><!--[if 
   font-size="medium"
   theme="tango">
 </asciinema-player>
-<aside class="notes"><div class="paragraph"><p>This demo show Commodore running in a Pod</p></div></aside></section>
+<aside class="notes"><div class="paragraph"><p>This demo shows Commodore running in a Pod</p></div></aside></section>
 <section id="_commodore_catalog_repo"><h2>Commodore - Catalog Repo</h2><div class="imageblock" style=""><img src="assets/images/gitlab_catalog_repo.png" alt="gitlab catalog repo" width="750"></div>
 <aside class="notes"><div class="ulist"><ul><li><p>Content of Commodore compile command</p></li></ul></div></aside></section>
 <section><asciinema-player
@@ -134,10 +134,10 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script><!--[if 
   font-size="medium"
   theme="tango">
 </asciinema-player>
-<aside class="notes"><div class="ulist"><ul><li><p>Enabling a cluster for Project Syn</p></li><li><p>A SSH deploy key has been added to the GitLab catalog repo by Lieutenant Operator</p></li></ul></div></aside></section>
+<aside class="notes"><div class="ulist"><ul><li><p>Enabling a cluster for Project Syn</p></li><li><p>An SSH deploy key has been added to the GitLab catalog repo by Lieutenant Operator</p></li></ul></div></aside></section>
 <section id="_steward_argo_cd_ui"><h2>Steward - Argo CD UI</h2><div class="imageblock" style=""><img src="assets/images/argocd_state.png" alt="argocd state" width="750"></div>
 <aside class="notes"><div class="paragraph"><p>Shows the Argo CD web UI right after the initial boostrapping</p></div></aside></section>
-<section id="_deep_dive_commodore_hierarchy"><h2>Deep Dive: Commodore Hierarchy</h2><div class="ulist"><ul><li><p>Component parameter</p></li><li><p>Global generic</p></li><li><p>Kubernetes distribution</p></li><li><p>Cloud provider</p></li><li><p>Cloud provider region</p></li><li><p>Customer- and cluster-specific configuration</p></li></ul></div>
+<section id="_deep_dive_commodore_hierarchy"><h2>Deep Dive: Commodore Hierarchy</h2><div class="ulist"><ul><li><p>Component defaults</p></li><li><p>Global generic</p></li><li><p>Kubernetes distribution</p></li><li><p>Cloud provider</p></li><li><p>Cloud provider region</p></li><li><p>Customer- and cluster-specific configuration</p></li></ul></div>
 <div class="paragraph"><p>(currently hard-coded)</p></div></section>
 <section id="_deep_dive_defaults_repo"><h2>Deep Dive: Defaults Repo</h2><div class="imageblock" style=""><img src="assets/images/commodore-defaults-repo.png" alt="commodore defaults repo" width="750"></div>
 <div class="paragraph"><p>(source: <a href="https://github.com/projectsyn/commodore-defaults" class="bare">github.com/projectsyn/commodore-defaults</a>)</p></div></section>
@@ -148,16 +148,16 @@ document.getElementsByTagName( 'head' )[0].appendChild( link );</script><!--[if 
 │   ├── defaults.yml <i class="conum" data-value="1"></i><b>(1)</b>
 │   └── my-component.yml <i class="conum" data-value="2"></i><b>(2)</b>
 ├── component
-│   ├── app.jsonnet <i class="conum" data-value="3"></i><b>(3)</b>
-│   └── main.jsonnet
+│   ├── app.jsonnet
+│   └── main.jsonnet <i class="conum" data-value="3"></i><b>(3)</b>
 ├── docs
 ├── lib
 │   └── my-component.libjsonnet
 └── postprocess
     └── filters.yml</code></pre></div></div>
-<div class="colist arabic"><table><tr><td><i class="conum" data-value="1"></i><b>1</b></td><td>Default values</td></tr><tr><td><i class="conum" data-value="2"></i><b>2</b></td><td>Kapitan configuration</td></tr><tr><td><i class="conum" data-value="3"></i><b>3</b></td><td>Argo CD application definition</td></tr></table></div></section>
+<div class="colist arabic"><table><tr><td><i class="conum" data-value="1"></i><b>1</b></td><td>Default parameters</td></tr><tr><td><i class="conum" data-value="2"></i><b>2</b></td><td>Kapitan configuration</td></tr><tr><td><i class="conum" data-value="3"></i><b>3</b></td><td>Component implementation</td></tr></table></div></section>
 <section id="_do_it_yourself"><h2>Do It Yourself</h2><div class="paragraph"><p>Browse to</p></div>
-<div class="paragraph"><p><a href="https://syn.tools/syn/getting-started.html" class="bare">syn.tools/syn/getting-started.html</a></p></div>
+<div class="paragraph"><p><a href="https://syn.tools/syn/tutorials/getting-started.html" class="bare">syn.tools/syn/tutorials/getting-started.html</a></p></div>
 <div class="paragraph"><p>and try it out for yourself</p></div></section>
 <section id="_further_resources"><h2>Further resources</h2><div class="ulist"><ul><li><p>Project site: <a href="https://syn.tools" class="bare">syn.tools</a></p></li><li><p>GitHub: <a href="https://github.com/projectsyn" class="bare">github.com/projectsyn</a></p></li></ul></div></section>
 <section id="_thanks"><h2>Thanks!</h2><div class="imageblock" style=""><img src="assets/images/project-syn.png" alt="project syn" width="750"></div>
