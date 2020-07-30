@@ -51,7 +51,7 @@ Full GitOps Operations:: GitOps automation with Argo CD and Git repo management.
 
 == Features
 
-Tooling Bootstrapping:: Getting a cluster part of Syn.
+Tools Bootstrapping:: Getting a cluster part of Syn.
 
 [.notes]
 --
@@ -101,7 +101,7 @@ Renovate to leverage GitOps to automatically update Commodore Components
 
 == Features
 
-Secret Management:: Deep integration into Vault with Kapitan.
+Secrets Management:: Deep integration into Vault with Kapitan.
 
 [.notes]
 --
@@ -255,7 +255,7 @@ asciinema::assets/casts/commodore.cast[poster="data:text/plain,Commodore Demo",s
 
 [.notes]
 --
-This demo show Commodore running in a Pod
+This demo shows Commodore running in a Pod
 --
 
 == Commodore - Catalog Repo
@@ -274,7 +274,7 @@ asciinema::assets/casts/steward.cast[poster="data:text/plain,Steward Demo",speed
 [.notes]
 --
 * Enabling a cluster for Project Syn
-* A SSH deploy key has been added to the GitLab catalog repo by Lieutenant Operator
+* An SSH deploy key has been added to the GitLab catalog repo by Lieutenant Operator
 --
 
 == Steward - Argo CD UI
@@ -288,7 +288,7 @@ Shows the Argo CD web UI right after the initial boostrapping
 
 == Deep Dive: Commodore Hierarchy
 
-* Component parameter
+* Component defaults
 * Global generic
 * Kubernetes distribution
 * Cloud provider
