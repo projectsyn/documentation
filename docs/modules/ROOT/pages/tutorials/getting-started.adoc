@@ -2,7 +2,7 @@
 
 This guide helps to get started with the various Project Syn tools.
 
-TIP: Have a look at xref:features.adoc[features] and xref:architecture.adoc[architecture] first to get an idea about Project Syn, this helps to understand what we're doing here.
+TIP: Have a look at xref:about/features.adoc[features] and xref:about/architecture.adoc[architecture] first to get an idea about Project Syn, this helps to understand what we're doing here.
 
 == Requirements
 
@@ -43,7 +43,7 @@ kubectl cluster-info
 
 Lieutenant is the central inventory service all Project Syn managed clusters report to, it consists of the Lieutenant _Operator_ and the Lieutenant _API_.
 
-As you can see on the xref:architecture.adoc[architecture] diagram, Lieutenant is the central API which is being used by all other Project Syn tools. Therefore it needs to be installed first so that all other components are actually able to do their job.
+As you can see on the xref:about/architecture.adoc[architecture] diagram, Lieutenant is the central API which is being used by all other Project Syn tools. Therefore it needs to be installed first so that all other components are actually able to do their job.
 
 Create a namespace to host the Operator and the API
 [source,shell]
