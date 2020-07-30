@@ -67,7 +67,7 @@ Configuration Management:: Customized manifests per cluster and tenant.
 [.notes]
 --
 * Commodore with Kapitan
-* Hierarchical configuration values
+* Hierarchical configuration parameters
 * Tight integration with Lieutenant e.g. for Git repo location
 --
 
@@ -323,7 +323,7 @@ image::commodore-defaults-parameters.png[width=750]
 │   └── my-component.yml // <2>
 ├── component
 │   ├── app.jsonnet
-│   └── main.jsonnet
+│   └── main.jsonnet // <3>
 ├── docs
 ├── lib
 │   └── my-component.libjsonnet
@@ -331,8 +331,9 @@ image::commodore-defaults-parameters.png[width=750]
     └── filters.yml
 ----
 
-<1> Default values
+<1> Default parameters
 <2> Kapitan configuration
+<3> Component implementation
 
 == Do It Yourself
 
