@@ -218,12 +218,12 @@ Steward:: In-cluster agent.
 
 Important tools - integral part of Project Syn:
 
-* [Argo CD](https://argoproj.github.io/argo-cd/)
-* [HashiCorp Vault](https://www.vaultproject.io/)
-* [Kapitan](https://kapitan.dev/)
-* [Renovate](https://renovate.whitesourcesoftware.com/)
-* [Crossplane](https://crossplane.io/)
-* [GitLab](https://about.gitlab.com/)
+* https://argoproj.github.io/argo-cd[Argo CD]
+* https://www.vaultproject.io[HashiCorp Vault]
+* https://kapitan.dev[Kapitan]
+* https://renovate.whitesourcesoftware.com[Renovate]
+* https://crossplane.io[Crossplane]
+* https://about.gitlab.com[GitLab]
 
 == Demo
 
