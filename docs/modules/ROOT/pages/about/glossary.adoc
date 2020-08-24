@@ -1,0 +1,11 @@
+= Project Syn Glossary
+
+Commodore Component::
+
+A self-contained module containing code (mainly Jsonnet) to build Kubernetes manifests.
+
+Synthesize::
+
+Make a Kubernetes cluster Project Syn managed.
+This is done by registering a cluster in Lieutenant and installing Steward
+on the target cluster.
