@@ -140,7 +140,7 @@ kubectl -n lieutenant create secret generic vshn-gitlab \
   --from-literal=token=${GITLAB_TOKEN}
 ----
 
-NOTE: This secret currently needs to be named exactly like that. See https://syn.tools/lieutenant-api/deployment.html#_gitlab[syn.tools] and https://github.com/projectsyn/lieutenant-operator/issues/48[GitHub issue] for more information.
+NOTE: This secret currently needs to be named exactly like that. See https://syn.tools/lieutenant-api/how-tos/gitlab_configuration.html[API documentation] and https://github.com/projectsyn/lieutenant-operator/issues/48[GitHub issue #48] for more information.
 
 === Prepare Lieutenant API Authentication and Authorization
 
