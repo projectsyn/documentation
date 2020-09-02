@@ -8,8 +8,7 @@ SHELL := bash
 pages   := $(shell find . -type f -name '*.adoc')
 web_dir := ./_antora
 
-ANTORA_CMD   ?= $(DOCKER_CMD) $(DOCKER_ARGS) --volume "$${PWD}":/antora vshn/antora:2.3.0
-ANTORA_ARGSS ?= --cache-dir=.cache/antora
+ANTORA_PREVIEW_CMD ?= $(DOCKER_CMD) run --rm --publish 2020:2020 --volume "${PWD}":/antora vshn/antora-preview:2.3.3 --style=syn --antora=docs
 
 DOCKER_CMD  ?= docker
 DOCKER_ARGS ?= run --rm --user "$$(id -u)" --volume "$${PWD}:/src" --workdir /src
@@ -23,16 +22,6 @@ YAMLLINT_DOCKER ?= $(DOCKER_CMD) $(DOCKER_ARGS) $(YAMLLINT_IMAGE)
 VALE_CMD  ?= $(DOCKER_CMD) $(DOCKER_ARGS) --volume "$${PWD}"/docs/modules:/pages vshn/vale:2.1.1
 VALE_ARGS ?= --minAlertLevel=error --config=/pages/ROOT/pages/.vale.ini /pages
 
-UNAME := $(shell uname)
-ifeq ($(UNAME), Linux)
-	OS = linux-x64
-	OPEN = xdg-open
-endif
-ifeq ($(UNAME), Darwin)
-	OS = darwin-x64
-	OPEN = open
-endif
-
 .PHONY: all
 all: lint docs open
 
@@ -41,15 +30,9 @@ all: lint docs open
 clean:
 	rm -rf $(web_dir)
 
-.PHONY: open
-open: $(web_dir)/index.html
-	-$(OPEN) $<
-
 .PHONY: docs
-docs:    $(web_dir)/index.html
-
-$(web_dir)/index.html: playbook.yml $(pages)
-	$(ANTORA_CMD) $(ANTORA_ARGSS) $<
+docs:
+	$(ANTORA_PREVIEW_CMD)
 
 .PHONY: lint
 lint: lint_yaml lint_adoc
