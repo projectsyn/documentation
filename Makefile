@@ -5,9 +5,6 @@ SHELL := bash
 .DELETE_ON_ERROR:
 .SUFFIXES:
 
-pages   := $(shell find . -type f -name '*.adoc')
-web_dir := ./_antora
-
 ANTORA_PREVIEW_CMD ?= $(DOCKER_CMD) run --rm --publish 2020:2020 --volume "${PWD}":/antora vshn/antora-preview:2.3.3 --style=syn --antora=docs
 
 DOCKER_CMD  ?= docker
@@ -25,15 +22,6 @@ VALE_ARGS ?= --minAlertLevel=error --config=/pages/ROOT/pages/.vale.ini /pages
 .PHONY: all
 all: lint docs open
 
-# This will clean the Antora Artifacts, not the npm artifacts
-.PHONY: clean
-clean:
-	rm -rf $(web_dir)
-
-.PHONY: docs
-docs:
-	$(ANTORA_PREVIEW_CMD)
-
 .PHONY: lint
 lint: lint_yaml lint_adoc
 
@@ -41,6 +29,10 @@ lint: lint_yaml lint_adoc
 lint_yaml: $(YAML_FILES)
 	$(YAMLLINT_DOCKER) -f parsable -c $(YAMLLINT_CONFIG) $(YAMLLINT_ARGS) -- $?
 
-.PHONY: lint_adoc
-lint_adoc:
+.PHONY: docs-serve
+docs-serve:
+	$(ANTORA_PREVIEW_CMD)
+
+.PHONY: docs-vale
+docs-vale:
 	$(VALE_CMD) $(VALE_ARGS)
