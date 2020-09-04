@@ -1,0 +1,46 @@
+= Jsonnet Best Practices
+
+== Merging External Config Data
+* Deep merge helper
+* Merge from hiera
+* Expose defaults in hiera
+* Dict with key=name (too keep them mergeable)
+* Provide "generic" defaults and merge with context specifics (i.e. cloud/region see openshift4-nodes)
+* Allow Null (to enable empty)
+* For non-mergeable data (i.e. strings), provide defaults + extras
+
+== Loops and Filters
+* File per item, yaml-stream
+** Combine in one file where it makes sense (same instance of concept)
+** Multiple files otherwise
+
+== Component Library Functions
+* CRDs
+* Helpers
+** Public API
+** Use sparingly
+* Provide mergeable output (to be used with `+`)
+
+== Conditional Keys and Files
+* .gitkeep
+* Empty array vs. Null
+
+== Using kube-libsonnet
+* https://github.com/bitnami-labs/kube-libsonnet
+* Namespaced (remove helper)
+
+== CRD Group Versions
+* In library
+
+== Container Image & Helm Chart Versions
+* Expose in hiera
+* Make Renovate compatible
+* Helm Chart + Image
+** Use chart image version
+** Provide override if necessary (caution: not automatically updated)
+
+== Multiline Strings
+* Ignore renderd format (i.e. \n, emtpy lines)
+
+== Component Structure
+* One `main.jsonnet` and one `compile` instruction
