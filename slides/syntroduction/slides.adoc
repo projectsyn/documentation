@@ -225,68 +225,11 @@ Important tools - integral part of Project Syn:
 * https://crossplane.io[Crossplane]
 * https://about.gitlab.com[GitLab]
 
-== Demo
+== Deep Dive
 
-The demo is based on the https://syn.tools/syn/tutorials/getting-started.html[Getting Started] guide.
+Let's have a look at some details.
 
-== !
-
-asciinema::assets/casts/lieutenant.cast[poster="data:text/plain,Lieutenant Demo",speed="0.4"]
-
-[.notes]
---
-* Tenants: An entity to assign clusters to.
-* GitRepos are created via their own objects
-* The API is an easy way to access the operators functionality
---
-
-== Lieutenant - Tenant Repo
-
-image::gitlab_tenant_repo.png[width=750]
-
-[.notes]
---
-* Some files are boostrapped in the repo already
---
-
-== !
-
-asciinema::assets/casts/commodore.cast[poster="data:text/plain,Commodore Demo",speed="0.4"]
-
-[.notes]
---
-This demo shows Commodore running in a Pod
---
-
-== Commodore - Catalog Repo
-
-image::gitlab_catalog_repo.png[width=750]
-
-[.notes]
---
-* Content of Commodore compile command
---
-
-== !
-
-asciinema::assets/casts/steward.cast[poster="data:text/plain,Steward Demo",speed="0.4"]
-
-[.notes]
---
-* Enabling a cluster for Project Syn
-* An SSH deploy key has been added to the GitLab catalog repo by Lieutenant Operator
---
-
-== Steward - Argo CD UI
-
-image::argocd_state.png[width=750]
-
-[.notes]
---
-Shows the Argo CD web UI right after the initial boostrapping
---
-
-== Deep Dive: Commodore Hierarchy
+== Deep Dive: Commodore Hierarchy (Reclass)
 
 * Component defaults
 * Global generic
@@ -321,9 +264,9 @@ image::commodore-defaults-parameters.png[width=750]
 ├── class
 │   ├── defaults.yml // <1>
 │   └── my-component.yml // <2>
-├── component
+├── component // <3>
 │   ├── app.jsonnet
-│   └── main.jsonnet // <3>
+│   └── main.jsonnet
 ├── docs
 ├── lib
 │   └── my-component.libjsonnet
@@ -346,6 +289,8 @@ and try it out for yourself
 == Further resources
 
 * Project site: https://syn.tools
+* Getting Started Guide: https://syn.tools/syn/tutorials/getting-started.html
+* Commodore Component Tutorial: https://syn.tools/tuto/index.html
 * GitHub: https://github.com/projectsyn
 
 == Thanks!
