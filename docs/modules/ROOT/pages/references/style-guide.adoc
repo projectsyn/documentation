@@ -8,7 +8,7 @@ This work is licensed under a http://creativecommons.org/licenses/by-nc-sa/4.0/[
 == General Style
 
 * Encode text files with UTF-8.
-* Use Unixe line endings (lf).
+* Use Unix line endings (lf).
 * Always end a file with a single empty line.
   This doesn't apply to empty files (for example `.gitkeep`).
 * Use two spaces for indentation except for `Makefile` where a single tab is to be used.
@@ -16,8 +16,8 @@ This work is licensed under a http://creativecommons.org/licenses/by-nc-sa/4.0/[
 
 [NOTE]
 ====
-Repositories of Project Syn provide an https://editorconfig.org/c[EditorConfig].
-When using a supported editor, space types and number of spaces will automatically be done correctly.
+Repositories of Project Syn provide an https://editorconfig.org/[EditorConfig].
+When using a https://editorconfig.org/#download[supported editor], space types and number of spaces will automatically be done correctly.
 ====
 
 == Asciidoc Style
@@ -35,8 +35,7 @@ Use `jsonnet fmt` to format files. This will fix basic style errors.
 
 === Variable Declaration
 
-* Variables should be named in camelCase style, and should have
-self-evident names.
+* Variables should be named in `camelCase` style, and should have self-evident names.
 +
 [source,jsonnet]
 ----
@@ -63,11 +62,11 @@ local clientPort = 2000;
 === Line Length
 
 * Limit lines to 120 characters.
-* The only exceptions are import statements and URLs (although even for those, try to keep them under 100 chars).
+* The only exceptions are import statements and URLs (although even for those, try to keep them under 120 chars).
 
 === Spacing and Indentation
 
-* Put one space before and after operators
+* Put one space before and after operators.
 +
 [source,jsonnet]
 ----
@@ -242,11 +241,10 @@ animalTemplate.newAnimal("Finnegan", 3)
 === File Structure
 
 * Jsonnet files which can be materialized with no further inputs should end with the `.jsonnet` suffix.
-* Jsonnet files which requires parameters to be materialized or which
-are libraries should end with the `.libjsonnet` suffix.
+* Jsonnet files which requires parameters to be materialized or which are libraries should end with the `.libjsonnet` suffix.
 * Files in `lib` always are libraries and must be named accordingly.
   Those files are considered part of a public API.
-  Treat classes and functions accordinglly and lookout for braking changes.
+  Treat classes and functions accordingly and lookout for breaking changes.
 
 ==== Documentation Style
 
@@ -264,5 +262,5 @@ are libraries should end with the `.libjsonnet` suffix.
 local Animal(name, age) = { … }
 ----
 
-* Always put documentation at the top of each jsonnet file or library to indicate its purpose.
+* Always put documentation at the top of each Jsonnet file or library to indicate its purpose.
 * Exceptions can be made for `app.jsonnet` and `main.jsonnet`.
