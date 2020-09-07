@@ -29,7 +29,7 @@ When using a https://editorconfig.org/#download[supported editor], space types a
 [NOTE]
 ====
 The Microsoft Writing Style is being enforced with https://github.com/errata-ai/vale[Vale].
-The implementation used can be found at https://github.com/errata-ai/Microsoft[ errata-ai/Microsoft]a.
+The implementation used can be found at https://github.com/errata-ai/Microsoft[errata-ai/Microsoft].
 ====
 
 == Jsonnet Style
