@@ -4,3 +4,265 @@ The Jsonnet related parts of this guide build on top of https://github.com/datab
 
 http://creativecommons.org/licenses/by-nc-sa/4.0/[image:https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png[Creative Commons License]] +
 This work is licensed under a http://creativecommons.org/licenses/by-nc-sa/4.0/[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License].
+
+== General Style
+
+* Encode text files with UTF-8.
+* Use Unixe line endings (lf).
+* Always end a file with a single empty line.
+  This doesn't apply to empty files (for example `.gitkeep`).
+* Use two spaces for indentation except for `Makefile` where a single tab is to be used.
+* Trim whitespaces from the end of a line.
+
+[NOTE]
+====
+Repositories of Project Syn provide an https://editorconfig.org/c[EditorConfig].
+When using a supported editor, space types and number of spaces will automatically be done correctly.
+====
+
+== Asciidoc Style
+
+* Don't split senctences across lines but keep them on one single line.
+* Start a new line for each and every sentence.
+
+== Jsonnet Style
+
+== Syntactic Style
+
+=== Auto Formatting
+
+Use `jsonnet fmt` to format files. This will fix basic style errors.
+
+=== Variable Declaration
+
+* Variables should be named in camelCase style, and should have
+self-evident names.
++
+[source,jsonnet]
+----
+local serverPort = 1000;
+local clientPort = 2000;
+----
+
+* Prefer `local` to `::` syntax for private/local variables.
+  Unlike `::`, variables defined with `local` can't be overridden by children, nor accessed by other files.
++
+[source,jsonnet]
+----
+{
+  // CORRECT
+  local myVariable = 3,
+  result: myVariable + 1,
+
+  // INCORRECT
+  myVariable:: 3,
+  result: $.myVariable + 1,
+}
+----
+
+=== Line Length
+
+* Limit lines to 120 characters.
+* The only exceptions are import statements and URLs (although even for those, try to keep them under 100 chars).
+
+=== Spacing and Indentation
+
+* Put one space before and after operators
++
+[source,jsonnet]
+----
+local c = a + b;
+----
+
+* Put one space after commas.
++
+[source,jsonnet]
+----
+["a", "b", "c"] // CORRECT
+
+["a","b","c"] // INCORRECT
+----
+
+* Put one space after colons.
++
+[source,jsonnet]
+----
+{
+  // CORRECT
+  foo:: "bar",
+  baz: "taz",
+  { hello: "world" },
+
+  // INCORRECT
+  foo :: "bar",
+  baz:"taz",
+  { hello : "world" },
+}
+----
+
+* Put one space or line brake after opening curly brackets and before closing curly brackets.
++
+[source,jsonnet]
+----
+// CORRECT
+local foo = { hello: "world" };
+local bar = {
+  hello: "world",
+};
+
+// INCORRECT
+local baz = {hello: "world"};
+----
+
+* Use 2-space indentation in general.
+
+* Only method or class parameter declarations use 4-space indentation, to visually differentiate parameters from method body.
++
+[source,jsonnet]
+----
+// CORRECT
+local multiply(
+    number1,
+    number2) = {
+  result: number1 * number 2
+}
+----
+
+* Omit vertical alignment.
+  They draw attention to the wrong parts of the code and result in hard to review pull requests due to the white space changes.
++
+[source,jsonnet]
+----
+// Don't align vertically
+local plus     = "+";
+local minus    = "-";
+local multiply = "*";
+
+// Do the following
+local plus = "+";
+local minus = "-";
+local multiply = "*";
+----
+
+=== Blank Lines (Vertical Whitespace)
+
+* A single blank line appears:
+** Within method bodies, as needed to create logical groupings of statements.
+** Optionally before the first member or after the last member of a class or method.
+* Use one or two blank line(s) to separate class definitions.
+* Excessive number of blank lines is discouraged.
+
+=== Defining and Using Abstractions
+
+==== Defining Classes
+
+* Rather than defining a concrete JSON file, it's often useful to define a template which takes some set of parameters before being materialized into JSON.
+  We can liken named functions which take a set of parameters and result in a fixed scheme to ``classes'' in object-oriented languages, and so we will use that terminology.
+* When defining a class, use the following syntax:
++
+[source,jsonnet]
+----
+local newAnimal(name, age) = {
+  name: name,
+  age: age,
+};
+{
+  newAnimal:: newAnimal,
+}
+----
+
+* Returning a dictionary with a `newXxx` method (rather than just returning the constructor directly) allows exposing constants, static methods, or related class constructors from the same file.
+  In other words, it allows extending this class in the future without refactoring all downstream consumers.
+* When defining a class with both required and optional parameters, put required parameters first.
+  Optional parameters should have a default, or `null` if a sentinel value is needed.
++
+[source,jsonnet]
+----
+local newAnimal(name, age, isCat = true) = { ... }
+----
+
+* Wrap parameter declarations by putting one per line with 2 extra spaces of indentation, to differentiate from the method body.
+  Doing this is always acceptable, even if the definition would not wrap.
++
+[source,jsonnet]
+----
+local newAnimal(
+    name,
+    age,
+    isCat = true) = {
+  name: name,
+  …
+}
+----
+
+== Defining Methods
+
+* Method definitions follow the same syntactic style as class definitions.
+* Methods defined within a class should always be defined with `::`, as they fail to render with `:`.
+* Methods which return single values (rather than a dictionary) should use parentheses `()` to enclose their bodies if they're multi-line, identically to how braces would be used.
++
+[source,jsonnet]
+----
+{
+  multiply:: function(number1, number2): (
+    number1 * number 2
+  ),
+}
+----
+
+=== Using Classes
+
+* Import all dependencies at the top of the file and given them names related to the imported file itself.
+  This makes it easy to see what other files you depend on as the file grows.
++
+[source,jsonnet]
+----
+// CORRECT
+local animalTemplate = import "animal.jsonnet.TEMPLATE";
+animalTemplate.newAnimal("Finnegan", 3)
+
+// AVOID
+(import "animal.jsonnet.TEMPLATE").newAnimal("Finnegan, 3)
+----
+
+* Prefer using named parameters, one per line, when constructing classes or invoking methods, especially when they wrap beyond one line:
++
+[source,jsonnet]
+----
+// PREFERRED
+animalTemplate.newAnimal(
+  name = "Finnegan",
+  age = 3,
+)
+
+// ACCEPTABLE, since it doesn't wrap
+animalTemplate.newAnimal("Finnegan", 3)
+----
+
+=== File Structure
+
+* Jsonnet files which can be materialized with no further inputs should end with the `.jsonnet` suffix.
+* Jsonnet files which requires parameters to be materialized or which
+are libraries should end with the `.libjsonnet` suffix.
+* Files in `lib` always are libraries and must be named accordingly.
+  Those files are considered part of a public API.
+  Treat classes and functions accordinglly and lookout for braking changes.
+
+==== Documentation Style
+
+* Use `//` for inline comments.
+* Use https://www.doxygen.nl/manual/docblocks.html[Docblocks] to document classes and functions.
++
+[source,jsonnet]
+----
+/**
+ * Multicellular, eukaryotic organism of the kingdom Animalia
+ *
+ * @param name Name by which this animal may be called.
+ * @param age Number of years (rounded to nearest int) animal has been alive.
+ */
+local Animal(name, age) = { … }
+----
+
+* Always put documentation at the top of each jsonnet file or library to indicate its purpose.
+* Exceptions can be made for `app.jsonnet` and `main.jsonnet`.
