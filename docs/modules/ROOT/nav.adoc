@@ -56,6 +56,7 @@ include::steward:ROOT:partial$nav-howtos.adoc[]
 --
 
 .Technical reference
+* xref:references/style-guide.adoc[Style Guide]
 * xref:references/labels-guide.adoc[Labels Guide]
 * Commodore
 +

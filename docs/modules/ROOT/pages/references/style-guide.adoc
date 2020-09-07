@@ -1,0 +1,6 @@
+= Style Guide
+
+The Jsonnet related parts of this guide build on top of https://github.com/databricks/jsonnet-style-guide/blob/30d4d54444c1001ba9561afd7c8de405630a2ca7/README.md[Jsonnet Guide] by https://databricks.com/[Databricks].
+
+http://creativecommons.org/licenses/by-nc-sa/4.0/[image:https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png[Creative Commons License]] +
+This work is licensed under a http://creativecommons.org/licenses/by-nc-sa/4.0/[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License].
