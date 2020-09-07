@@ -24,6 +24,13 @@ When using a https://editorconfig.org/#download[supported editor], space types a
 
 * Don't split senctences across lines but keep them on one single line.
 * Start a new line for each and every sentence.
+* Follow the https://docs.microsoft.com/en-us/style-guide/welcome/[Microsoft Writing Style Guide].
+
+[NOTE]
+====
+The Microsoft Writing Style is being enforced with https://github.com/errata-ai/vale[Vale].
+The implementation used can be found at https://github.com/errata-ai/Microsoft[ errata-ai/Microsoft]a.
+====
 
 == Jsonnet Style
 
