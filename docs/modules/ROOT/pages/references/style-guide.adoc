@@ -178,16 +178,17 @@ local f = { hello: "world", };
 
 * Use 2-space indentation in general.
 
-* Only method or class parameter declarations use 4-space indentation, to visually differentiate parameters from method body.
+* Only function parameter declarations use 4-space indentation, to visually differentiate parameters from function body.
 +
 [source,jsonnet]
 ----
 // CORRECT
 local multiply(
     number1,
-    number2) = {
-  result: number1 * number 2
-}
+    number2) =
+  {
+    result: number1 * number 2
+  }
 ----
 
 * Omit vertical alignment.
@@ -209,34 +210,44 @@ local multiply = "*";
 === Blank lines (vertical whitespace)
 
 * A single blank line appears:
-** Within method bodies, as needed to create logical groupings of statements.
-** Optionally before the first member or after the last member of a class or method.
-* Use one or two blank line(s) to separate class definitions.
+** Within functions bodies, as needed to create logical groupings of statements.
+** Optionally before the first member or after the last member of a template or function.
+* Use one or two blank line(s) to separate logical blocks in files.
+  Those blocks can be single function definitions or groups of local varaible that semantically belong together.
 * Excessive number of blank lines is discouraged.
 
 === Defining and using abstractions
 
-==== Defining classes
+==== Defining templates
 
 * Rather than defining a concrete JSON object, it's often useful to define a template which takes some set of parameters before being materialized into JSON.
-  We can liken named functions which take a set of parameters and result in a fixed scheme to ``classes'' in object-oriented languages, and so we will use that terminology.
-* When defining a class, use the following syntax:
++
+[INFO]
+====
+Looking at this from the perspective of object oriented programming, this looks like a class.
+However it differs from classes, as the resulting object do not have methods.
+From the Jsonnet perspective, this is just a regular function.
+When refering to this type of functions in specific, use the term _template function_.
+====
+* When defining a template function, use the following syntax:
 +
 [source,jsonnet]
 ----
-local newAnimal(name, age) = {
-  name: name,
-  age: age,
-};
+local newAnimal(name, age) =
+  {
+    name: name,
+    age: age,
+  };
+
 {
-  newAnimal:: newAnimal,
+  newAnimal: newAnimal,
 }
 ----
 
-* When writing libraries, always return a single object encapsulating any methods instead of returning a single method.
-  This allows returning multiple values (constants, static methods or class constructors) from a single library.
+* When writing libraries, always return a single object encapsulating any functions instead of returning a single function.
+  This allows returning multiple values (constants and functions) from a single library.
   Additionally this ensures libraries remain extensible without having to refactor all consumers.
-* When defining a class with both required and optional parameters, put required parameters first.
+* When defining a template functio with both required and optional parameters, put required parameters first.
   Optional parameters should have a default, or `null` if a sentinel value is needed.
 +
 [source,jsonnet]
@@ -244,7 +255,7 @@ local newAnimal(name, age) = {
 local newAnimal(name, age, isCat = true) = { ... }
 ----
 
-* Wrap parameter declarations by putting one parameter per line with 2 extra spaces of indentation, to differentiate from the method body.
+* Wrap parameter declarations by putting one parameter per line with 2 extra spaces of indentation, to differentiate from the function body.
   Doing this is always acceptable, even if the definition would not wrap.
 +
 [source,jsonnet]
@@ -258,22 +269,24 @@ local newAnimal(
 }
 ----
 
-== Defining methods
+== Defining functions
 
-* Method definitions follow the same syntactic style as class definitions.
-* Methods defined within a class should always be defined with `::`, as they fail to render with `:`.
-* Methods which return single values (rather than an object) should use parentheses `()` to enclose their bodies if they're multi-line, identically to how braces would be used.
+* Do not define functions withing objects.
+  Such objects will fail to render.
+  The exception to this rules is the last object within a library file.
+* Functions which return single values (rather than an object) should use parentheses `()` to enclose their bodies if they're multi-line, identically to how braces would be used.
 +
 [source,jsonnet]
 ----
 {
-  multiply:: function(number1, number2): (
-    number1 * number 2
-  ),
+  multiply(number1, number2):
+    (
+      number1 * number 2
+    ),
 }
 ----
 
-=== Using classes
+=== Using libraries
 
 * Import all dependencies at the top of the file and given them names related to the imported file itself.
   This makes it easy to see what other files you depend on as the file grows.
@@ -281,25 +294,33 @@ local newAnimal(
 [source,jsonnet]
 ----
 // CORRECT
-local animalTemplate = import "animal.jsonnet.TEMPLATE";
-animalTemplate.newAnimal("Finnegan", 3)
+local animal = import "animal.libsonnet";
+animal.newAnimal("Finnegan", 3);
 
 // AVOID
-(import "animal.jsonnet.TEMPLATE").newAnimal("Finnegan, 3)
+(import "animal.libsonnet").newAnimal("Finnegan, 3);
 ----
 
-* Prefer using named parameters, one per line, when constructing classes or invoking methods, especially when they wrap beyond one line:
+* Keep function parameters on one single or put one per line but do not mix the two styles.
 +
 [source,jsonnet]
 ----
-// PREFERRED
-animalTemplate.newAnimal(
+// CORRECT
+animal.newAnimal("Finnegan", 3);
+animal.newAnimal(
   name = "Finnegan",
   age = 3,
-)
+);
+animal.newAnimal(
+  "Finnegan",
+  3,
+);
 
-// ACCEPTABLE, since it doesn't wrap
-animalTemplate.newAnimal("Finnegan", 3)
+// INCORRECT
+animal.newAnimal("Finnegan",
+  3,
+  42,
+);
 ----
 
 === File structure
@@ -308,12 +329,12 @@ animalTemplate.newAnimal("Finnegan", 3)
 * Jsonnet files which require parameters to be materialized or which are libraries should end with the `.libjsonnet` suffix.
 * Files in `lib` always are libraries and must be named accordingly.
   Those files are considered part of a public API.
-  Treat classes and functions in libraries accordingly and look out for breaking changes.
+  Treat functions in libraries accordingly and look out for breaking changes.
 
 ==== Documentation style
 
 * Use `//` for inline comments.
-* Use https://www.doxygen.nl/manual/docblocks.html[Docblocks] to document classes and functions.
+* Use https://www.doxygen.nl/manual/docblocks.html[Docblocks] to document functions.
 +
 [source,jsonnet]
 ----
