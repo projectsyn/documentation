@@ -153,6 +153,29 @@ local bar =
 local baz = ["a", "b"];
 ----
 
+* Omit tailing `,` on single line arrays and objects.
+  Keep them when splitting over multiple lines.
++
+[source,jsonnet]
+----
+// CORRECT
+local a = [ "a", "b" ] ;
+local b = { hello: "world" };
+local c =
+  [
+    "a",
+    "b",
+  ];
+local d =
+  {
+    hello: "world",
+  };
+
+// INCORRECT
+local e = [ "a", "b", ];
+local f = { hello: "world", };
+----
+
 * Use 2-space indentation in general.
 
 * Only method or class parameter declarations use 4-space indentation, to visually differentiate parameters from method body.
