@@ -327,7 +327,7 @@ animal.newAnimal("Finnegan",
 
 * Jsonnet files which can be materialized with no further inputs should end with the `.jsonnet` suffix.
 * Jsonnet files which require parameters to be materialized or which are libraries should end with the `.libjsonnet` suffix.
-* Files in `lib` always are libraries and must be named accordingly.
+* Files in `lib` always are libraries which should never be materialized and must be named accordingly.
   Those files are considered part of a public API.
   Treat functions in libraries accordingly and look out for breaking changes.
 
