@@ -343,6 +343,7 @@ animal.newAnimal("Finnegan",
  *
  * @param name Name by which this animal may be called.
  * @param age Number of years (rounded to nearest int) animal has been alive.
+ * @returns an object describing the animal.
  */
 local Animal(name, age) = { … }
 ----
