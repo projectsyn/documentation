@@ -38,22 +38,14 @@ The implementation used can be found at https://github.com/errata-ai/Microsoft[e
 
 === Auto formatting
 
-Use `jsonnet fmt` to format files. This will fix basic style errors.
+Use `jsonnetfmt` with the `--pad-arrays` option to format files.
+This will fix basic style errors.
 
 [IMPORTANT]
 ====
-Jsonnet auto formatter is available in different flavours (`jsonnet fmt`, `jsonnetfmt`).
-They do have different option defaults.
-Use eighter with the following options:
-
-* `--indent 2`
-* `--max-blank-lines 2`
-* `--string-style d`
-* `--comment-style s`
-* `--pretty-field-names`
-* `--pad-arrays`
-* `--pad-objects`
-* `--sort-imports`
+Jsonnet is available in two implementations (https://github.com/google/jsonnet[jsonnet] and https://github.com/google/go-jsonnet[go-jsonnet]).
+Within the automated builds, we use the https://hub.docker.com/r/bitnami/jsonnet[Jsonnet docker image by Bitnami].
+Should there be any discrepancies between versions and flavours, the one packaged by Bitnami is the reference.
 ====
 
 === Variable declaration
