@@ -8,8 +8,8 @@ This work is licensed under a http://creativecommons.org/licenses/by-nc-sa/4.0/[
 == General Style
 
 * Encode text files with UTF-8.
-* Use Unix line endings (lf).
-* Always end a file with a single empty line.
+* End lines with a single `\n` (lf).
+* Always end a file with a single `\n`.
   This doesn't apply to empty files (for example `.gitkeep`).
 * Use two spaces for indentation except for `Makefile` where a single tab is to be used.
 * Trim whitespace from the end of a line.
