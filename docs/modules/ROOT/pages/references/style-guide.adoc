@@ -49,7 +49,7 @@ Use eighter with the following options:
 * `--indent 2`
 * `--max-blank-lines 2`
 * `--string-style d`
-* `--comant-style s`
+* `--comment-style s`
 * `--pretty-field-names`
 * `--pad-arrays`
 * `--pad-objects`
