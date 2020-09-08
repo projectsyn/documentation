@@ -100,7 +100,7 @@ local c = a + b;
 +
 [source,jsonnet]
 ----
-["a", "b", "c"] // CORRECT
+[ "a", "b", "c" ] // CORRECT
 
 ["a","b","c"] // INCORRECT
 ----
@@ -122,18 +122,35 @@ local c = a + b;
 }
 ----
 
-* Put one space or line break after opening curly brackets and before closing curly brackets.
+* Put one space or line break after `{` and before `}`.
 +
 [source,jsonnet]
 ----
 // CORRECT
 local foo = { hello: "world" };
-local bar = {
-  hello: "world",
-};
+local bar =
+  {
+    hello: "world",
+  };
 
 // INCORRECT
 local baz = {hello: "world"};
+----
+
+* Put one space or line break after `[` and before `]`.
++
+[source,jsonnet]
+----
+// CORRECT
+local foo = [ "a", "b" ] ;
+local bar =
+  [
+    "a",
+    "b",
+  ];
+
+// INCORRECT
+local baz = ["a", "b"];
 ----
 
 * Use 2-space indentation in general.
