@@ -12,7 +12,7 @@ This work is licensed under a http://creativecommons.org/licenses/by-nc-sa/4.0/[
 * Always end a file with a single empty line.
   This doesn't apply to empty files (for example `.gitkeep`).
 * Use two spaces for indentation except for `Makefile` where a single tab is to be used.
-* Trim whitespaces from the end of a line.
+* Trim whitespace from the end of a line.
 
 [NOTE]
 ====
@@ -22,7 +22,7 @@ When using a https://editorconfig.org/#download[supported editor], space types a
 
 == Asciidoc Style
 
-* Don't split senctences across lines but keep them on one single line.
+* Don't split sentences across lines but keep them on one single line.
 * Start a new line for each and every sentence.
 * Follow the https://docs.microsoft.com/en-us/style-guide/welcome/[Microsoft Writing Style Guide].
 
@@ -42,7 +42,7 @@ Use `jsonnet fmt` to format files. This will fix basic style errors.
 
 === Variable Declaration
 
-* Variables should be named in `camelCase` style, and should have self-evident names.
+* Variables should be named in `camelCase` style, and should have self-explanatory names.
 +
 [source,jsonnet]
 ----
@@ -106,7 +106,7 @@ local c = a + b;
 }
 ----
 
-* Put one space or line brake after opening curly brackets and before closing curly brackets.
+* Put one space or line break after opening curly brackets and before closing curly brackets.
 +
 [source,jsonnet]
 ----
@@ -162,7 +162,7 @@ local multiply = "*";
 
 ==== Defining Classes
 
-* Rather than defining a concrete JSON file, it's often useful to define a template which takes some set of parameters before being materialized into JSON.
+* Rather than defining a concrete JSON object, it's often useful to define a template which takes some set of parameters before being materialized into JSON.
   We can liken named functions which take a set of parameters and result in a fixed scheme to ``classes'' in object-oriented languages, and so we will use that terminology.
 * When defining a class, use the following syntax:
 +
@@ -177,8 +177,9 @@ local newAnimal(name, age) = {
 }
 ----
 
-* Returning a dictionary with a `newXxx` method (rather than just returning the constructor directly) allows exposing constants, static methods, or related class constructors from the same file.
-  In other words, it allows extending this class in the future without refactoring all downstream consumers.
+* When writing libraries, always return a single object encapsulating any methods instead of returning a single method.
+  This allows returning multiple values (constants, static methods or class constructors) from a single library.
+  Additionally this ensures libraries remain extensible without having to refactor all consumers.
 * When defining a class with both required and optional parameters, put required parameters first.
   Optional parameters should have a default, or `null` if a sentinel value is needed.
 +
@@ -187,7 +188,7 @@ local newAnimal(name, age) = {
 local newAnimal(name, age, isCat = true) = { ... }
 ----
 
-* Wrap parameter declarations by putting one per line with 2 extra spaces of indentation, to differentiate from the method body.
+* Wrap parameter declarations by putting one parameter per line with 2 extra spaces of indentation, to differentiate from the method body.
   Doing this is always acceptable, even if the definition would not wrap.
 +
 [source,jsonnet]
@@ -205,7 +206,7 @@ local newAnimal(
 
 * Method definitions follow the same syntactic style as class definitions.
 * Methods defined within a class should always be defined with `::`, as they fail to render with `:`.
-* Methods which return single values (rather than a dictionary) should use parentheses `()` to enclose their bodies if they're multi-line, identically to how braces would be used.
+* Methods which return single values (rather than an object) should use parentheses `()` to enclose their bodies if they're multi-line, identically to how braces would be used.
 +
 [source,jsonnet]
 ----
@@ -248,10 +249,10 @@ animalTemplate.newAnimal("Finnegan", 3)
 === File Structure
 
 * Jsonnet files which can be materialized with no further inputs should end with the `.jsonnet` suffix.
-* Jsonnet files which requires parameters to be materialized or which are libraries should end with the `.libjsonnet` suffix.
+* Jsonnet files which require parameters to be materialized or which are libraries should end with the `.libjsonnet` suffix.
 * Files in `lib` always are libraries and must be named accordingly.
   Those files are considered part of a public API.
-  Treat classes and functions accordingly and lookout for breaking changes.
+  Treat classes and functions in libraries accordingly and look out for breaking changes.
 
 ==== Documentation Style
 
