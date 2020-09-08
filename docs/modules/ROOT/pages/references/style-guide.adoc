@@ -225,7 +225,7 @@ local multiply = "*";
 [INFO]
 ====
 Looking at this from the perspective of object oriented programming, this looks like a class.
-However it differs from classes, as the resulting object do not have methods.
+However it differs from classes, as the resulting object don't have methods.
 From the Jsonnet perspective, this is just a regular function.
 When refering to this type of functions in specific, use the term _template function_.
 ====
@@ -271,7 +271,7 @@ local newAnimal(
 
 == Defining functions
 
-* Do not define functions withing objects.
+* Don't define functions withing objects.
   Such objects will fail to render.
   The exception to this rules is the last object within a library file.
 * Functions which return single values (rather than an object) should use parentheses `()` to enclose their bodies if they're multi-line, identically to how braces would be used.
@@ -301,7 +301,7 @@ animal.newAnimal("Finnegan", 3);
 (import "animal.libsonnet").newAnimal("Finnegan, 3);
 ----
 
-* Keep function parameters on one single or put one per line but do not mix the two styles.
+* Keep function parameters on one single or put one per line but don't mix the two styles.
 +
 [source,jsonnet]
 ----
