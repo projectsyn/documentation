@@ -1,11 +1,11 @@
-= Style Guide
+= Style guide
 
 The Jsonnet related parts of this guide build on top of https://github.com/databricks/jsonnet-style-guide/blob/30d4d54444c1001ba9561afd7c8de405630a2ca7/README.md[Jsonnet Guide] by https://databricks.com/[Databricks].
 
 http://creativecommons.org/licenses/by-nc-sa/4.0/[image:https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png[Creative Commons License]] +
 This work is licensed under a http://creativecommons.org/licenses/by-nc-sa/4.0/[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License].
 
-== General Style
+== General style
 
 * Encode text files with UTF-8.
 * End lines with a single `\n` (lf).
@@ -20,7 +20,7 @@ Repositories of Project Syn provide an https://editorconfig.org/[EditorConfig].
 When using a https://editorconfig.org/#download[supported editor], space types and number of spaces will automatically be done correctly.
 ====
 
-== Asciidoc Style
+== Asciidoc style
 
 * Don't split sentences across lines but keep them on one single line.
 * Start a new line for each and every sentence.
@@ -32,15 +32,15 @@ The Microsoft Writing Style is being enforced with https://github.com/errata-ai/
 The implementation used can be found at https://github.com/errata-ai/Microsoft[errata-ai/Microsoft].
 ====
 
-== Jsonnet Style
+== Jsonnet style
 
-== Syntactic Style
+== Syntactic style
 
-=== Auto Formatting
+=== Auto formatting
 
 Use `jsonnet fmt` to format files. This will fix basic style errors.
 
-=== Variable Declaration
+=== Variable declaration
 
 * Variables should be named in `camelCase` style, and should have self-explanatory names.
 +
@@ -66,12 +66,12 @@ local clientPort = 2000;
 }
 ----
 
-=== Line Length
+=== Line length
 
 * Limit lines to 120 characters.
 * The only exceptions are import statements and URLs (although even for those, try to keep them under 120 chars).
 
-=== Spacing and Indentation
+=== Spacing and indentation
 
 * Put one space before and after operators.
 +
@@ -150,7 +150,7 @@ local minus = "-";
 local multiply = "*";
 ----
 
-=== Blank Lines (Vertical Whitespace)
+=== Blank lines (vertical whitespace)
 
 * A single blank line appears:
 ** Within method bodies, as needed to create logical groupings of statements.
@@ -158,9 +158,9 @@ local multiply = "*";
 * Use one or two blank line(s) to separate class definitions.
 * Excessive number of blank lines is discouraged.
 
-=== Defining and Using Abstractions
+=== Defining and using abstractions
 
-==== Defining Classes
+==== Defining classes
 
 * Rather than defining a concrete JSON object, it's often useful to define a template which takes some set of parameters before being materialized into JSON.
   We can liken named functions which take a set of parameters and result in a fixed scheme to ``classes'' in object-oriented languages, and so we will use that terminology.
@@ -202,7 +202,7 @@ local newAnimal(
 }
 ----
 
-== Defining Methods
+== Defining methods
 
 * Method definitions follow the same syntactic style as class definitions.
 * Methods defined within a class should always be defined with `::`, as they fail to render with `:`.
@@ -217,7 +217,7 @@ local newAnimal(
 }
 ----
 
-=== Using Classes
+=== Using classes
 
 * Import all dependencies at the top of the file and given them names related to the imported file itself.
   This makes it easy to see what other files you depend on as the file grows.
@@ -246,7 +246,7 @@ animalTemplate.newAnimal(
 animalTemplate.newAnimal("Finnegan", 3)
 ----
 
-=== File Structure
+=== File structure
 
 * Jsonnet files which can be materialized with no further inputs should end with the `.jsonnet` suffix.
 * Jsonnet files which require parameters to be materialized or which are libraries should end with the `.libjsonnet` suffix.
@@ -254,7 +254,7 @@ animalTemplate.newAnimal("Finnegan", 3)
   Those files are considered part of a public API.
   Treat classes and functions in libraries accordingly and look out for breaking changes.
 
-==== Documentation Style
+==== Documentation style
 
 * Use `//` for inline comments.
 * Use https://www.doxygen.nl/manual/docblocks.html[Docblocks] to document classes and functions.
