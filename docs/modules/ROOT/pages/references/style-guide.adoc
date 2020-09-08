@@ -40,6 +40,22 @@ The implementation used can be found at https://github.com/errata-ai/Microsoft[e
 
 Use `jsonnet fmt` to format files. This will fix basic style errors.
 
+[IMPORTANT]
+====
+Jsonnet auto formatter is available in different flavours (`jsonnet fmt`, `jsonnetfmt`).
+They do have different option defaults.
+Use eighter with the following options:
+
+* `--indent 2`
+* `--max-blank-lines 2`
+* `--string-style d`
+* `--comant-style s`
+* `--pretty-field-names`
+* `--pad-arrays`
+* `--pad-objects`
+* `--sort-imports`
+====
+
 === Variable declaration
 
 * Variables should be named in `camelCase` style, and should have self-explanatory names.
