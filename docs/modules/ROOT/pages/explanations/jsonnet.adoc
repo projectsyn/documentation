@@ -1,46 +1,107 @@
 = Jsonnet Best Practices
 
 == Merging External Config Data
-* Deep merge helper
-* Merge from hiera
-* Expose defaults in hiera
-* Dict with key=name (too keep them mergeable)
-* Provide "generic" defaults and merge with context specifics (i.e. cloud/region see openshift4-nodes)
-* Allow Null (to enable empty)
-* For non-mergeable data (i.e. strings), provide defaults + extras
+////
+* Deep merge helper ✔
+* Merge from hiera ✔
+* Expose defaults in hiera ✔
+* Dict with key=name (too keep them mergeable) ✔
+* Provide "generic" defaults and merge with context specifics (i.e. cloud/region see openshift4-nodes) ✔
+* Allow Null (to enable empty) ✔
+* For non-mergeable data (i.e. strings), provide defaults + extras ✔
+////
+If a component manages an external configuration it's considered best practice to expose it in the configuration hierarchy and to define a sensible default where possible.
+This allows to override the configuration via the hierarchy.
+
+If multiple instances of a configuration are required, expose them within a dictionary where the keys correspond to the name of an instance.
+This allows for very flexible use of a component without changing any code.
+
+Allow to set a common configuration which is used as baseline for the multiple instances.
+This allows to reduce duplication by combining common options:
+[source,jsonnet]
+----
+{
+  [name]:
+    [kube._Object('operator.openshift.io/v1', 'IngressController', name) {
+      metadata+: {
+        namespace: params.namespace + '-operator',
+      },
+      spec: params.ingressControllerDefaults + params.ingressControllers[name],
+    }]
+  for name in ingressControllers
+}
+----
+
+Make sure to allow `Null` values for such dicts to support disabling the component by setting the config dict to `Null`.
+This usually requires an explicit check like the following example:
+[source,jsonnet]
+----
+local ingressControllers =
+  if params.ingressControllers != null then
+    std.objectFields(params.ingressControllers)
+  else
+    [];
+----
+
+The Commodore standard library provides a helper function `makeMergeable(o)` to make an object deep mergeable.
+The `+:` field syntax can be used in Jsonnet to deeply merge nested fields.
+This function helps to do the same with config coming from the hierarchy (and therefore from YAML).
+
+Try to avoid exposing non-mergeable data (like strings) directly in the hierarchy.
+Consider implementing rendering structured data into string format when the component is compiled.
+See the https://github.com/projectsyn/component-fluentbit/blob/d6d5448777aeb301b1328c2f7b9c5ead8982ff45/component/main.jsonnet[component-fluentbit] for an example.
+For cases where that's not possible or feasible, provide a default config which can be combined with extra config.
+This is to allow adding extra config without redefining the full default config.
+
 
 == Loops and Filters
+////
 * File per item, yaml-stream
 ** Combine in one file where it makes sense (same instance of concept)
 ** Multiple files otherwise
+////
 
 == Component Library Functions
+////
 * CRDs
 * Helpers
 ** Public API
 ** Use sparingly
 * Provide mergeable output (to be used with `+`)
+////
 
 == Conditional Keys and Files
+////
 * .gitkeep
 * Empty array vs. Null
+////
 
 == Using kube-libsonnet
+////
 * https://github.com/bitnami-labs/kube-libsonnet
 * Namespaced (remove helper)
+////
 
 == CRD Group Versions
+////
 * In library
+////
 
 == Container Image & Helm Chart Versions
+////
 * Expose in hiera
 * Make Renovate compatible
 * Helm Chart + Image
 ** Use chart image version
 ** Provide override if necessary (caution: not automatically updated)
+////
 
 == Multiline Strings
-* Ignore renderd format (i.e. \n, emtpy lines)
+////
+* Ignore renderd format (like \n, emtpy lines)
+////
 
 == Component Structure
+////
 * One `main.jsonnet` and one `compile` instruction
+////
