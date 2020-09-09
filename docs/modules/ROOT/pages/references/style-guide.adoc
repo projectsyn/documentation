@@ -205,7 +205,7 @@ local multiply = "*";
 ** Within functions bodies, as needed to create logical groupings of statements.
 ** Optionally before the first member or after the last member of a template or function.
 * Use one or two blank line(s) to separate logical blocks in files.
-  Those blocks can be single function definitions or groups of local varaible that semantically belong together.
+  Those blocks can be single function definitions or groups of local variables that semantically belong together.
 * Excessive number of blank lines is discouraged.
 
 === Defining and using abstractions
@@ -217,9 +217,9 @@ local multiply = "*";
 [INFO]
 ====
 Looking at this from the perspective of object oriented programming, this looks like a class.
-However it differs from classes, as the resulting object don't have methods.
+However it differs from classes, as the resulting objects don't have methods.
 From the Jsonnet perspective, this is just a regular function.
-When refering to this type of functions in specific, use the term _template function_.
+When specifically referring to this type of function, use the term _template function_.
 ====
 * When defining a template function, use the following syntax:
 +
@@ -239,7 +239,7 @@ local newAnimal(name, age) =
 * When writing libraries, always return a single object encapsulating any functions instead of returning a single function.
   This allows returning multiple values (constants and functions) from a single library.
   Additionally this ensures libraries remain extensible without having to refactor all consumers.
-* When defining a template functio with both required and optional parameters, put required parameters first.
+* When defining a template function with both required and optional parameters, put required parameters first.
   Optional parameters should have a default, or `null` if a sentinel value is needed.
 +
 [source,jsonnet]
@@ -263,9 +263,9 @@ local newAnimal(
 
 == Defining functions
 
-* Don't define functions withing objects.
+* Don't define functions within objects.
   Such objects will fail to render.
-  The exception to this rules is the last object within a library file.
+  The exception to this rule is the last object within a library file.
 * Functions which return single values (rather than an object) should use parentheses `()` to enclose their bodies if they're multi-line, identically to how braces would be used.
 +
 [source,jsonnet]
@@ -293,7 +293,8 @@ animal.newAnimal("Finnegan", 3);
 (import "animal.libsonnet").newAnimal("Finnegan, 3);
 ----
 
-* Keep function parameters on one single or put one per line but don't mix the two styles.
+* Keep function parameters on a single line or put one parameter per line when calling functions.
+* When putting one parameter per line for a function call, add a line break (`\n`) after the opening `(`.
 +
 [source,jsonnet]
 ----
