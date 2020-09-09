@@ -120,10 +120,9 @@ local c = a + b;
 ----
 // CORRECT
 local foo = { hello: "world" };
-local bar =
-  {
-    hello: "world",
-  };
+local bar = {
+  hello: "world",
+};
 
 // INCORRECT
 local baz = {hello: "world"};
@@ -135,14 +134,30 @@ local baz = {hello: "world"};
 ----
 // CORRECT
 local foo = [ "a", "b" ] ;
-local bar =
-  [
-    "a",
-    "b",
-  ];
+local bar = [
+  "a",
+  "b",
+];
 
 // INCORRECT
 local baz = ["a", "b"];
+----
+
+* Start objects on the same line as the variables they're assigned to.
++
+[source,jsonnet]
+----
+// PREFERRED
+local foo = { hello: "world" };
+local bar = {
+  hello: "world",
+};
+
+// ACCEPTABLE
+local baz =
+  {
+    hello: "world",
+  };
 ----
 
 * Omit tailing `,` on single line arrays and objects.
