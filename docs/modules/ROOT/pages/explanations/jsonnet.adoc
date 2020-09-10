@@ -82,6 +82,11 @@ This is to allow adding extra config without redefining the full default config.
 * Namespaced (remove helper)
 ////
 
+== Using Library functions
+////
+* Import them conditionally: https://github.com/projectsyn/component-backup-k8up/pull/2
+////
+
 == CRD Group Versions
 ////
 * In library
