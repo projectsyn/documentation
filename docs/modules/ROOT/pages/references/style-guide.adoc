@@ -297,11 +297,10 @@ When specifically referring to this type of function, use the term _template fun
 +
 [source,jsonnet]
 ----
-local newAnimal(name, age) =
-  {
-    name: name,
-    age: age,
-  };
+local newAnimal(name, age) = {
+  name: name,
+  age: age,
+};
 
 {
   newAnimal: newAnimal,
