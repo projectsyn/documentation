@@ -65,12 +65,12 @@ local clientPort = 2000;
 ----
 {
   // CORRECT
-  local myVariable = 3,
-  result: myVariable + 1,
+  local foo = 3,
+  bar: foo + 1,
 
   // INCORRECT
-  myVariable:: 3,
-  result: $.myVariable + 1,
+  baz:: 3,
+  qux: $.baz + 1,
 }
 ----
 
