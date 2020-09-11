@@ -405,9 +405,9 @@ animal.newAnimal("Finnegan",
 /**
  * Multicellular, eukaryotic organism of the kingdom Animalia
  *
- * @param name Name by which this animal may be called.
- * @param age Number of years (rounded to nearest int) animal has been alive.
- * @returns an object describing the animal.
+ * \param name Name by which this animal may be called.
+ * \param age Number of years (rounded to nearest int) animal has been alive.
+ * \returns an object describing the animal.
  */
 local Animal(name, age) = { … }
 ----
