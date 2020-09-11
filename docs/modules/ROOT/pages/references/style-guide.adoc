@@ -188,14 +188,14 @@ local bar(x) =
 
 * Start `if` and `else` on new lines and prefer to keep `else if` together.
 +
-[sourece,jsonnet]
+[source,jsonnet]
 ----
 // PREFERRED
 local foo(x) =
   if x < 42 then {
     result: "No enought",
   }
-  else if > 42 then {
+  else if x > 42 then {
     result: "Too much",
   }
   else {
@@ -208,7 +208,7 @@ local bar(x) =
     result: "No enought",
   }
   else
-    if > 42 then {
+    if x > 42 then {
       result: "Too much",
     }
     else {
@@ -255,7 +255,7 @@ local multiply(
 ----
 
 * Omit vertical alignment.
-  They draw attention to the wrong parts of the code and result in hard to review pull requests due to the white space changes.
+  Having vertical alignment results in hard to review pull requests due to the white space changes.
 +
 [source,jsonnet]
 ----
@@ -277,13 +277,14 @@ local multiply = "*";
 ** Optionally before the first member or after the last member of a template or function.
 * Use one or two blank line(s) to separate logical blocks in files.
   Those blocks can be single function definitions or groups of local variables that semantically belong together.
-* Excessive number of blank lines is discouraged.
+* Excessive use of blank lines is discouraged.
 
 === Defining and using abstractions
 
 ==== Defining templates
 
-* Rather than defining a concrete JSON object, it's often useful to define a template which takes some set of parameters before being materialized into JSON.
+* Rather than defining a concrete JSON object, it's often useful to define a template which takes a set of parameters.
+  Such templates can be used to parametrize JSON objects that need to be materialized multiple times with only small changes.
 +
 [INFO]
 ====
@@ -389,8 +390,8 @@ animal.newAnimal("Finnegan",
 
 === File structure
 
-* Jsonnet files which can be materialized with no further inputs should end with the `.jsonnet` suffix.
-* Jsonnet files which require parameters to be materialized or which are libraries should end with the `.libjsonnet` suffix.
+* Jsonnet files which are intended to be materialized should end with the `.jsonnet` suffix.
+* Jsonnet files which aren't intended to be materialized -- usually libraries -- should end with the `.libjsonnet` suffix.
 * Files in `lib` always are libraries which should never be materialized and must be named accordingly.
   Those files are considered part of a public API.
   Treat functions in libraries accordingly and look out for breaking changes.
@@ -412,5 +413,5 @@ animal.newAnimal("Finnegan",
 local Animal(name, age) = { … }
 ----
 
-* Always put documentation at the top of each Jsonnet file or library to indicate its purpose.
+* Put a  https://www.doxygen.nl/manual/docblocks.html[Docblock] at the top of each Jsonnet file or library to indicate its purpose.
 * Exceptions can be made for `app.jsonnet` and `main.jsonnet`.
