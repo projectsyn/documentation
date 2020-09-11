@@ -80,6 +80,7 @@ include::steward:ROOT:partial$nav-reference.adoc[]
 
 .Explanation
 * xref:SDDs:index.adoc[Syn Design Documents]
+* xref:explanations/jsonnet.adoc[Jsonnet Best Practices]
 * Commodore
 +
 --
