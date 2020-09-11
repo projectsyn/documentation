@@ -60,7 +60,7 @@ Configuration Git repositories       ^                 |                        
 |Configuration generator leveraging a hierarchical configuration model. Uses https://kapitan.dev/[Kapitan] under the hood.
 
 |xref:lieutenant-operator:ROOT:index.adoc[Lieutenant Operator]
-|Manages the CRDs `Cluster`, `Tenant`, `GitRepo`. Implements the business logic for handling all aspects around Git repositories for clusters and tenants. 
+|Manages the CRDs `Cluster`, `Tenant`, `GitRepo`. Implements the business logic for handling all aspects around Git repositories for clusters and tenants.
 
 |xref:lieutenant-api:ROOT:index.adoc[Lieutenant API]
 |REST API to expose the functionality of the Lieutenant Operator and to enforce some defaults.

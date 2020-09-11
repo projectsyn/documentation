@@ -46,7 +46,7 @@ parameters:
       crossplane: 0.4.0
       cert-manager: 0.11.0
 ...
- 
+
   kapitan:
     dependencies:
     - type: https
@@ -100,4 +100,3 @@ The `images` dictionary in a class file specifies the docker images for this c
 * https://docs.renovatebot.com/
 * https://github.com/renovatebot/renovate
 * https://github.com/renovatebot/renovate/blob/master/docs/development/adding-a-package-manager.md
-

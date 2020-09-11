@@ -2,7 +2,7 @@
 
 :sdd_author:    Marco Fretz
 :sdd_owner:     Simon Rüegg
-:sdd_reviewers: 
+:sdd_reviewers:
 :sdd_date:      2019-10-18
 :sdd_status:    implemented
 include::partial$meta-info-table.adoc[]

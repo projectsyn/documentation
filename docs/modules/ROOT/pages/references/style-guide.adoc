@@ -1,0 +1,416 @@
+= Style guide
+
+The Jsonnet related parts of this guide build on top of https://github.com/databricks/jsonnet-style-guide/blob/30d4d54444c1001ba9561afd7c8de405630a2ca7/README.md[Jsonnet Guide] by https://databricks.com/[Databricks].
+
+http://creativecommons.org/licenses/by-nc-sa/4.0/[image:https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png[Creative Commons License]] +
+This work is licensed under a http://creativecommons.org/licenses/by-nc-sa/4.0/[Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License].
+
+== General style
+
+* Encode text files with UTF-8.
+* End lines with a single `\n` (lf).
+* Always end a file with a single `\n`.
+  This doesn't apply to empty files (for example `.gitkeep`).
+* Use two spaces for indentation except for `Makefile` where a single tab is to be used.
+* Trim whitespace from the end of a line.
+
+[NOTE]
+====
+Repositories of Project Syn provide an https://editorconfig.org/[EditorConfig].
+When using a https://editorconfig.org/#download[supported editor], space types and number of spaces will automatically be done correctly.
+====
+
+== Asciidoc style
+
+* Don't split sentences across lines but keep them on one single line.
+* Start a new line for each and every sentence.
+* Follow the https://docs.microsoft.com/en-us/style-guide/welcome/[Microsoft Writing Style Guide].
+
+[NOTE]
+====
+The Microsoft Writing Style is being enforced with https://github.com/errata-ai/vale[Vale].
+The implementation used can be found at https://github.com/errata-ai/Microsoft[errata-ai/Microsoft].
+====
+
+== Jsonnet style
+
+== Syntactic style
+
+=== Auto formatting
+
+Use `jsonnetfmt` with the `--pad-arrays` option to format files.
+This will fix basic style errors.
+
+[IMPORTANT]
+====
+Jsonnet is available in two implementations (https://github.com/google/jsonnet[jsonnet] and https://github.com/google/go-jsonnet[go-jsonnet]).
+Within the automated builds, we use the https://hub.docker.com/r/bitnami/jsonnet[Jsonnet docker image by Bitnami].
+Should there be any discrepancies between versions and flavours, the one packaged by Bitnami is the reference.
+====
+
+=== Variable declaration
+
+* Variables should be named in `camelCase` style, and should have self-explanatory names.
++
+[source,jsonnet]
+----
+local serverPort = 1000;
+local clientPort = 2000;
+----
+
+* Prefer `local` to `::` syntax for private/local variables.
+  Unlike `::`, variables defined with `local` can't be overridden by children, nor accessed by other files.
++
+[source,jsonnet]
+----
+{
+  // CORRECT
+  local foo = 3,
+  bar: foo + 1,
+
+  // INCORRECT
+  baz:: 3,
+  qux: $.baz + 1,
+}
+----
+
+=== Line length
+
+* Limit lines to 120 characters.
+* The only exceptions are import statements and URLs (although even for those, try to keep them under 120 chars).
+
+=== Spacing and indentation
+
+* Put one space before and after operators.
++
+[source,jsonnet]
+----
+local c = a + b;
+----
+
+* Put one space after commas.
++
+[source,jsonnet]
+----
+[ "a", "b", "c" ] // CORRECT
+
+["a","b","c"] // INCORRECT
+----
+
+* Put one space after colons.
++
+[source,jsonnet]
+----
+{
+  // CORRECT
+  foo:: "bar",
+  baz: "taz",
+  { hello: "world" },
+
+  // INCORRECT
+  foo :: "bar",
+  baz:"taz",
+  { hello : "world" },
+}
+----
+
+* Put one space or line break after `{` and before `}`.
++
+[source,jsonnet]
+----
+// CORRECT
+local foo = { hello: "world" };
+local bar = {
+  hello: "world",
+};
+
+// INCORRECT
+local baz = {hello: "world"};
+----
+
+* Put one space or line break after `[` and before `]`.
++
+[source,jsonnet]
+----
+// CORRECT
+local foo = [ "a", "b" ] ;
+local bar = [
+  "a",
+  "b",
+];
+
+// INCORRECT
+local baz = ["a", "b"];
+----
+
+* Start objects on the same line as the variables they're assigned to.
++
+[source,jsonnet]
+----
+// PREFERRED
+local foo = { hello: "world" };
+local bar = {
+  hello: "world",
+};
+
+// ACCEPTABLE
+local baz =
+  {
+    hello: "world",
+  };
+----
+
+* Objects within a conditional start on the same line as the condition.
++
+[source,jsonnet]
+----
+// PREFERRED
+local foo(x) =
+  if x == 42 then {
+    result: "The Answer",
+  }
+  else {
+    result: "Don't know",
+  };
+
+
+// ACCEPTABLE
+local bar(x) =
+  if x == 42 then
+    {
+      result: "The Answer",
+    }
+  else
+    {
+      result: "Don't know",
+    };
+----
+
+* Start `if` and `else` on new lines and prefer to keep `else if` together.
++
+[source,jsonnet]
+----
+// PREFERRED
+local foo(x) =
+  if x < 42 then {
+    result: "No enought",
+  }
+  else if x > 42 then {
+    result: "Too much",
+  }
+  else {
+    result: "The Answer",
+  }
+
+// ACCEPTABLE
+local bar(x) =
+  if x < 42 then {
+    result: "No enought",
+  }
+  else
+    if x > 42 then {
+      result: "Too much",
+    }
+    else {
+      result: "The Answer",
+    }
+----
+
+* Omit tailing `,` on single line arrays and objects.
+  Keep them when splitting over multiple lines.
++
+[source,jsonnet]
+----
+// CORRECT
+local a = [ "a", "b" ] ;
+local b = { hello: "world" };
+local c =
+  [
+    "a",
+    "b",
+  ];
+local d =
+  {
+    hello: "world",
+  };
+
+// INCORRECT
+local e = [ "a", "b", ];
+local f = { hello: "world", };
+----
+
+* Use 2-space indentation in general.
+
+* Only function parameter declarations use 4-space indentation, to visually differentiate parameters from function body.
++
+[source,jsonnet]
+----
+// CORRECT
+local multiply(
+    number1,
+    number2) =
+  {
+    result: number1 * number 2
+  }
+----
+
+* Omit vertical alignment.
+  Having vertical alignment results in hard to review pull requests due to the white space changes.
++
+[source,jsonnet]
+----
+// CORRECT
+local plus = "+";
+local minus = "-";
+local multiply = "*";
+
+// INCORRECT
+local plus     = "+";
+local minus    = "-";
+local multiply = "*";
+----
+
+=== Blank lines (vertical whitespace)
+
+* A single blank line appears:
+** Within functions bodies, as needed to create logical groupings of statements.
+** Optionally before the first member or after the last member of a template or function.
+* Use one or two blank line(s) to separate logical blocks in files.
+  Those blocks can be single function definitions or groups of local variables that semantically belong together.
+* Excessive use of blank lines is discouraged.
+
+=== Defining and using abstractions
+
+==== Defining templates
+
+* Rather than defining a concrete JSON object, it's often useful to define a template which takes a set of parameters.
+  Such templates can be used to parametrize JSON objects that need to be materialized multiple times with only small changes.
++
+[INFO]
+====
+Looking at this from the perspective of object oriented programming, this looks like a class.
+However it differs from classes, as the resulting objects don't have methods.
+From the Jsonnet perspective, this is just a regular function.
+When specifically referring to this type of function, use the term _template function_.
+====
+* When defining a template function, use the following syntax:
++
+[source,jsonnet]
+----
+local newAnimal(name, age) = {
+  name: name,
+  age: age,
+};
+
+{
+  newAnimal: newAnimal,
+}
+----
+
+* When writing libraries, always return a single object encapsulating any functions instead of returning a single function.
+  This allows returning multiple values (constants and functions) from a single library.
+  Additionally this ensures libraries remain extensible without having to refactor all consumers.
+* When defining a template function with both required and optional parameters, put required parameters first.
+  Optional parameters should have a default, or `null` if a sentinel value is needed.
++
+[source,jsonnet]
+----
+local newAnimal(name, age, isCat = true) = { ... }
+----
+
+* Wrap parameter declarations by putting one parameter per line with 2 extra spaces of indentation, to differentiate from the function body.
+  Doing this is always acceptable, even if the definition would not wrap.
++
+[source,jsonnet]
+----
+local newAnimal(
+    name,
+    age,
+    isCat = true) = {
+  name: name,
+  …
+}
+----
+
+== Defining functions
+
+* Don't define functions within objects.
+  Such objects will fail to render.
+  The exception to this rule is the last object within a library file.
+* Functions which return single values (rather than an object) should use parentheses `()` to enclose their bodies if they're multi-line, identically to how braces would be used.
++
+[source,jsonnet]
+----
+{
+  multiply(number1, number2):
+    (
+      number1 * number 2
+    ),
+}
+----
+
+=== Using libraries
+
+* Import all dependencies at the top of the file and given them names related to the imported file itself.
+  This makes it easy to see what other files you depend on as the file grows.
++
+[source,jsonnet]
+----
+// CORRECT
+local animal = import "animal.libsonnet";
+animal.newAnimal("Finnegan", 3);
+
+// AVOID
+(import "animal.libsonnet").newAnimal("Finnegan, 3);
+----
+
+* Keep function parameters on a single line or put one parameter per line when calling functions.
+* When putting one parameter per line for a function call, add a line break (`\n`) after the opening `(`.
++
+[source,jsonnet]
+----
+// CORRECT
+animal.newAnimal("Finnegan", 3);
+animal.newAnimal(
+  name = "Finnegan",
+  age = 3,
+);
+animal.newAnimal(
+  "Finnegan",
+  3,
+);
+
+// INCORRECT
+animal.newAnimal("Finnegan",
+  3,
+  42,
+);
+----
+
+=== File structure
+
+* Jsonnet files which are intended to be materialized should end with the `.jsonnet` suffix.
+* Jsonnet files which aren't intended to be materialized -- usually libraries -- should end with the `.libjsonnet` suffix.
+* Files in `lib` always are libraries which should never be materialized and must be named accordingly.
+  Those files are considered part of a public API.
+  Treat functions in libraries accordingly and look out for breaking changes.
+
+==== Documentation style
+
+* Use `//` for inline comments.
+* Use https://www.doxygen.nl/manual/docblocks.html[Docblocks] to document functions.
++
+[source,jsonnet]
+----
+/**
+ * Multicellular, eukaryotic organism of the kingdom Animalia
+ *
+ * \param name Name by which this animal may be called.
+ * \param age Number of years (rounded to nearest int) animal has been alive.
+ * \returns an object describing the animal.
+ */
+local Animal(name, age) = { … }
+----
+
+* Put a  https://www.doxygen.nl/manual/docblocks.html[Docblock] at the top of each Jsonnet file or library to indicate its purpose.
+* Exceptions can be made for `app.jsonnet` and `main.jsonnet`.

@@ -114,7 +114,7 @@ When the application specific Kubernetes Operator already brings native Backup/R
 
 NOTE: This section is still subject to change, depending on how the main monitoring concept will actually look like.
 
-Each application service should bring its own `ServiceMonitor`, `PodMonitor` and `PrometheusRule` definitions for the Prometheus Operator. These objects are distributed by the Commodore Component which manages the Kubernetes Operator. 
+Each application service should bring its own `ServiceMonitor`, `PodMonitor` and `PrometheusRule` definitions for the Prometheus Operator. These objects are distributed by the Commodore Component which manages the Kubernetes Operator.
 
 If there are any Grafana Dashboards available, they should also be distributed by the Commodore Component.
 

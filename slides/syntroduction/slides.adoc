@@ -301,4 +301,3 @@ image::{title-image}[width=750]
 
 [.small]
 Sponsored by: VSHN AG – Neugasse 10 – CH-8005 Zürich – +41 44 545 53 00 – https://vshn.ch – info@vshn.ch
-
