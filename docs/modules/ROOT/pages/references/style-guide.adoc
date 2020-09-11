@@ -259,14 +259,14 @@ local multiply(
 +
 [source,jsonnet]
 ----
-// Don't align vertically
-local plus     = "+";
-local minus    = "-";
-local multiply = "*";
-
-// Do the following
+// CORRECT
 local plus = "+";
 local minus = "-";
+local multiply = "*";
+
+// INCORRECT
+local plus     = "+";
+local minus    = "-";
 local multiply = "*";
 ----
 
