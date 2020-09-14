@@ -34,9 +34,9 @@ The implementation used can be found at https://github.com/errata-ai/Microsoft[e
 
 == Jsonnet style
 
-== Syntactic style
+=== Syntactic style
 
-=== Auto formatting
+==== Auto formatting
 
 Use `jsonnetfmt` with the `--pad-arrays` option to format files.
 This will fix basic style errors.
@@ -48,7 +48,7 @@ Within the automated builds, we use the https://hub.docker.com/r/bitnami/jsonnet
 Should there be any discrepancies between versions and flavours, the one packaged by Bitnami is the reference.
 ====
 
-=== Variable declaration
+==== Variable declaration
 
 * Variables should be named in `camelCase` style, and should have self-explanatory names.
 +
@@ -74,12 +74,12 @@ local clientPort = 2000;
 }
 ----
 
-=== Line length
+==== Line length
 
 * Limit lines to 120 characters.
 * The only exceptions are import statements and URLs (although even for those, try to keep them under 120 chars).
 
-=== Spacing and indentation
+==== Spacing and indentation
 
 * Put one space before and after operators.
 +
@@ -270,7 +270,7 @@ local minus    = "-";
 local multiply = "*";
 ----
 
-=== Blank lines (vertical whitespace)
+==== Blank lines (vertical whitespace)
 
 * A single blank line appears:
 ** Within functions bodies, as needed to create logical groupings of statements.
@@ -332,7 +332,7 @@ local newAnimal(
 }
 ----
 
-== Defining functions
+==== Defining functions
 
 * Don't define functions within objects.
   Such objects will fail to render.
@@ -349,7 +349,7 @@ local newAnimal(
 }
 ----
 
-=== Using libraries
+==== Using libraries
 
 * Import all dependencies at the top of the file and given them names related to the imported file itself.
   This makes it easy to see what other files you depend on as the file grows.
@@ -387,7 +387,7 @@ animal.newAnimal("Finnegan",
 );
 ----
 
-=== File structure
+==== File structure
 
 * Jsonnet files which are intended to be materialized should end with the `.jsonnet` suffix.
 * Jsonnet files which aren't intended to be materialized -- usually libraries -- should end with the `.libjsonnet` suffix.
