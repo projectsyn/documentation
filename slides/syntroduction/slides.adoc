@@ -277,7 +277,7 @@ image::commodore-defaults-parameters.png[width=750]
 ----
 
 <1> Default parameters and Kapitan configuration
-<3> Component implementation
+<2> Component implementation
 
 == Do It Yourself
 
