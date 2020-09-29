@@ -26,7 +26,26 @@ Managing a fleet of Kubernetes clusters is hard - let's automate that!
 --
 * No such integrated thing existed
 * Don't reinvent the wheel wherever possible
+* Born out of the daily business needs
 --
+
+== Why?
+
+A lot of questions to answer:
+
+* Where are all my clusters and to whom do they belong?
+* What do they look like (Distribution, Infrastructure, ...)
+* How do I bring all my configuration on to the cluster?
+* How can I have a common configuration across all clusters?
+* What does "managed" mean for a Kubernetes cluster?
+
+And more ...
+
+== Project Syn!
+
+icon:check-circle[size=3x]
+
+Project Syn helps to answer these questions - and even more.
 
 == Features
 
@@ -62,31 +81,18 @@ Tools Bootstrapping:: Getting a cluster part of Syn.
 
 == Features
 
-Configuration Management:: Customized manifests per cluster and tenant.
+Configuration Management:: Customized manifests per cluster and tenant using a hierarchical configuration structure.
+Reusable Components:: Open Source Commodore Components.
+Default Toolset:: Set of composed Commodore Components.
+
 
 [.notes]
 --
 * Commodore with Kapitan
 * Hierarchical configuration parameters
 * Tight integration with Lieutenant e.g. for Git repo location
---
-
-== Features
-
-Reusable Components:: Open Source Commodore Components.
-
-[.notes]
---
 * Commodore Components as modules
 * Growing set of Open Source components
---
-
-== Features
-
-Default Toolset:: Set of composed Commodore Components.
-
-[.notes]
---
 Project Syn provided default toolset.
 --
 
@@ -110,15 +116,6 @@ Secrets Management:: Deep integration into Vault with Kapitan.
 * Revealed during apply phase on cluster
 * Doesn't leave cluster
 * Deep integration in Lieutenant
---
-
-== Features
-
-Service Provisioning:: Application service provisioning fully integrated with Crossplane.
-
-[.notes]
---
-Crossplane to enable Kubernetes native service provisioning
 --
 
 == Architecture: Big Picture
@@ -229,16 +226,21 @@ Important tools - integral part of Project Syn:
 
 Let's have a look at some details.
 
-== Deep Dive: Commodore Hierarchy (Reclass)
+== Deep Dive: Commodore Hierarchy
 
-* Component defaults
-* Global generic
-* Kubernetes distribution
-* Cloud provider
-* Cloud provider region
-* Customer- and cluster-specific configuration
+. Component defaults
+. Global generic
+. Kubernetes distribution
+. Cloud provider
+. Cloud provider region
+. Customer- and cluster-specific configuration
 
-(currently hard-coded)
+This is based on https://github.com/kapicorp/reclass[reclass].
+
+[.notes]
+--
+* This structure is currently hard-coded
+--
 
 == Deep Dive: Defaults Repo
 
@@ -261,10 +263,10 @@ image::commodore-defaults-parameters.png[width=750]
 == Deep Dive: Commodore Component
 
 ----
-├── class
-│   ├── defaults.yml // <1>
-│   └── my-component.yml // <2>
-├── component // <3>
+├── class // <1>
+│   ├── defaults.yml
+│   └── my-component.yml
+├── component // <2>
 │   ├── app.jsonnet
 │   └── main.jsonnet
 ├── docs
@@ -274,8 +276,7 @@ image::commodore-defaults-parameters.png[width=750]
     └── filters.yml
 ----
 
-<1> Default parameters
-<2> Kapitan configuration
+<1> Default parameters and Kapitan configuration
 <3> Component implementation
 
 == Do It Yourself
@@ -291,6 +292,7 @@ and try it out for yourself
 * Project site: https://syn.tools
 * Getting Started Guide: https://syn.tools/syn/tutorials/getting-started.html
 * Commodore Component Tutorial: https://syn.tools/tuto/index.html
+* Roadmap: https://syn.tools/syn/about/roadmap.html
 * GitHub: https://github.com/projectsyn
 
 == Thanks!
@@ -300,4 +302,5 @@ image::{title-image}[width=750]
 {author} – {email}
 
 [.small]
-Sponsored by: VSHN AG – Neugasse 10 – CH-8005 Zürich – +41 44 545 53 00 – https://vshn.ch – info@vshn.ch
+_Project Sponsor_ +
+VSHN AG – Neugasse 10 – CH-8005 Zürich – +41 44 545 53 00 – https://vshn.ch – info@vshn.ch
