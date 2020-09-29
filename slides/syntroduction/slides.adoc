@@ -239,7 +239,7 @@ This is based on https://github.com/kapicorp/reclass[reclass].
 
 [.notes]
 --
-* This structure is currently hard-coded
+* This hierarchy will be configurable as of a future version of Commodore
 --
 
 == Deep Dive: Defaults Repo
