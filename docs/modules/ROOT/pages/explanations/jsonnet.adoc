@@ -113,7 +113,10 @@ This is to allow adding extra config without redefining the full default config.
 
 == Randomize (cron) schedules
 
-Randomize CronJob or any other time based schedules is a crucial topic.
+It's important to be able to randomize the exact time at which scheduled jobs run across environments.
+Two important reasons for randomizing the time at which a scheduled job runs are:
+* If many jobs start at the same time, there's a real possibility of overloading the (cluster, OS) scheduler and compute capacity.
+* If many clients start their scheduled jobs at the same time, external systems or APIs, such as a backup server, can get overloaded.
 
 With Kapitan and Jsonnet, we're limited to the scope of a single cluster when compiling a catalog.
 Distributing schedules must be done within that limited scope.
@@ -131,9 +134,10 @@ local job = kube.CronJob(name) {
 }
 ----
 
-There are three obvious cases to distribute schedules:
+As mentioned above, there are two big reasons for distributing start times of scheduled jobs.
+Those two reasons result in three cases for distribution:
 
-* Distributed clients, single target:
+* Distributed clients using a single target, such as a backup server:
   Clients are distributed through multiple clusters but act against a single API target.
   Within the scope of all clusters, each client should take action at a different time.
   This is to not overload the API.
@@ -142,14 +146,14 @@ Use `inv.parameters.cluster.name` as the scope.
 
 * Workload on same cluster:
   Multiple job instances are scheduled on the same cluster.
-  Within the scope of a single clusters, each job needs to start at a different time.
-  This is to not exhaust a clusters available resources.
+  Within the scope of a single cluster, each job needs to start at a different time.
+  This is to not exhaust a cluster's available resources and to avoid increased scheduling times due to many jobs needing to be scheduled in a short time.
 +
 Use the namespace if the jobs are located within different namespaces.
 +
 Use the job name for other cases.
 
-* The combination of the other two.
+* Scheduled jobs which combine both reasons:
 +
 Use `inv.parameters.cluster.name` combined with the namespace or job name.
 +
