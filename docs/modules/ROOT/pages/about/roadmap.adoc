@@ -55,18 +55,16 @@ Announcement blog post: https://vshn.ch/blog/second-beta-release-of-project-syn-
 
 The following topics will be part of the first one-point-zero release:
 
-* Commodore automated catalog generation
-** Implementation of https://syn.tools/syn/SDDs/0021-cluster-catalog-compilation.html[SDD 0021 - Cluster Catalog Compilation]
 * Enhancements for Commodore Component developers
 ** Component testing framework and automation
 ** Component documentation automation and integration into syn.tools
+* Enhanced Commodore configuration hierarchy (dynamic hierarchy)
+* Automated Component maintenance with Renovate (Support for GitHub)
 * Automated secret generation in Vault on cluster creation
-* Automated Component maintenance with Renovate
-** Renovate enhancements to support components on GitHub
-** Pull / Merge Request dashboard showing open maintenance requests
 * Implementation of https://syn.tools/syn/SDDs/0023-managed-services-controller.html[SDD 0023 - Managed Services Controller]
-* Automated cluster provisioning object generator, supporting OpenShift Hive and Crossplane
 * GitOps for application deployment on a Project Syn enabled Kubernetes Cluster
+* Commodore automated catalog generation
+** Implementation of https://syn.tools/syn/SDDs/0021-cluster-catalog-compilation.html[SDD 0021 - Cluster Catalog Compilation]
 
 New tools appearing in this release:
 
@@ -75,22 +73,15 @@ New tools appearing in this release:
 
 https://github.com/orgs/projectsyn/projects/2[GitHub Project]
 
-== v1.1.0
+== Upcoming
 
 NOTE: This is still subject to change
-
-Focus for this release:
 
 * Enhance Commodore to be used for regular application deployment
 * Full https://crossplane.io/[Crossplane] integration
 * Enable Commodore to create merge requests on catalog generation (policy-based, similar to Renovate)
 * Integration of Open Policy Agent into Lieutenant Operator
 * Git commit signing of Commodore catalogs and only allow properly signed catalogs on clusters
-
-== v1.2.0
-
-NOTE: This is still subject to change
-
-Focus for this release:
-
+* Automated cluster provisioning object generator, supporting OpenShift Hive and Crossplane
 * Cluster inventory enhancements (reports via Lieutenant inventory)
+* Pull / Merge Request dashboard showing open maintenance requests

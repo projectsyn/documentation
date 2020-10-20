@@ -1,8 +1,8 @@
 = SDD 0023 - Managed Services Controller
 
 :sdd_author:    Tobias Brunner
-:sdd_owner:     
-:sdd_reviewers: 
+:sdd_owner:
+:sdd_reviewers:
 :sdd_date:      2020-06-22
 :sdd_status:    accepted
 include::partial$meta-info-table.adoc[]

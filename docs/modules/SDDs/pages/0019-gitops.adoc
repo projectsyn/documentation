@@ -64,4 +64,3 @@ Also with https://www.weave.works/blog/argo-flux-join-forces[this announcement] 
 * Introduction to GitOps with OpenShift - https://blog.openshift.com/introduction-to-gitops-with-openshift/
 * GitOps - https://www.weave.works/technologies/gitops/
 * Argo CD & Flux joining forces - https://www.weave.works/blog/argo-flux-join-forces
-

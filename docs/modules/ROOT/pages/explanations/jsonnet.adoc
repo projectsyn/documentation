@@ -1,0 +1,165 @@
+= Jsonnet Best Practices
+
+== Merging External Config Data
+////
+* Deep merge helper ✔
+* Merge from hiera ✔
+* Expose defaults in hiera ✔
+* Dict with key=name (too keep them mergeable) ✔
+* Provide "generic" defaults and merge with context specifics (i.e. cloud/region see openshift4-nodes) ✔
+* Allow Null (to enable empty) ✔
+* For non-mergeable data (i.e. strings), provide defaults + extras ✔
+////
+If a component manages an external configuration it's considered best practice to expose it in the configuration hierarchy and to define a sensible default where possible.
+This allows to override the configuration via the hierarchy.
+
+If multiple instances of a configuration are required, expose them within a dictionary where the keys correspond to the name of an instance.
+This allows for very flexible use of a component without changing any code.
+
+Allow to set a common configuration which is used as baseline for the multiple instances.
+This allows to reduce duplication by combining common options:
+[source,jsonnet]
+----
+{
+  [name]:
+    [kube._Object('operator.openshift.io/v1', 'IngressController', name) {
+      metadata+: {
+        namespace: params.namespace + '-operator',
+      },
+      spec: params.ingressControllerDefaults + params.ingressControllers[name],
+    }]
+  for name in ingressControllers
+}
+----
+
+Make sure to allow `Null` values for such dicts to support disabling the component by setting the config dict to `Null`.
+This usually requires an explicit check like the following example:
+[source,jsonnet]
+----
+local ingressControllers =
+  if params.ingressControllers != null then
+    std.objectFields(params.ingressControllers)
+  else
+    [];
+----
+
+The Commodore standard library provides a helper function `makeMergeable(o)` to make an object deep mergeable.
+The `+:` field syntax can be used in Jsonnet to deeply merge nested fields.
+This function helps to do the same with config coming from the hierarchy (and therefore from YAML).
+
+Try to avoid exposing non-mergeable data (like strings) directly in the hierarchy.
+Consider implementing rendering structured data into string format when the component is compiled.
+See the https://github.com/projectsyn/component-fluentbit/blob/d6d5448777aeb301b1328c2f7b9c5ead8982ff45/component/main.jsonnet[component-fluentbit] for an example.
+For cases where that's not possible or feasible, provide a default config which can be combined with extra config.
+This is to allow adding extra config without redefining the full default config.
+
+
+== Loops and Filters
+////
+* File per item, yaml-stream
+** Combine in one file where it makes sense (same instance of concept)
+** Multiple files otherwise
+////
+
+== Component Library Functions
+////
+* CRDs
+* Helpers
+** Public API
+** Use sparingly
+* Provide mergeable output (to be used with `+`)
+////
+
+== Conditional Keys and Files
+////
+* .gitkeep
+* Empty array vs. Null
+////
+
+== Using kube-libsonnet
+////
+* https://github.com/bitnami-labs/kube-libsonnet
+* Namespaced (remove helper)
+////
+
+== Using Library functions
+////
+* Import them conditionally: https://github.com/projectsyn/component-backup-k8up/pull/2
+////
+
+== CRD Group Versions
+////
+* In library
+////
+
+== Container Image & Helm Chart Versions
+////
+* Expose in hiera
+* Make Renovate compatible
+* Helm Chart + Image
+** Use chart image version
+** Provide override if necessary (caution: not automatically updated)
+////
+
+== Multiline Strings
+////
+* Ignore renderd format (like \n, emtpy lines)
+////
+
+== Component Structure
+////
+* One `main.jsonnet` and one `compile` instruction
+////
+
+== Randomize (cron) schedules
+
+It's important to be able to randomize the exact time at which scheduled jobs run across environments.
+Two important reasons for randomizing the time at which a scheduled job runs are:
+
+* If many jobs start at the same time, there's a real possibility of overloading the (cluster, OS) scheduler and compute capacity.
+* If many clients start their scheduled jobs at the same time, external systems or APIs, such as a backup server, can get overloaded.
+
+With Kapitan and Jsonnet, we're limited to the scope of a single cluster when compiling a catalog.
+Distributing schedules must be done within that limited scope.
+This can be done by leveraging a hashing function.
+The input to that hashing function then defines the scope of distribution.
+
+[source,jsonnet]
+----
+local scope = "…" // Something that defines the scope of the schedule
+local minute = std.foldl(function(x, y) x + y, std.encodeUTF8(std.md5(scope)), 0) % 60;
+local job = kube.CronJob(name) {
+  spec+: {
+    schedule: '%d * * * *' % minute,
+  …
+}
+----
+
+As mentioned above, there are two big reasons for distributing start times of scheduled jobs.
+Those two reasons result in three cases for distribution:
+
+* Distributed clients using a single target, such as a backup server:
++
+Clients are distributed through multiple clusters but act against a single API target.
+Within the scope of all clusters, each client should take action at a different time.
+This is to not overload the API.
++
+Use `inv.parameters.cluster.name` as the scope.
+
+* Workload on same cluster:
++
+Multiple job instances are scheduled on the same cluster.
+Within the scope of a single cluster, each job needs to start at a different time.
+This is to not exhaust a cluster's available resources and to avoid increased scheduling times due to many jobs needing to be scheduled in a short time.
++
+Use the namespace if the jobs are located within different namespaces.
+Use the job name for other cases.
+
+* Scheduled jobs which combine both reasons:
++
+Use `inv.parameters.cluster.name` combined with the namespace or job name.
++
+[source,jsonnet]
+----
+local scope = inv.parameters.cluster.name + "…"
+----

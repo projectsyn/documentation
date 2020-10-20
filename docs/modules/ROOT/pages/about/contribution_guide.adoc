@@ -10,6 +10,7 @@ done (read more about http://help.github.com/pull-requests/[pull requests]).
 
 == Coding conventions
 
-=== Commodore Components
+See:
 
-We're using `jsonnetfmt` and `yamllint` to ensure consistency. The `Makefile` provides targets to invoke them.
+* xref:references/style-guide.adoc[Style Guide]
+* xref:references/labels-guide.adoc[Labels Guide]

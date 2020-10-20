@@ -1,5 +1,13 @@
 = Project Syn Glossary
 
+Configuration Hierarchy::
+
+https://kapitan.dev/inventory/[Kapitan inventory], which
+uses https://reclass.pantsfullofunix.net/[reclass], to provide a hierarchical
+configuration lookup.
+
+See xref:commodore::reference/concepts.adoc[Commodore concepts].
+
 Commodore Component::
 
 A self-contained module containing code (mainly Jsonnet) to build Kubernetes manifests.
