@@ -58,10 +58,10 @@ Install *Lieutenant Operator* with the following commands:
 [source,shell]
 ----
 # CRDs (global scope)
-kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.2.0"
+kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.3.0"
 
 # Operator deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.2.0"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.3.0"
 
 # Operator configuration
 kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator \
@@ -83,7 +83,7 @@ Install *Lieutenant API* with the following commands:
 [source,shell]
 ----
 # API deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.2.0"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.3.0"
 
 # Ingress
 if [[ "$OSTYPE" == "darwin"* ]]; then export INGRESS_IP=127.0.0.1; else export INGRESS_IP=$(kubectl -n kube-system get svc traefik -o jsonpath="{.status.loadBalancer.ingress[0].ip}"); fi
@@ -264,7 +264,7 @@ Replace `MYSSHKEYPATH` with the path to your SSH key file, for example `~/.ssh/i
 ----
 export COMMODORE_SSH_PRIVATE_KEY=MYSSHKEYPATH
 kubectl -n lieutenant run commodore-shell \
-  --image=docker.io/projectsyn/commodore:v0.2.0 \
+  --image=docker.io/projectsyn/commodore:v0.3.0 \
   --env=COMMODORE_API_URL="http://${LIEUTENANT_URL}/" \
   --env=COMMODORE_API_TOKEN=${LIEUTENANT_TOKEN} \
   --env=COMMODORE_GLOBAL_GIT_BASE=https://github.com/projectsyn \
