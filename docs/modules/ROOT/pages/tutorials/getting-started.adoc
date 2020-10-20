@@ -85,6 +85,10 @@ Install *Lieutenant API* with the following commands:
 # API deployment
 kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.3.0"
 
+# API configuration
+kubectl -n lieutenant set env deployment/lieutenant-api -c lieutenant-api \
+  DEFAULT_API_SECRET_REF_NAME=gitlab-com
+
 # Ingress
 if [[ "$OSTYPE" == "darwin"* ]]; then export INGRESS_IP=127.0.0.1; else export INGRESS_IP=$(kubectl -n kube-system get svc traefik -o jsonpath="{.status.loadBalancer.ingress[0].ip}"); fi
 
@@ -134,13 +138,11 @@ Replace `MYTOKEN` with the generated GitLab API token. If you're using your own 
 ----
 export GITLAB_TOKEN=MYTOKEN
 export GITLAB_ENDPOINT=gitlab.com
-kubectl -n lieutenant create secret generic vshn-gitlab \
+kubectl -n lieutenant create secret generic gitlab-com \
   --from-literal=endpoint="https://${GITLAB_ENDPOINT}" \
   --from-literal=hostKeys="$(ssh-keyscan ${GITLAB_ENDPOINT})" \
   --from-literal=token=${GITLAB_TOKEN}
 ----
-
-NOTE: This secret currently needs to be named exactly like that. See https://syn.tools/lieutenant-api/how-tos/gitlab_configuration.html[API documentation] and https://github.com/projectsyn/lieutenant-operator/issues/48[GitHub issue #48] for more information.
 
 === Prepare Lieutenant API Authentication and Authorization
 
