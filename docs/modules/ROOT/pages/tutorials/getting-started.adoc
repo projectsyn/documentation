@@ -196,7 +196,7 @@ EOF
 
 In this section you will create your first Lieutenant configuration objects using the API to test the deployment and configuration.
 
-. Prepare access to API, replace `MYUSER` with your GitLab user id
+. Prepare access to API, replace `MYUSER` with your GitLab username
 +
 [source,shell]
 ----
