@@ -219,6 +219,18 @@ echo https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant
 +
 TIP: If everything went well, the Lieutenant Operator created a new git repository under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant, which will be used to store the configuration used by Commodore to create a catalog for a cluster.
 
+. Patch the Tenant object directly in Kubernetes to add a Cluster template.
++
+[source,shell]
+----
+kubectl -n lieutenant patch tenant $TENANT_ID --type="merge" -p "{\"spec\":{\"clusterTemplate\":{\"gitRepoTemplate\":{\"apiSecretRef\":{\"name\":\"gitlab-com\"},\"path\":\"${GITLAB_USERNAME}\",\"repoName\":\"{{ .Name }}\"},\"tenantRef\":{}}}}"
+----
++
+[TIP]
+--
+This patch is needed because of the new feature implemented in the Operator in https://github.com/projectsyn/lieutenant-operator/pull/110[PR #110 "Add cluster template to tenant"]. It will be added to the API in https://github.com/projectsyn/lieutenant-api/issues/89[Issue #89 "Expose Cluster Template Feature in Tenant Objects"].
+--
+
 . Retrieve the registered Tenants via API and directly on the cluster
 +
 [source,shell]
@@ -237,7 +249,10 @@ echo $CLUSTER_ID
 echo https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1
 ----
 +
-TIP: If everything went well, the Lieutenant Operator created a new git repository under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1 which will be used to store the generated catalog of deployment files.
+[TIP]
+--
+If everything went well, the Lieutenant Operator created a new git repository under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1 which will be used to store the generated catalog of deployment files.
+--
 
 . Retrieve the registered Clusters via API and directly on the cluster
 +
