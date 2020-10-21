@@ -58,10 +58,10 @@ Install *Lieutenant Operator* with the following commands:
 [source,shell]
 ----
 # CRDs (global scope)
-kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.2.0"
+kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.3.0"
 
 # Operator deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.2.0"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.3.0"
 
 # Operator configuration
 kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator \
@@ -83,7 +83,11 @@ Install *Lieutenant API* with the following commands:
 [source,shell]
 ----
 # API deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.2.0"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.3.0"
+
+# API configuration
+kubectl -n lieutenant set env deployment/lieutenant-api -c lieutenant-api \
+  DEFAULT_API_SECRET_REF_NAME=gitlab-com
 
 # Ingress
 if [[ "$OSTYPE" == "darwin"* ]]; then export INGRESS_IP=127.0.0.1; else export INGRESS_IP=$(kubectl -n kube-system get svc traefik -o jsonpath="{.status.loadBalancer.ingress[0].ip}"); fi
@@ -134,13 +138,11 @@ Replace `MYTOKEN` with the generated GitLab API token. If you're using your own 
 ----
 export GITLAB_TOKEN=MYTOKEN
 export GITLAB_ENDPOINT=gitlab.com
-kubectl -n lieutenant create secret generic vshn-gitlab \
+kubectl -n lieutenant create secret generic gitlab-com \
   --from-literal=endpoint="https://${GITLAB_ENDPOINT}" \
   --from-literal=hostKeys="$(ssh-keyscan ${GITLAB_ENDPOINT})" \
   --from-literal=token=${GITLAB_TOKEN}
 ----
-
-NOTE: This secret currently needs to be named exactly like that. See https://syn.tools/lieutenant-api/how-tos/gitlab_configuration.html[API documentation] and https://github.com/projectsyn/lieutenant-operator/issues/48[GitHub issue #48] for more information.
 
 === Prepare Lieutenant API Authentication and Authorization
 
@@ -217,6 +219,18 @@ echo https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant
 +
 TIP: If everything went well, the Lieutenant Operator created a new git repository under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant, which will be used to store the configuration used by Commodore to create a catalog for a cluster.
 
+. Patch the Tenant object directly in Kubernetes to add a Cluster template.
++
+[source,shell]
+----
+kubectl -n lieutenant patch tenant $TENANT_ID --type="merge" -p "{\"spec\":{\"clusterTemplate\":{\"gitRepoTemplate\":{\"apiSecretRef\":{\"name\":\"gitlab-com\"},\"path\":\"${GITLAB_USERNAME}\",\"repoName\":\"{{ .Name }}\"},\"tenantRef\":{}}}}"
+----
++
+[TIP]
+--
+This patch is needed because of the new feature implemented in the Operator in https://github.com/projectsyn/lieutenant-operator/pull/110[PR #110 "Add cluster template to tenant"]. It will be added to the API in https://github.com/projectsyn/lieutenant-api/issues/89[Issue #89 "Expose Cluster Template Feature in Tenant Objects"].
+--
+
 . Retrieve the registered Tenants via API and directly on the cluster
 +
 [source,shell]
@@ -235,7 +249,10 @@ echo $CLUSTER_ID
 echo https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1
 ----
 +
-TIP: If everything went well, the Lieutenant Operator created a new git repository under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1 which will be used to store the generated catalog of deployment files.
+[TIP]
+--
+If everything went well, the Lieutenant Operator created a new git repository under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1 which will be used to store the generated catalog of deployment files.
+--
 
 . Retrieve the registered Clusters via API and directly on the cluster
 +
@@ -264,7 +281,7 @@ Replace `MYSSHKEYPATH` with the path to your SSH key file, for example `~/.ssh/i
 ----
 export COMMODORE_SSH_PRIVATE_KEY=MYSSHKEYPATH
 kubectl -n lieutenant run commodore-shell \
-  --image=docker.io/projectsyn/commodore:v0.2.0 \
+  --image=docker.io/projectsyn/commodore:v0.3.0 \
   --env=COMMODORE_API_URL="http://${LIEUTENANT_URL}/" \
   --env=COMMODORE_API_TOKEN=${LIEUTENANT_TOKEN} \
   --env=COMMODORE_GLOBAL_GIT_BASE=https://github.com/projectsyn \
@@ -397,9 +414,10 @@ With these steps, the local `k3s` instance is now Syn enabled, has Argo CD runni
 [TIP]
 ====
 If you want or need to reset the bootstrap token, this is the way to go:
+Get the k3d Kubernetes API URL with `k3d kubeconfig get projectsyn` and replace `REPLACE_API_URL` in the command below:
 [source,shell]
 ----
-curl -k -H "${LIEUTENANT_AUTH}" -H "Content-Type: application/json-patch+json" -X PATCH -d '[{ "op": "remove", "path": "/status/bootstrapToken" }]' "https://localhost:6443/apis/syn.tools/v1alpha1/namespaces/lieutenant/clusters/${CLUSTER_ID}/status"
+curl -k -H "${LIEUTENANT_AUTH}" -H "Content-Type: application/json-patch+json" -X PATCH -d '[{ "op": "remove", "path": "/status/bootstrapToken" }]' "REPLACE_API_URL/apis/syn.tools/v1alpha1/namespaces/lieutenant/clusters/${CLUSTER_ID}/status"
 ----
 ====
 

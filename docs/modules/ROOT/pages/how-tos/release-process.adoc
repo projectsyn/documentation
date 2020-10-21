@@ -34,6 +34,8 @@ Describe this release: copy most recent CHANGELOG.md entries (remove square brac
 ----
 .. Publish the release
 
+. Check and update xref:tutorials/getting-started.adoc[Getting Started guide] and https://syn.tools/tuto/index.html[Tutorial: Writing your First Commodore Component] (These guides need to be up-to-date and work 100% all the time)
+
 After the release is done, switch back the deployment artifacts to point to `latest` again.
 
 == Additional work for full release
