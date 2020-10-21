@@ -1,6 +1,7 @@
 * xref:index.adoc[Home]
 
 .About
+* xref:about/introduction.adoc[Introduction]
 * xref:about/features.adoc[Features]
 * xref:about/architecture.adoc[Architecture]
 * xref:about/roadmap.adoc[Roadmap]

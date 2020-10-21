@@ -1,0 +1,25 @@
+# Introduction
+
+Imagine you just deployed these Virtual Machines using your favorite infrastructure as code tool on your favorite cloud infrastructure. They're still empty, no applications installed, no configuration set, just the plain Linux distribution default installation. What do you do next? You might install your favorite configuration management agent - let's assume it is Puppet - and let it automatically bring all the VMs into a state which you defined in code.
+
+Move forward to now: Imagine you just deployed these Kubernetes Clusters using your favorite infrastructure as code tool on your favorite cloud infrastructure. They're still empty, no applications installed, no configuration set, just the plain Kubernetes distribution default installation. What do you do next?
+
+Say hello to _Project Syn_: Just install the agent (Steward) in to the empty cluster and let it bring the Kubernetes cluster into a state which you defined in code.
+
+Let's compare Project Syn to Puppet:
+
+* Puppet Server → Commodore: Catalog compilation
+* PuppetDB → Lieutenant: Inventory and facts
+* Puppet Agent → Steward and Argo CD: In-cluster agent
+* Hiera → Commodore with Kapitan: Hierarchical configuration structure
+* Puppet Module → Commodore Component
+
+So to summarize:
+
+> Project Syn is a set of tools helping to securely manage a fleet of Kubernetes clusters. It brings a hierarchical configuration management based on GitOps principles, reusable components and an inventory of information about all Kubernetes clusters.
+
+What's next?
+
+* Look at a list of xref:about/features.adoc[features]
+* Check out the xref:about/architecture.adoc[architecture]
+* Get started with the step-by-step xref:tutorials/getting-started.adoc[Getting Started] guide
