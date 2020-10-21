@@ -1,6 +1,6 @@
 # Introduction
 
-Imagine you just deployed these Virtual Machines using your favorite infrastructure as code tool on your favorite cloud infrastructure. They're still empty, no applications installed, no configuration set, just the plain Linux distribution default installation. What do you do next? You might install your favorite configuration management agent - let's assume it is Puppet - and let it automatically bring all the VMs into a state which you defined in code.
+Imagine you just deployed these Virtual Machines using your favorite infrastructure as code tool on your favorite cloud infrastructure. They're still empty, no applications installed, no configuration set, just the plain Linux distribution default installation. What do you do next? You might install your favorite configuration management agent - let's assume it's Puppet - and let it automatically bring all the VMs into a state which you defined in code.
 
 Move forward to now: Imagine you just deployed these Kubernetes Clusters using your favorite infrastructure as code tool on your favorite cloud infrastructure. They're still empty, no applications installed, no configuration set, just the plain Kubernetes distribution default installation. What do you do next?
 
