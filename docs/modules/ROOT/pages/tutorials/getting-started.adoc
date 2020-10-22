@@ -414,7 +414,7 @@ With these steps, the local `k3s` instance is now Syn enabled, has Argo CD runni
 [TIP]
 ====
 If you want or need to reset the bootstrap token, this is the way to go:
-Get the k3d Kubernetes API URL with `k3d kubeconfig get projectsyn` and replace `REPLACE_API_URL` in the command below:
+Get the Kubernetes API URL with `kubectl cluster-info` and replace `REPLACE_API_URL` in the command below:
 [source,shell]
 ----
 curl -k -H "${LIEUTENANT_AUTH}" -H "Content-Type: application/json-patch+json" -X PATCH -d '[{ "op": "remove", "path": "/status/bootstrapToken" }]' "REPLACE_API_URL/apis/syn.tools/v1alpha1/namespaces/lieutenant/clusters/${CLUSTER_ID}/status"
