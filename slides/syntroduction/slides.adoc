@@ -1,4 +1,4 @@
-:author: SIG Syn
+:author: 
 :doctitle: Introduction
 :email: ahoy@syn.tools
 :producer: VSHN AG
@@ -12,111 +12,49 @@
 
 image::{title-image}[width=750]
 
-== Project Syn! Syn?
+== Remember Virtual Machines?
 
-TIP: Syn is a Swedish word and translates to "vision"
+* Automated provisioning
+* Configuration Management!
 
-> Project Syn is a pre-integrated set of tools to provision, update, backup, observe and react/alert production applications on Kubernetes and in the cloud. It supports DevOps through full self-service and automation using containers, Kubernetes and GitOps.
+== Remember Kubernetes Clusters?
 
-== Why?
+* Automated provisioning
+* Configuration Management?
 
-Managing a fleet of Kubernetes clusters is hard - let's automate that!
-
-[.notes]
---
-* No such integrated thing existed
-* Don't reinvent the wheel wherever possible
-* Born out of the daily business needs
---
-
-== Why?
-
-A lot of questions to answer:
+== A lot to know
 
 * Where are all my clusters and to whom do they belong?
 * What do they look like (Distribution, Infrastructure, ...)
 * How do I bring all my configuration on to the cluster?
 * How can I have a common configuration across all clusters?
-* What does "managed" mean for a Kubernetes cluster?
 
 And more ...
 
-== Project Syn!
+== Project Syn
 
-icon:check-circle[size=3x]
+> Project Syn is a set of tools helping to securely manage a fleet of Kubernetes clusters. It brings a hierarchical configuration management based on GitOps principles, reusable components and an inventory of information about all Kubernetes clusters.
 
-Project Syn helps to answer these questions - and even more.
+== Comparison to the Known
 
-== Features
+Let's compare Project Syn to Puppet:
 
-Multi-Cluster and Multi-Tenant Management:: Keeping track of a fleet of Kubernetes clusters, Multi-Tenant aware.
+* Puppet Server → *Commodore*: Catalog compilation
+* PuppetDB → *Lieutenant*: Inventory and facts
+* Puppet Agent → *Steward* and Argo CD: In-cluster agent
+* Hiera → Commodore with Kapitan: Hierarchical configuration structure
+* Puppet Module → Commodore Component
 
-[.notes]
---
-* Inventory Service
-* Facts
-* Central information service for other Syn tools
---
+== Third-party Tooling
 
-== Features
+On the shoulders of giants:
 
-Full GitOps Operations:: GitOps automation with Argo CD and Git repo management.
+* https://kapitan.dev[Kapitan]
+* https://argoproj.github.io/argo-cd[Argo CD]
+* https://renovate.whitesourcesoftware.com[Renovate]
+* https://www.vaultproject.io[HashiCorp Vault]
 
-[.notes]
---
-* Argo CD as key utility
-* Lieutenant Operator to manage repositories
---
-
-== Features
-
-Tools Bootstrapping:: Getting a cluster part of Syn.
-
-[.notes]
---
-* Steward to bootstrap GitOps tooling into cluster
-* One-time install URL with bootstrap token
-* SSH deploy key automation
---
-
-== Features
-
-Configuration Management:: Customized manifests per cluster and tenant using a hierarchical configuration structure.
-Reusable Components:: Open Source Commodore Components.
-Default Toolset:: Set of composed Commodore Components.
-
-
-[.notes]
---
-* Commodore with Kapitan
-* Hierarchical configuration parameters
-* Tight integration with Lieutenant e.g. for Git repo location
-* Commodore Components as modules
-* Growing set of Open Source components
-Project Syn provided default toolset.
---
-
-== Features
-
-Automatically Maintained Components:: Component maintenance automation thanks to Renovate.
-
-[.notes]
---
-Renovate to leverage GitOps to automatically update Commodore Components
---
-
-== Features
-
-Secrets Management:: Deep integration into Vault with Kapitan.
-
-[.notes]
---
-* Secrets stored in Vault
-* References in GitOps
-* Revealed during apply phase on cluster
-* Doesn't leave cluster
-* Deep integration in Lieutenant
---
+And more ...
 
 == Architecture: Big Picture
 
@@ -168,122 +106,19 @@ Configuration Git repositories       ^                 |                        
                            +----------------------+                             +------------------------+
 ....
 
-== Architecture: Operator
+== Featuritis
 
-[ditaa, Lieutenant Operator, svg]
-....
-                   +--------------+
-                   |Lieutenant API|
-                   +-------+------+
-                           |
-Lieutenant Operator        v
-/--------------------------+------------------------------\
-|                                                         |
-|                 +-----------------+              c1AB   |
-|                 |Tenant     cBLU  |                     |
-|                 +----+-------+----+                     |
-|                      ^       |                          |
-|                      |       |                          |
-|          +-----------+       +--------+                 |
-|          |Belongs to                  |                 |
-|          |                            |                 |
-|          |                            | Generates       |
-|  +-------+---------+                  | Tenant          |
-|  |Cluster   cBLU   |                  | configuration   |
-|  +-------+---------+                  | Git repository  |
-|          |                            |                 |
-|          | Generates                  |                 |
-|          | Cluster Catalog            |                 |
-|          | Git repository             |                 |
-|          v                            v                 |
-|  +-------+--------+          +--------+-------+         |
-|  |GitRepo   cBLU  |          |GitRepo    cBLU |         |
-|  +----------------+          +----------------+         |
-|                                                         |
-\---------------------------------------------------------/
-....
-
-
-== Core Project Syn Tools
-
-Lieutenant API:: REST API to easily work with cluster and tenant objects.
-Lieutenant Operator:: Automation of cluster and tenant handling. Git repo management.
-Commodore:: Cluster catalog compilation engine using Kapitan.
-Steward:: In-cluster agent.
-
-== Third-party Tooling
-
-Important tools - integral part of Project Syn:
-
-* https://argoproj.github.io/argo-cd[Argo CD]
-* https://www.vaultproject.io[HashiCorp Vault]
-* https://kapitan.dev[Kapitan]
-* https://renovate.whitesourcesoftware.com[Renovate]
-* https://crossplane.io[Crossplane]
-* https://about.gitlab.com[GitLab]
-
-== Deep Dive
-
-Let's have a look at some details.
-
-== Deep Dive: Commodore Hierarchy
-
-. Component defaults
-. Global generic
-. Kubernetes distribution
-. Cloud provider
-. Cloud provider region
-. Customer- and cluster-specific configuration
-
-This is based on https://github.com/kapicorp/reclass[reclass].
-
-[.notes]
---
-* This hierarchy will be configurable as of a future version of Commodore
---
-
-== Deep Dive: Defaults Repo
-
-image::commodore-defaults-repo.png[width=750]
-
-(source: https://github.com/projectsyn/commodore-defaults)
-
-== Deep Dive: Source of Components
-
-image::commodore-defaults-components.png[width=750]
-
-== Deep Dive: Include Components
-
-image::commodore-defaults-classes.png[width=750]
-
-== Deep Dive: Parameters for Components
-
-image::commodore-defaults-parameters.png[width=750]
-
-== Deep Dive: Commodore Component
-
-----
-├── class // <1>
-│   ├── defaults.yml
-│   └── my-component.yml
-├── component // <2>
-│   ├── app.jsonnet
-│   └── main.jsonnet
-├── docs
-├── lib
-│   └── my-component.libjsonnet
-└── postprocess
-    └── filters.yml
-----
-
-<1> Default parameters and Kapitan configuration
-<2> Component implementation
+* Configuration Management for Kubernetes
+* Full GitOps Operations and Automation
+* Reusable Configuration Management Components
+* Secrets Management
+* Multi-Cluster and Multi-Tenant Management (Inventory)
 
 == Do It Yourself
 
 Browse to
 
-https://syn.tools/syn/tutorials/getting-started.html
+https://syn.fan/start
 
 and try it out for yourself
 
