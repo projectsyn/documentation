@@ -12,28 +12,58 @@
 
 image::{title-image}[width=750]
 
+[.notes]
+--
+Welcome to Project Syn!
+--
+
 == Remember Virtual Machines?
 
 * Automated provisioning
+* Many Virtual Machines
 * Configuration Management!
+
+[.notes]
+--
+* VMs automatically deployed, still empty, no apps, no config
+* Want to configure them by hand? NO!
+* Solution: Configuration Management Tool like Puppet
+* Install agent, register at server, wait and profit
+* Configuration drift? No, enforced by agent in VM
+* Multiple infrastructures and Linux distros? Abstracted by cfgmgmt tool
+* All defined as code
+--
 
 == Remember Kubernetes Clusters?
 
 * Automated provisioning
+* Many Kubernetes Cluster
 * Configuration Management?
 
-== A lot to know
+[.notes]
+--
+There was a time of just having one or two clusters, carefully hand-crafted.
 
-* Where are all my clusters and to whom do they belong?
-* What do they look like (Distribution, Infrastructure, ...)
-* How do I bring all my configuration on to the cluster?
-* How can I have a common configuration across all clusters?
+* Kubernetes cluster automatically deployed, still empty, no apps, no config
+* Want to configure them by hand? NO!
+* Solution: ?
+* What if you could just register the cluster, deploy an agent, wait and profit?
+* Smells like configuration management - just like if the cluster was "just a VM"
 
-And more ...
+And this brings us to Project Syn
+--
 
 == Project Syn
 
 > Project Syn is a set of tools helping to securely manage a fleet of Kubernetes clusters. It brings a hierarchical configuration management based on GitOps principles, reusable components and an inventory of information about all Kubernetes clusters.
+
+[.notes]
+--
+* It's not just one single tool and doesn't want to reinvent the wheel.
+* Re-using of already existing tools, glueing them together.
+* Bringing ideas upstream wherever possible and where it makes sense.
+* Re-usability is key!
+--
 
 == Comparison to the Known
 
@@ -42,8 +72,14 @@ Let's compare Project Syn to Puppet:
 * Puppet Server → *Commodore*: Catalog compilation
 * PuppetDB → *Lieutenant*: Inventory and facts
 * Puppet Agent → *Steward* and Argo CD: In-cluster agent
-* Hiera → Commodore with Kapitan: Hierarchical configuration structure
+* Hiera → Kapitan Reclass: Hierarchical configuration structure
 * Puppet Module → Commodore Component
+
+[.notes]
+--
+* Puppet gave a lot of ideas how the architecture will look like
+* Other configuration management tools may be similar
+--
 
 == Third-party Tooling
 
@@ -53,10 +89,22 @@ On the shoulders of giants:
 * https://argoproj.github.io/argo-cd[Argo CD]
 * https://renovate.whitesourcesoftware.com[Renovate]
 * https://www.vaultproject.io[HashiCorp Vault]
+* https://about.gitlab.com[GitLab]
 
 And more ...
 
-== Architecture: Big Picture
+[.notes]
+--
+Without these tools Project Syn wouldn't work as it does today:
+
+* *Kapitan*: Core tool for generating configuration with hierarchical configuration lookup
+* *Argo CD*: GitOps tooling, applying and enforcing configuration in-cluster
+* *Renovate*: Keeping components and software versions up-to-date
+* *Vault*: Storing secrets with tight integration in Kapitan
+* *GitLab*: Git repository management
+--
+
+== Architecture
 
 [ditaa, Project Syn, svg]
 ....
@@ -72,12 +120,12 @@ And more ...
        |                                 |          |        |                  |             |                       |
        |                                 +--------->+ Vault  +<-----------------|-----+       | Deployment            |
        |                                            | {s}    |                  |     |       | Reconciliation        |
-       |    Get cluster, tenant and                 +--------+                  |     |       |                       |
-       |    Git repo information                                                |     |       |                       |
+       |    Get Cluster, Tenant and                 +--------+                  |     |       |                       |
+       |    Git Repo information                                                |     |       |                       |
        |                                                                        |     |       v                       |
        |    /------------------------\  Push compiled +-----------------+       |   +-+-------+----------+            |
        |    |                        |  catalog       |                 |       |   |                    |            |
-       +----+ Commodore              +--------------->+ Cluster catalog +<------|---+ Argo CD            |            |
+       +----+ Commodore              +--------------->+ Cluster Catalog +<------|---+ Argo CD            |            |
             | cBLU                   |                | cGRE            |       |   |                    |            |
             \-----+------+--------+--/                +-----------------+       |   +--------------------+            |
                   ^      ^        ^                                             |                                     |
@@ -106,13 +154,50 @@ Configuration Git repositories       ^                 |                        
                            +----------------------+                             +------------------------+
 ....
 
-== Featuritis
+[.notes]
+--
+* Commodore is the main tool, generating configuration adapted and parametrized for a clusters
+* The generated catalog is pushed to a Git repository per cluster
+* Commodore get's all the information from Lieutenant and from input Git repositories
+* Commodore components are the reusable parts to compose configuration
+* Lieutenant stores Tenants and Clusters and manages Git repositories
+* Steward bootstraps Argo CD into a cluster and configures it
+* Steward generates an SSH deploy key and Lieutenant configures access on the Git repo
+* Argo CD connects to the cluster Git catalog repository and retrieves the YAMLs
+* Kapitan reveals secrets only on the cluster during apply, accessing the Vault
+--
+
+== Features Conclusion
 
 * Configuration Management for Kubernetes
 * Full GitOps Operations and Automation
 * Reusable Configuration Management Components
 * Secrets Management
 * Multi-Cluster and Multi-Tenant Management (Inventory)
+
+[.notes]
+--
+This is just a conclusion what Project Syn offers
+--
+
+== What's coming
+
+Development is in full swing:
+
+* Renaming of tools
+* Automated catalog generation
+* API replacement by plain Kubernetes API
+* User experience improvements
+* Syn CLI
+* Component Hub
+
+Roadmap: https://syn.tools/syn/about/roadmap.html
+
+[.notes]
+--
+* Roadmap is subject to change and has a lot more details.
+* Planning happens all on GitHub with issues and projects there.
+--
 
 == Do It Yourself
 
@@ -122,13 +207,22 @@ https://syn.fan/start
 
 and try it out for yourself
 
+[.notes]
+--
+* If you need help, ping is in the chat!
+* Please be aware that the project is enhancing fast and the guid can break from time to time.
+* We try hard to make sure the guide works all the time.
+--
+
 == Further resources
 
 * Project site: https://syn.tools
-* Getting Started Guide: https://syn.tools/syn/tutorials/getting-started.html
 * Commodore Component Tutorial: https://syn.tools/tuto/index.html
-* Roadmap: https://syn.tools/syn/about/roadmap.html
 * GitHub: https://github.com/projectsyn
+
+[.notes]
+--
+--
 
 == Thanks!
 
