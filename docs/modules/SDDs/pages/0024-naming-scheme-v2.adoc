@@ -55,7 +55,7 @@ Examples:
 Descriptive names will tie functionality of the tooling to the name.
 Allthough this isn't a drawback at first sight, it might become a drawback after some time as the tool advances and the functionality changes.
 The tool would then need to be renamed which might impose a lot of work or a new tool with a new name would need to be created.
-It's not always easy to detect that the purpose of a tool has changed but might become obvious while the project proceeds and new knowledge get's gained.
+It's not always easy to detect that the purpose of a tool has changed but might become obvious as the project proceeds and new knowledge is gained.
 
 === Functionality hard to describe
 
