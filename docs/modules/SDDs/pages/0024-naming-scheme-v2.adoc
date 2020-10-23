@@ -1,0 +1,61 @@
+= SDD 0024 - Project Syn Tools Naming Scheme v2
+
+:sdd_author:    Tobias Brunner
+:sdd_owner:
+:sdd_reviewers:
+:sdd_date:      2020-10-23
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+Naming is hard, this page helps to make it easy. It describes the rules to name Project Syn tools.
+====
+
+== Motivation
+
+In xref:0002-naming-scheme.adoc[SDD 0002 - Naming Scheme] a naming scheme was defined for Project Syn tools which turned out to be sub-optimal.
+The naming of the tools to be non-descriptive is a high barrier of entry in to the world of Project Syn.
+This SDD describes a more descriptive naming scheme which solves this issue.
+
+=== Goals
+
+* Naming scheme which is descriptive
+* Applicable to all new tools from now on
+
+=== Non-Goals
+
+* Renaming of existing tools (like Lieutenant, Steward and Commodore) as they will change over time anyways, ultimately being replaced by newer tools.
+
+== Design Proposal
+
+`syn-$type[-$purpose]`
+
+`$type`:: Describes what kind of tool it is.
++
+Examples for types:
+
+* Operator
+* Agent
+* CLI
+* Component
+
+`[-$purpose]`:: Optional to describe purpose of the tool
+
+Examples:
+
+* syn-cli-compile
+* syn-operator-tenant
+* syn-agent
+
+== Drawbacks
+
+Descriptive names will tie functionality of the tooling to the name.
+If the tool advances and the functionality changes the name might not reflect the purpose anymore.
+The tool would then need to be renamed which might impose a lot of work or a new tool with a new name would need to be created.
+It's not always easy to detect that the purpose of a tool has changed.
+
+== Alternatives
+
+Use non-descriptive and fictive names, which would impose that this SDD won't go into effect.
