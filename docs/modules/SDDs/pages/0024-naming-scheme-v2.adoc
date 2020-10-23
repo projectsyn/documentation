@@ -51,7 +51,7 @@ Examples:
 
 === Allowed deviations between tool and binary name
 
-A tool's binary is allowed to deviate as long as it is discoverable with `syn<Tab><Tab>`, and the suffix is well known as a particular type of tool.
+A tool's binary is allowed to deviate as long as it's discoverable with `syn<Tab><Tab>`, and the suffix is well known as a particular type of tool.
 
 Examples where deviation is OK:
 
