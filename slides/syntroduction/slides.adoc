@@ -195,6 +195,7 @@ Roadmap: https://syn.tools/syn/about/roadmap.html
 
 [.notes]
 --
+* Although Project Syn is used in production and in several projects, it's still in full development towards a 1.0 release.
 * Roadmap is subject to change and has a lot more details.
 * Planning happens all on GitHub with issues and projects there.
 --
