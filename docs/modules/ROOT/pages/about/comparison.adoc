@@ -1,5 +1,9 @@
 = Comparison to Similar Tools
 
+This page compares Project Syn to similar tools in terms of functionality.
+The compared tools might change over time as they develop further.
+Therefore the comparison reflects the state at the time of the writing (see GitHub for details of the writing time).
+
 == Rancher Fleet
 
 https://fleet.rancher.io[Fleet is GitOps at scale].
@@ -26,12 +30,12 @@ https://github.com/caos/orbos[ORBOS - GitOps everything].
 The tooling is composed of three main components:
 
 * ORBITER: Orchestration tooling to spin up and manage Kubernetes clusters.
-* BOOM: Kubernetes Operator to install and managed system tooling on a Kubernetes clusters.
+* BOOM: Kubernetes Operator to install and manage system tooling on a Kubernetes clusters.
 * MISSION: Web UI to manage Kubernetes clusters, closed source.
 
 In contrary to Project Syn ORBOS focuses on the full lifecycle of Kubernetes clusters, whereas Project Syn doesn't provide means to provision and managed Kubernetes Clusters.
-Project Syn delegates this part to specialized tooling and focuses on managing the content of a Kubernetes cluster.
+Project Syn delegates this part to specialized tooling and focuses on managing the content on a Kubernetes cluster.
 
 The Kubernetes Operator BOOM installs and manages a hardcoded set of tools and doesn't allow deviation from that list. Project Syn instead provides fully flexible configuration management based on composable and reusable components.
 
-None of these three tools provides means of securely managing secrets like Project Syn with Kapitan and Vault does.
+None of these three ORBOS tools provide means of securely managing secrets like Project Syn with Kapitan and Vault does.
