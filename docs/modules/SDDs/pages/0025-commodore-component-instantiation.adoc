@@ -1,0 +1,100 @@
+= SDD 0025 - Commodore Component Instantiation
+
+:sdd_author:    Simon Gerber
+:sdd_owner:     Simon Gerber
+:sdd_reviewers: Reviewer names
+:sdd_date:      2020-10-23
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This SDD describes possible options to allow Commodore components to be instantiated multiple times per cluster.
+It additionally defines the option we've chosen to implement.
+====
+
+== Motivation
+
+Currently Commodore components don't support installing multiple instances of the software they manage.
+There are already a some components for which installing multiple instances is a common use case, such as the https://github.com/projectsyn/component-nfs-client-provisioner/[nfs-client-provisioner component].
+
+=== Goals
+
+* Define how we want to allow Commodore components to be instantiated multiple times per cluster.
+
+=== Non-Goals
+
+* Define a solution for managing multiple instances of services for the customer on a Syn-enabled cluster.
+
+== Design Proposal
+
+Commodore will provide a well-defined structure for instantiating components and providing per-instance parameters.
+Commodore will provide the instance's identifier ("name") to the component in a well-defined way.
+Component authors must explicitly mark their components as supporting instantiation.
+Similar to Helm charts, the components themselves must make sure to not cause any naming collisions of objects
+This is required both for namespaces and non-namespaced resources.
+By default, Commodore will place component instances in a single namespace.
+
+Rather than requiring users to manually implement "common" parameters, Commodore may provide support for defining "common" parameters which are used for all instances unless overridden.
+
+The astute reader will notice that the proposed design combines features from both "pure" approaches listed in <<Alternatives>>.
+
+=== User Stories
+
+* As a user, I would like to configure multiple instances of `nfs-client-provisioner` which provision volumes on different NFS shares on my Project Syn-managed clusters.
+  Ideally, I would like to be able to provide shared configuration options, such as mount options only once.
+
+== Alternatives
+
+=== Multi-instance aware components
+
+One alternative approach for supporting instantiating components, is to simply leave implementation to the component authors.
+A pure form of this approach needs no changes in Commodore, but has some significant drawbacks from a usability perspective.
+For this approach, component authors need to implement multi-instance support in each component individually.
+
+This approach works well for infrastructure tooling for which a Kubernetes operator exists.
+If an operator exists, the component can install the operator and associated CRDs, and can render instances as custom resources for the operator to provision.
+
+The main drawback of the pure approach is that it may not be feasible to implement without some changes in Commodore for components which use Helm charts as their base, unless the Helm chart exposes a similar structure.
+The reason for this is that Kapitan's Helm templating is expressed in the reclass inventory, and reclass isn't flexible enough to instantiate multiple copies of a part of the hierarchy based on another key in the inventory.
+
+While it's ultimately left to the component authors, we assume that many components will expose the multi-instance nature of the component in `parameters.<component-name>`.
+Taking `nfs-client-provisioner` as our working example, the parameters structure might look roughly as reproduced below.
+
+[source,yaml]
+----
+parameters:
+  nfs_client_provisioner:
+    namespace: ...
+    common:
+      host: ...
+    instances:
+      instanceA:
+        path: ...
+      instanceB:
+        path: ...
+      instanceC:
+        host: ...
+        path: ...
+----
+
+In this example structure, the component allows users to define configurations which are shared between multiple (but maybe not all) instances in a key `common`.
+Instances are configured in key `instances`, and keys in `instances` are used as instance identifiers.
+This hypothetical multi-instance-aware nfs-client-provisioner component includes internal logic which allows users to only specify overrides for instances and fills in missing keys with their counterparts defined in `common`.
+
+=== Commodore support for component instantiation
+
+The other alternative approach is to not make components multi-instance aware, but instead implement support for instantiating a component multiple times in Commodore.
+The pure form of this approach would make all components support multiple instances without any changes to the component.
+This would potentially scale better, as component authors won't have to reinvent the wheel for every component that needs multi-instance support.
+
+However, a pure form of this approach has different problems, as Commodore may need to extensively rewrite component implementations to ensure that creating multiple instances of a component doesn't result in identifier conflicts.
+
+For this approach, Commodore will expect an identical structure in `parameters` for each component instance .
+Users wishing to instantiate a component multiple times need to adhere to Commodore's expected structure and provide a full set of parameters for each instance.
+Users are free to use reclass references to share common parameter values between instances.
+
+== References
+
+The original discussion resulting in this SDD can be found in https://github.com/projectsyn/commodore/issues/221[projectsyn/commodore#221].
