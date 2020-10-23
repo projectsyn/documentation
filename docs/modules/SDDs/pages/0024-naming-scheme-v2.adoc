@@ -16,7 +16,7 @@ Naming is hard, this page helps to make it easy. It describes the rules to name 
 == Motivation
 
 In xref:0002-naming-scheme.adoc[SDD 0002 - Naming Scheme] a naming scheme was defined for Project Syn tools which turned out to be sub-optimal.
-The naming of the tools to be non-descriptive is a high barrier of entry in to the world of Project Syn.
+Having tools with non-descriptive names increases the (already relatively high) barrier of entry into the world of Project Syn.
 This SDD describes a more descriptive naming scheme which solves this issue.
 
 === Goals
