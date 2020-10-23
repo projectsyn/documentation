@@ -32,7 +32,7 @@ This SDD describes a more descriptive naming scheme which solves this issue.
 
 `syn-$type[-$purpose]`
 
-`$type`:: Describes what kind of tool it is.
+`$type`:: Describes the kind of the tool.
 +
 Examples for types:
 
