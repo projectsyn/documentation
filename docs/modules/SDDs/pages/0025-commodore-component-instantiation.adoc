@@ -17,7 +17,7 @@ It additionally defines the option we've chosen to implement.
 == Motivation
 
 Currently Commodore components don't support installing multiple instances of the software they manage.
-There are already a some components for which installing multiple instances is a common use case, such as the https://github.com/projectsyn/component-nfs-client-provisioner/[nfs-client-provisioner component].
+There are already some components for which installing multiple instances is a common use case, such as the https://github.com/projectsyn/component-nfs-client-provisioner/[nfs-client-provisioner component].
 
 === Goals
 
@@ -31,9 +31,9 @@ There are already a some components for which installing multiple instances is a
 
 Commodore will provide a well-defined structure for instantiating components and providing per-instance parameters.
 Commodore will provide the instance's identifier ("name") to the component in a well-defined way.
-Component authors must explicitly mark their components as supporting instantiation.
+Component authors must explicitly declare that their component supports instantiation.
 Similar to Helm charts, the components themselves must make sure to not cause any naming collisions of objects
-This is required both for namespaces and non-namespaced resources.
+This is required both for namespaced and non-namespaced resources.
 By default, Commodore will place component instances in a single namespace.
 
 Rather than requiring users to manually implement "common" parameters, Commodore may provide support for defining "common" parameters which are used for all instances unless overridden.
