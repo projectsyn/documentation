@@ -18,7 +18,7 @@ In Project Syn the configuration is generated and stored in a Git repository per
 These generated objects are then applied as-is directly on the destination cluster which gets it by accessing the Git repository with Argo CD.
 
 Together with Kapitan and Vault Project Syn solves the issue of storing secrets in a secure way.
-Fleet does not provide any solution for that out-of-the box.
+Fleet doesn't provide any solution for that out-of-the box.
 
 Bootstrapping Fleet into a destination cluster is done using a bootstrap token which is very similar to Project Syn.
 Fleet doesn't need any API server and does everything via the Kubernetes API while Project Syn relies on a specialized API which stores it's data on the underlying Kubernetes cluster.
