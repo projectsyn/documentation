@@ -39,7 +39,6 @@ Examples for types:
 * Operator
 * Agent
 * CLI
-* Component
 
 `[-$purpose]`:: Optional to describe purpose of the tool
 
@@ -51,10 +50,16 @@ Examples:
 
 == Drawbacks
 
+=== Name tied to functionality
+
 Descriptive names will tie functionality of the tooling to the name.
-If the tool advances and the functionality changes the name might not reflect the purpose anymore.
+Allthough this is not a drawback at first sight, it might become a drawback after some time as the tool advances and the functionality changes.
 The tool would then need to be renamed which might impose a lot of work or a new tool with a new name would need to be created.
-It's not always easy to detect that the purpose of a tool has changed.
+It's not always easy to detect that the purpose of a tool has changed but might become obvious while the project proceeds and new knowledge get's gained.
+
+=== Functionality hard to describe
+
+It's not always easy to describe the functionality in one single word and from time to time this will make it hard to find a matching name.
 
 == Alternatives
 
