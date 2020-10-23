@@ -55,7 +55,7 @@ A tool's binary is allowed to deviate as long as it's discoverable with `syn<Tab
 
 Examples where deviation is OK:
 
-* The Syn Catalog Compiler, could have the binary name `syncc`, because nobody wants to type `syn-catalog-compiler`, and `cc` is well known as indicating a compiler (technically `cc` is the suffix indicating a C compiler, but luckily catalog also starts with a c).
+* The Syn Catalog Compiler could have the binary name `syncc`, because nobody wants to type `syn-catalog-compiler`, and `cc` is well known as indicating a compiler (technically `cc` is the suffix indicating a C compiler, but luckily catalog also starts with a c).
 * The Syn CLI could have the binary name `synctl` to match `kubectl`. `kubectl` should be immediately familiar to all users of Project Syn, so it would be nice if the Project Syn CLI would have a matching binary name.
 
 == Drawbacks
