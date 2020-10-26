@@ -8,6 +8,7 @@
 * xref:about/contribution_guide.adoc[Contribution Guide]
 * xref:about/code_of_conduct.adoc[Code of Conduct]
 * xref:about/glossary.adoc[Glossary]
+* xref:about/comparison.adoc[Comparison]
 
 .Tutorials
 * xref:tutorials/getting-started.adoc[Getting Started with Project Syn]

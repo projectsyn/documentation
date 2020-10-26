@@ -1,0 +1,43 @@
+= Comparison to Similar Tools
+
+This page compares Project Syn to similar tools in terms of functionality.
+The compared tools might change over time as they develop further.
+Therefore the comparison reflects the state at the time of the writing (see GitHub for details of the writing time).
+
+== Rancher Fleet
+
+https://fleet.rancher.io[Fleet is GitOps at scale].
+
+The main goal of Fleet is to deploy applications to remote clusters, called the Fleet agents, whereas Project Syn focuses on generating configuration prepared for each cluster, depending on the properties of the destination cluster.
+
+Fleet implements its own GitOps model, rather than reusing existing tools like Flux or Argo CD like Project Syn does.
+
+Git repositories are watched for changes by the central component called Fleet Manager.
+Deployment artifacts are prepared for deployment to the destination clusters by generating a Helm Chart and putting it into a CRD which is transferred to the destination cluster by the Fleet agent.
+On the destination cluster the Helm Chart is installed.
+In Project Syn the configuration is generated and stored in a Git repository per cluster.
+These generated objects are then applied as-is directly on the destination cluster by Argo CD.
+Argo CD is configured to fetch the objects from the cluster Git repository.
+
+Together with Kapitan and Vault Project Syn solves the issue of storing secrets in a secure way.
+Fleet doesn't provide any solution for that out-of-the box.
+
+Bootstrapping Fleet into a destination cluster is done using a bootstrap token which is very similar to Project Syn.
+Fleet doesn't need any API server and does everything via the Kubernetes API while Project Syn relies on a specialized API which stores it's data on the underlying Kubernetes cluster.
+
+== CAOS ORBOS
+
+https://github.com/caos/orbos[ORBOS - GitOps everything].
+
+The tooling is composed of three main components:
+
+* ORBITER: Orchestration tooling to spin up and manage Kubernetes clusters.
+* BOOM: Kubernetes Operator to install and manage system tooling on a Kubernetes cluster.
+* MISSION: Web UI to manage Kubernetes clusters, closed source.
+
+Contrary to Project Syn, ORBOS focuses on the full lifecycle of Kubernetes clusters, whereas Project Syn doesn't provide support for provisioning and managing Kubernetes Clusters themselves.
+Instead, Project Syn delegates cluster lifecycle management to specialized tooling and focuses on managing the content on a Kubernetes cluster.
+
+The Kubernetes Operator BOOM installs and manages a hardcoded set of tools and doesn't allow deviation from that list. Project Syn instead provides fully flexible configuration management based on composable and reusable components.
+
+None of the ORBOS tools provide a means of securely managing secrets like Project Syn does with Kapitan and Vault.
