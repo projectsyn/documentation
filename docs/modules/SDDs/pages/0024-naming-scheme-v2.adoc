@@ -4,7 +4,7 @@
 :sdd_owner:
 :sdd_reviewers:
 :sdd_date:      2020-10-23
-:sdd_status:    draft
+:sdd_status:    accepted
 include::partial$meta-info-table.adoc[]
 
 [NOTE]
