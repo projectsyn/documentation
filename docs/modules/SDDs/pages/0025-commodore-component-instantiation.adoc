@@ -34,9 +34,10 @@ Commodore will provide the instance's identifier ("name") to the component in a 
 Component authors must explicitly declare that their component supports instantiation.
 Similar to Helm charts, the components themselves must make sure to not cause any naming collisions of objects
 This is required both for namespaced and non-namespaced resources.
-By default, Commodore will place component instances in a single namespace.
+Commodore won't modify the `parameters.<component-name>.namespace` field for instantiated components.
+Component authors need to explicitly implement a namespace per instance, if they so desire.
 
-Rather than requiring users to manually implement "common" parameters, Commodore may provide support for defining "common" parameters which are used for all instances unless overridden.
+Rather than requiring users to manually implement "common" parameters, Commodore will transparently merge instance and "common" parameters by merging the instance parameters into `parameters.<component-name>` in each Kapitan target.
 
 The astute reader will notice that the proposed design combines features from both "pure" approaches listed in <<Alternatives>>.
 
@@ -44,6 +45,50 @@ The astute reader will notice that the proposed design combines features from bo
 
 * As a user, I would like to configure multiple instances of `nfs-client-provisioner` which provision volumes on different NFS shares on my Project Syn-managed clusters.
   Ideally, I would like to be able to provide shared configuration options, such as mount options only once.
+
+=== Implementation Notes
+
+We could implement component instantiation using aliasing.
+The aliasing would be expressed by the keyword "as" in the entries in `applications`.
+If an instance-aware component is added without an alias, its regular name would be used as the instance name.
+For the aliased instances, users can provide overrides in `parameters.<alias>`, with dashes in the alias name replaced by underscores.
+
+Taking `nfs-client-provisioner` as the example, this could look somewhat as shown below.
+
+[source,yaml]
+----
+applications:
+  - nfs-client-provisioner
+  - nfs-client-provisioner as nfs-fast
+  - nfs-client-provisioner as nfs-slow
+
+parameters:
+  nfs_client_provisioner:
+    host: nfs.example.com # shared between all instances
+    path: /nfs # used for the unaliased instance
+  nfs_fast:
+    path: /path/to/fast/share # used for alias nfs_fast
+  nfs_slow:
+    path: /path/to/slow/share # used for alias nfs_slow
+----
+
+For the alias approach, Commodore can generate customized targets for each alias.
+Taking the `nfs-fast` alias as an example the target would look as follows.
+
+.inventory/targets/nfs-fast.yml
+[source,yaml]
+----
+classes:
+  - [ ... default classes ... ]
+  - global.commodore
+  - components.nfs-client-provisioner
+parameters:
+  kapitan:
+    vars:
+      target: nfs-fast
+    nfs_client_provisioner: ${nfs_fast}
+----
+
 
 == Alternatives
 
