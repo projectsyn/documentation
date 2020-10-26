@@ -14,7 +14,8 @@ image::{title-image}[width=750]
 
 [.notes]
 --
-Welcome to Project Syn!
+Hi. I'm Tobias and I'll introduce Project Syn to you.
+At the end of this talk you will have an idea what Project Syn is all about.
 --
 
 == Remember Virtual Machines?
@@ -25,11 +26,13 @@ Welcome to Project Syn!
 
 [.notes]
 --
-* VMs automatically deployed, still empty, no apps, no config
-* Want to configure them by hand? NO!
-* Solution: Configuration Management Tool like Puppet
+* VMs usually automatically deployed
+* Still empty after VM deployment: No apps, no config
+* Did you configure them by hand? NO! Hopefully not.
+* Solution: Configuration Management Tool like Puppet, Chef, SaltStack or Ansible.
 * Install agent, register at server, wait and profit
-* Configuration drift? No, enforced by agent in VM
+* Change configuration? Manually? NO! But there was sometimes a need to do so anyways.
+* Configuration drift? Enforced by agent in VM, manual configuration reverted.
 * Multiple infrastructures and Linux distros? Abstracted by cfgmgmt tool
 * All defined as code
 --
@@ -59,26 +62,29 @@ And this brings us to Project Syn
 
 [.notes]
 --
-* It's not just one single tool and doesn't want to reinvent the wheel.
-* Re-using of already existing tools, glueing them together.
-* Bringing ideas upstream wherever possible and where it makes sense.
-* Re-usability is key!
+* Project Syn solves your configuration management needs for managing a fleet of Kubernetes clusters!
+* It is a set of tools to securely manage them, just like they where VMs. 
+* Re-using of already existing tools, glueing them together with custom tooling.
+* With its hierarchical configuration management and having GitOps at it's core it's capabable of taking care of a lot of Kubernetes clusters.
+* Re-usability is key
+* The concept of Commodore Components helps users of Project Syn to not have to re-invent the wheel and to profit by having access to carefully crafted components having best practices already backed in.
 --
 
 == Comparison to the Known
 
 Let's compare Project Syn to Puppet:
 
+* Puppet Module → *Commodore Component*
 * Puppet Server → *Commodore*: Catalog compilation
 * PuppetDB → *Lieutenant*: Inventory and facts
 * Puppet Agent → *Steward* and Argo CD: In-cluster agent
 * Hiera → Kapitan Reclass: Hierarchical configuration structure
-* Puppet Module → Commodore Component
 
 [.notes]
 --
+* Project Syn is inspired by Puppet
 * Puppet gave a lot of ideas how the architecture will look like
-* Other configuration management tools may be similar
+* Other configuration management tools may be similar 
 --
 
 == Third-party Tooling
@@ -184,12 +190,11 @@ This is just a conclusion what Project Syn offers
 
 Development is in full swing:
 
-* Renaming of tools
 * Automated catalog generation
-* API replacement by plain Kubernetes API
-* User experience improvements
+* Lieutenant API replacement by plain Kubernetes API
+* User Experience Improvements
 * Syn CLI
-* Component Hub
+* Commodore Component Hub
 
 Roadmap: https://syn.tools/syn/about/roadmap.html
 
@@ -221,15 +226,11 @@ and try it out for yourself
 * Commodore Component Tutorial: https://syn.tools/tuto/index.html
 * GitHub: https://github.com/projectsyn
 
-[.notes]
---
---
-
 == Thanks!
 
 image::{title-image}[width=750]
 
-{author} – {email}
+{email}
 
 [.small]
 _Project Sponsor_ +
