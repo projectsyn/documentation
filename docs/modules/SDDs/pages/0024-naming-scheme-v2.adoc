@@ -1,0 +1,79 @@
+= SDD 0024 - Project Syn Tools Naming Scheme v2
+
+:sdd_author:    Tobias Brunner
+:sdd_owner:
+:sdd_reviewers:
+:sdd_date:      2020-10-23
+:sdd_status:    accepted
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+Naming is hard, this page helps to make it easy. It describes the rules to name Project Syn tools.
+====
+
+== Motivation
+
+In xref:0002-naming-scheme.adoc[SDD 0002 - Naming Scheme] a naming scheme was defined for Project Syn tools which turned out to be sub-optimal.
+Having tools with non-descriptive names increases the (already relatively high) barrier of entry into the world of Project Syn.
+This SDD describes a more descriptive naming scheme which solves this issue.
+
+=== Goals
+
+* Naming scheme which is descriptive
+* Applicable to all new tools from now on
+
+=== Non-Goals
+
+* Renaming of existing tools (like Lieutenant, Steward and Commodore) as they will change over time anyways, ultimately being replaced by newer tools.
+
+== Design Proposal
+
+=== Display Names
+
+Tools must have descriptive display names of the form `Syn ${purpose} ${type}`.
+
+`$purpose` (Optional):: Describes purpose of the tool.
+
+`$type`:: Describes the kind of the tool.
++
+Examples:
+
+* Operator
+* Agent
+* CLI
+* Compiler
+
+Examples:
+
+* "Syn Catalog Compiler"
+* "Syn Tenant Operator"
+* "Syn Agent"
+* *Syn CLI"
+
+=== Binary Name
+
+A tool's binary must be discoverable with `syn<Tab><Tab>`, and the suffix well known as a particular type of tool.
+
+Examples:
+
+* The Syn Catalog Compiler could have the binary name `syncc`, because nobody wants to type `syn-catalog-compiler`, and `cc` is well known as indicating a compiler (technically `cc` is the suffix indicating a C compiler, but luckily catalog also starts with a c).
+* The Syn CLI could have the binary name `synctl` to match `kubectl`. `kubectl` should be immediately familiar to all users of Project Syn, so it would be nice if the Project Syn CLI would have a matching binary name.
+
+== Drawbacks
+
+=== Name tied to functionality
+
+Descriptive names will tie functionality of the tooling to the name.
+Allthough this isn't a drawback at first sight, it might become a drawback after some time as the tool advances and the functionality changes.
+The tool would then need to be renamed which might impose a lot of work or a new tool with a new name would need to be created.
+It's not always easy to detect that the purpose of a tool has changed but might become obvious as the project proceeds and new knowledge is gained.
+
+=== Functionality hard to describe
+
+It's not always easy to describe the functionality in one single word and from time to time this will make it hard to find a matching name.
+
+== Alternatives
+
+Use non-descriptive and fictive names, which would impose that this SDD won't go into effect.

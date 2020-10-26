@@ -4,13 +4,13 @@
 :sdd_owner:     SIG Syn
 :sdd_reviewers: SIG Syn
 :sdd_date:      2019-10-18
-:sdd_status:    draft
+:sdd_status:    obsolete
 include::partial$meta-info-table.adoc[]
 
 [NOTE]
 .Summary
 ====
-This defines the naming scheme for all SYN components.
+This SDD has been obsoleted by xref:0024-naming-scheme-v2.adoc[SDD 0024 - Project Syn Tools Naming Scheme v2]
 ====
 
 == Motivation
