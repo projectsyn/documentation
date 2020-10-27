@@ -2,9 +2,9 @@
 
 :sdd_author:    Simon Gerber
 :sdd_owner:     Simon Gerber
-:sdd_reviewers: Reviewer names
+:sdd_reviewers: SIG Syn
 :sdd_date:      2020-10-23
-:sdd_status:    draft
+:sdd_status:    accepted
 include::partial$meta-info-table.adoc[]
 
 [NOTE]
