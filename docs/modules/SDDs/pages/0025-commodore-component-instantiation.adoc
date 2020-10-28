@@ -32,7 +32,7 @@ There are already some components for which installing multiple instances is a c
 Commodore will provide a well-defined structure for instantiating components and providing per-instance parameters.
 Commodore will provide the instance's identifier ("name") to the component in a well-defined way.
 Component authors must explicitly declare that their component supports instantiation.
-Similar to Helm charts, the components themselves must make sure to not cause any naming collisions of objects
+Similar to Helm charts, the components themselves must make sure to not cause any naming collisions of objects.
 This is required both for namespaced and non-namespaced resources.
 Commodore won't modify the `parameters.<component-name>.namespace` field for instantiated components.
 Component authors need to explicitly implement a namespace per instance, if they so desire.
