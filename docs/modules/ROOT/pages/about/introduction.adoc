@@ -1,4 +1,4 @@
-# Introduction
+= Introduction
 
 Imagine you just deployed these Virtual Machines using your favorite infrastructure as code tool on your favorite cloud infrastructure. They're still empty, no applications installed, no configuration set, just the plain Linux distribution default installation. What do you do next? You might install your favorite configuration management agent - let's assume it's Puppet - and let it automatically bring all the VMs into a state which you defined in code.
 
@@ -23,3 +23,9 @@ What's next?
 * Look at a list of xref:about/features.adoc[features]
 * Check out the xref:about/architecture.adoc[architecture]
 * Get started with the step-by-step xref:tutorials/getting-started.adoc[Getting Started] guide
+
+== 2020-10-29 Cloud Native Bern Meetup
+
+Introduction to Project Syn at the https://www.meetup.com/cloudnativebern/events/272975884/[Cloud Native Bern Meetup]:
+
+video::4hSw_iwnmB0[youtube,width=600,height=400,theme=light]
