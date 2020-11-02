@@ -24,7 +24,7 @@ What's next?
 * Check out the xref:about/architecture.adoc[architecture]
 * Get started with the step-by-step xref:tutorials/getting-started.adoc[Getting Started] guide
 
-== 2020-10-29 Cloud Native Bern Meetup
+== 2020–10–29 Cloud Native Bern Meetup
 
 Introduction to Project Syn at the https://www.meetup.com/cloudnativebern/events/272975884/[Cloud Native Bern Meetup]:
 

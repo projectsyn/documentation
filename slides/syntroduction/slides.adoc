@@ -1,4 +1,4 @@
-:author: 
+:author:
 :doctitle: Introduction
 :email: ahoy@syn.tools
 :producer: VSHN AG
