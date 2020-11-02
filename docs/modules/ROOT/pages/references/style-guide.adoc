@@ -419,9 +419,9 @@ local Animal(name, age) = { … }
 
 === Defining dependencies
 
-* Download external dependencies to a path within the components directory.
-* Add that dirctory to the components `.gitignore` file.
-* Ensure the outpt path changes when the upstream change.
+* Download external dependencies to a path within the component's directory.
+* Add that directory to the component's `.gitignore` file.
+* Ensure the output path changes when the upstream changes.
 +
 [CAUTION]
 ====
