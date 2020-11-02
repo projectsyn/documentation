@@ -414,3 +414,29 @@ local Animal(name, age) = { … }
 
 * Put a  https://www.doxygen.nl/manual/docblocks.html[Docblock] at the top of each Jsonnet file or library to indicate its purpose.
 * Exceptions can be made for `app.jsonnet` and `main.jsonnet`.
+
+== Commodore component style
+
+=== Defining dependencies
+
+* Download external dependencies to a path within the component's directory.
+* Add that directory to the component's `.gitignore` file.
+* Ensure the output path changes when the upstream changes.
++
+[CAUTION]
+====
+Commodore doesn't delete those files between catalog compiles.
+If the file is already present, it won't be downloaded again.
+====
+
+[source,jsonnet]
+----
+parameters:
+  kapitan:
+    dependencies:
+      # CRDs
+      - type: https
+        source: https://raw.githubusercontent.com/argoproj/argo-cd/${argocd:git_tag}/manifests/crds/application-crd.yaml
+        output_path: dependencies/argocd/manifests/${argocd:git_tag}/crds/application-crd.yaml
+[…]
+----
