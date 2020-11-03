@@ -417,15 +417,15 @@ local Animal(name, age) = { … }
 
 == Commodore component style
 
-=== Defining dependencies
+=== Defining HTTP(S) dependencies
 
-* Download external dependencies to a path within the component's directory.
+* Download external HTTP(S) dependencies to a path within the component's directory.
 * Add that directory to the component's `.gitignore` file.
 * Ensure the output path changes when the upstream changes.
 +
 [CAUTION]
 ====
-Commodore doesn't delete those files between catalog compiles.
+Commodore doesn't delete https://kapitan.dev/external_dependencies/#http-type[HTTP(S) dependencies] between catalog compiles.
 If the file is already present, it won't be downloaded again.
 ====
 
