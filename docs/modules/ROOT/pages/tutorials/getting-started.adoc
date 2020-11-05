@@ -58,23 +58,25 @@ Install *Lieutenant Operator* with the following commands:
 [source,shell]
 ----
 # CRDs (global scope)
-kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.3.0"
+kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.4.2"
 
 # Operator deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.3.0"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.4.2"
 
 # Operator configuration
 kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator \
-  SKIP_VAULT_SETUP=true \
   DEFAULT_DELETION_POLICY=Delete \
-  LIEUTENANT_DELETE_PROTECTION=false
+  DEFAULT_GLOBAL_GIT_REPO_URL=https://github.com/projectsyn/getting-started-commodore-defaults \
+  LIEUTENANT_DELETE_PROTECTION=false \
+  SKIP_VAULT_SETUP=true
 ----
 
-The environment variables will configure Lieutenant Operator to:
+These environment variables will configure Lieutenant Operator to:
 
-* not use Hashicorp Vault (don't do this for production deployments)
-* delete external resources by default (good for cleaning up after this guide is finished)
-* not set deletion protection annotations
+* not set deletion protection annotations (`DEFAULT_DELETION_POLICY`)
+* configure the global git repo URL by default on Tenants (`DEFAULT_GLOBAL_GIT_REPO_URL`)
+* delete external resources by default (good for cleaning up after this guide is finished) (`LIEUTENANT_DELETE_PROTECTION`)
+* not use Hashicorp Vault (don't do this for production deployments) (`SKIP_VAULT_SETUP`)
 
 === Install Lieutenant API
 
@@ -83,7 +85,7 @@ Install *Lieutenant API* with the following commands:
 [source,shell]
 ----
 # API deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.3.0"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.4.0"
 
 # API configuration
 kubectl -n lieutenant set env deployment/lieutenant-api -c lieutenant-api \
@@ -212,14 +214,14 @@ export GITLAB_USERNAME="MYUSER"
 +
 [source,shell]
 ----
-TENANT_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{\"displayName\":\"My first Tenant\",\"gitRepo\":{\"url\":\"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant.git\"}}" "http://${LIEUTENANT_URL}/tenants" | jq -r ".id")
+TENANT_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{\"displayName\":\"My first Tenant\",\"gitRepo\":{\"url\":\"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant\"}}" "http://${LIEUTENANT_URL}/tenants" | jq -r ".id")
 echo $TENANT_ID
 echo https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant
 ----
 +
 TIP: If everything went well, the Lieutenant Operator created a new git repository under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant, which will be used to store the configuration used by Commodore to create a catalog for a cluster.
 
-. Patch the Tenant object directly in Kubernetes to add a Cluster template.
+. Patch the Tenant object directly in Kubernetes to add a Cluster template and set the `globalGitRepoURL`.
 +
 [source,shell]
 ----
@@ -281,10 +283,9 @@ Replace `MYSSHKEYPATH` with the path to your SSH key file, for example `~/.ssh/i
 ----
 export COMMODORE_SSH_PRIVATE_KEY=MYSSHKEYPATH
 kubectl -n lieutenant run commodore-shell \
-  --image=docker.io/projectsyn/commodore:v0.3.0 \
+  --image=docker.io/projectsyn/commodore:v0.4.0 \
   --env=COMMODORE_API_URL="http://${LIEUTENANT_URL}/" \
   --env=COMMODORE_API_TOKEN=${LIEUTENANT_TOKEN} \
-  --env=COMMODORE_GLOBAL_GIT_BASE=https://github.com/projectsyn \
   --env=SSH_PRIVATE_KEY="$(cat ${COMMODORE_SSH_PRIVATE_KEY})" \
   --env=CLUSTER_ID=${CLUSTER_ID} \
   --env=GITLAB_ENDPOINT=${GITLAB_ENDPOINT} \
@@ -343,7 +344,7 @@ You now have your first Commodore compiled catalog available under `catalog/` an
 
 To see what was just generated, browse to https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1 (or do a `find catalog/`) to see the Git commit (and Git push) Commodore created and all the generated Kubernetes objects. These objects will then actually be applied to the cluster by Argo CD (we've not installed Argo CD in this guide).
 
-TIP: This guide uses https://github.com/projectsyn/commodore-defaults/ as the global common configuration repository. If you want to use your own, adapt the `COMMODORE_GLOBAL_GIT_BASE` environment variable. Currently the Git repo needs to be named `commodore-defaults`.
+TIP: This guide uses https://github.com/projectsyn/getting-started-commodore-defaults/ as the global common configuration repository. If you want to use your own, adapt the `globalGitRepoURL` in the Tenant spec or update the Operator configuration env var `DEFAULT_GLOBAL_GIT_REPO_URL`.
 
 Now exit the Commodore container by typing `exit`. This also deletes the Pod on the local `k3s` or `docker-desktop` instance.
 
