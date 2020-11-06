@@ -21,3 +21,4 @@ The all are using the xref:sdd-template.adoc[SDD Template].
 * xref:0023-managed-services-controller.adoc[0023 - Managed Services Controller]
 * xref:0024-naming-scheme-v2.adoc[0024 - Project Syn Tools Naming Scheme v2]
 * xref:0025-commodore-component-instantiation.adoc[0025 - Commodore Component Instantiation]
+* xref:0026-commodore-component-testing.adoc[0026 - Commodore Component Testing]

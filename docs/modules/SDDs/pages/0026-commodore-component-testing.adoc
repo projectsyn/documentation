@@ -1,0 +1,68 @@
+= SDD 0025 - Commodore Component Instantiation
+
+:sdd_author:    Christian Cremer
+:sdd_owner:     Christian Cremer
+:sdd_reviewers: SIG Syn
+:sdd_date:      2020-11-06
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This SDD describes possible options to test Commodore components locally and in CI.
+====
+
+== Motivation
+
+Currently Commodore components don't support compiling and testing isolated within a component itself, one needs a whole catalog.
+Testing a component with different parameters is crucial in ensuring component quality.
+
+=== Goals
+
+* Define how we want to test Commodore components.
+
+=== Non-Goals
+
+* Dictate which kind of tests a component author or contributor must provide in order for contributions to be accepted.
+* Dictate test "coverage" rules.
+* Limit component authors in the testing tools.
+  Component authors are free to add more or other testing tools.
+
+== Design Proposal
+
+Component templates will provide a scaffold for an easy getting started with testing.
+Components are to be tested with Go unit tests and OpenPolicyAgent's Conftest policies using the Rego language.
+The advantage of using Go unit tests allows component authors to deserialize rendered YAML back into actual Kubernetes structs, allowing easy assertions on expected values.
+The advantage of Writing policies using the Rego syntax allows ensuring certain standards over a multiple of manifests (for example define well-known common labels).
+Combining both test methods should cover a wide range of test cases.
+It should be easy for component authors to run the tests on their local workstation, without needing a Commodore catalog compililation.
+A library for Go unit tests to define common helper functions should reduce the need to write boilerplate code for testing.
+A central set of policies tailored for Syn can be applied against all components in order to maintain a unified "good practice" across the components.
+
+=== User Stories
+
+* As a component author, I would like to test my rendered component with different parameters, so that I can preview and assert the output against a set of expected results for quality assurance.
+
+=== Implementation Notes
+
+In the `Makefile`, we add targets that run Go unit tests and Conftest.
+In the GitHub Action workflow files, we add jobs that run the same tests in CI workflows on GitHub.
+A new library (or contribution to an existing) should centralize the common boilerplate needed to run Go unit tests.
+Some research is needed to figure out how to host policies centrally and apply them across all components.
+
+== Alternatives
+
+=== Kubeval
+
+https://github.com/instrumenta/kubeval[Kubeval] is a known tool for validating Kubernetes specification in YAML files.
+However, it doesn't currently support CRDs, thus it's not possible to validate manifests that aren't in the core Kubernetes API.
+Furthermore, it only validates the syntax (structure, field types such as string, numbers etc.) but not whether the actual values are rendered as expected.
+Kubeval therefore would be easy to apply, but is of limited use.
+
+== References
+
+The original discussions resulting in this SDD can be found in
+
+. https://github.com/projectsyn/component-espejo/pull/8[component-espejo#8]
+. https://github.com/projectsyn/commodore/issues/172[projectsyn/commodore#172]
