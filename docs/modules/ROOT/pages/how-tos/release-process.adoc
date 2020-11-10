@@ -2,6 +2,8 @@
 
 All Project Syn Tools follow this release process:
 
+. Check and update xref:tutorials/getting-started.adoc[Getting Started guide] and https://syn.tools/tuto/index.html[Tutorial: Writing your First Commodore Component] using the `latest` tags. (These guides need to be up-to-date and work 100% all the time)
+
 . Create a release branch
 +
 [source,shell]
@@ -9,7 +11,7 @@ All Project Syn Tools follow this release process:
 git checkout -b prepare-release
 ----
 
-. Edit the `CHANGELOG.md` for the release
+. Update `CHANGELOG.md` for the release by replacing `## [Unreleased]` with the version number and the release date.
 
 . Where appropriate, edit `deploy/kustomization.yaml` to point to the to-be-released version
 .. On Lieutenant API also update the Steward tag in `deploy/deployment.yaml`: Environment variable `STEWARD_IMAGE`.
@@ -32,11 +34,12 @@ Tag version: "v0.2.0"
 Release title: "v0.2.0"
 Describe this release: copy most recent CHANGELOG.md entries (remove square brackets)
 ----
-.. Publish the release
+.. Publish the release.
 
-. Check and update xref:tutorials/getting-started.adoc[Getting Started guide] and https://syn.tools/tuto/index.html[Tutorial: Writing your First Commodore Component] (These guides need to be up-to-date and work 100% all the time)
+. Create a PR to
 
-After the release is done, switch back the deployment artifacts to point to `latest` again.
+.. switch back the deployment artifacts to point to `latest` again (see step 4)
+.. add the `## [Unreleased]` section to `CHANGELOG.md`
 
 == Additional work for full release
 
