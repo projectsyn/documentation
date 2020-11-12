@@ -11,7 +11,9 @@ All Project Syn Tools follow this release process:
 git checkout -b prepare-release
 ----
 
-. Update `CHANGELOG.md` for the release by replacing `## [Unreleased]` with the version number and the release date.
+. Update `CHANGELOG.md` for the release
+.. Replace `## [Unreleased]` with the version number and the release date.
+.. Update the `[Unreleased]` compare link at the bottom to point to the new version number.
 
 . Where appropriate, edit `deploy/kustomization.yaml` to point to the to-be-released version
 .. On Lieutenant API also update the Steward tag in `deploy/deployment.yaml`: Environment variable `STEWARD_IMAGE`.
