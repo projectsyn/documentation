@@ -43,6 +43,8 @@ Describe this release: copy most recent CHANGELOG.md entries (remove square brac
 .. switch back the deployment artifacts to point to `latest` again (see step 4)
 .. add the `## [Unreleased]` section to `CHANGELOG.md`
 
+NOTE: Yes, this has to be automated, but hasn't been done yet.
+
 == Additional work for full release
 
 If a "major" release is being done, the following additional work needs to be done:
