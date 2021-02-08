@@ -1,0 +1,40 @@
+= Project Syn Visual Design
+
+== Logo
+
+The logos are available under https://github.com/projectsyn/documentation/tree/master/docs/modules/ROOT/assets/images[assets/images].
+
+=== Wide
+
+link:/syn/_images/logo_projectsyn.png[PNG], link:/syn/_images/logo_projectsyn.svg[SVG]
+
+image::logo_projectsyn.png[link="/syn/_images/logo_projectsyn.png"]
+
+=== Square
+
+link:/syn/_images/logo_projectsyn_square.png[PNG], link:/syn/_images/logo_projectsyn_square.svg[SVG]
+
+image::logo_projectsyn_square.png[link="/syn/_images/logo_projectsyn_square.png"]
+
+== Colors
+
+The color palette is as follows:
+
+[cols=","]
+|===
+
+|{set:cellbgcolor:#1A1E54}
+|{set:cellbgcolor:#white}#1A1E54
+
+|{set:cellbgcolor:#AB3643}
+|{set:cellbgcolor:#white}#AB3643
+
+|{set:cellbgcolor:#FFBF00}
+|{set:cellbgcolor:#white}#FFBF00
+
+|{set:cellbgcolor:#A1E0E9}
+|{set:cellbgcolor:#white}#A1E0E9
+
+|===
+
+https://coolors.co/1a1e54-ab3643-ffbf00-a1e0e9[https://coolors.co/].
