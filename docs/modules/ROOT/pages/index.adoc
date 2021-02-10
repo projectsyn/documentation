@@ -1,6 +1,6 @@
 = Project Syn
 
-image::syn.png[]
+image::logo_projectsyn.svg[]
 
 [discrete]
 == Introduction
