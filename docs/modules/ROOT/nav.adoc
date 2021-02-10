@@ -37,6 +37,7 @@ include::steward:ROOT:partial$nav-tutorials.adoc[]
 
 .How-to guides
 * xref:how-tos/release-process.adoc[Release Process]
+* xref:how-tos/change-parameter.adoc[Change a parameter]
 * Commodore
 +
 --

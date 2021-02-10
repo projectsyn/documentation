@@ -1,0 +1,46 @@
+= Change a parameter
+
+Suppose you want to overwrite an inventory parameter for a cluster or tenant.
+This page assumes that you have already set up access to Lieutenant, so that `commodore catalog compile` generally works from any directory.
+
+TIP: To run `commodore` from any directory, it should be in `$PATH` or an alias to a containerized Commodore.
+
+. Get the Cluster and Tenant ID from Lieutenant and compile the catalog.
++
+[source,bash]
+----
+export $CLUSTER_ID = <target-cluster-id>
+dir=$(mktemp -d)
+pushd "${dir}"
+commodore catalog compile $CLUSTER_ID
+----
+. Open your editor and edit the files you need to change.
++
+[TIP]
+====
+- If you want to overwrite an inventory parameter for a tenant or cluster, edit the appropriate file in `inventory/classes/<tenant-id>`.
+- If you want to adjust a parameter for a Kubernetes distribution or cloud provider, edit the appropriate file in `inventory/classes/global`.
+====
++
+TIP: You can compile the catalog locally to verify your changes with `commodore catalog compile $CLUSTER_ID --local`.
+
+. Navigate into the tenant or global directory, depending on which files you've edited, and commit your changes.
++
+[source,bash]
+----
+pushd inventory/classes/<tenant-id>
+git status
+git add *
+git commit
+git push
+popd
+----
+. Compile the catalog again and push
++
+[source,bash]
+----
+commodore catalog compile $CLUSTER_ID --push --interactive
+# Cleanup
+popd
+rm -r "${dir}"
+----
