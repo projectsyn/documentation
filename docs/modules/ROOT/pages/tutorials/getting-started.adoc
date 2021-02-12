@@ -58,10 +58,10 @@ Install *Lieutenant Operator* with the following commands:
 [source,shell]
 ----
 # CRDs (global scope)
-kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.4.2"
+kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.5.0"
 
 # Operator deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.4.2"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.5.0"
 
 # Operator configuration
 kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator \
@@ -283,7 +283,7 @@ Replace `MYSSHKEYPATH` with the path to your SSH key file, for example `~/.ssh/i
 ----
 export COMMODORE_SSH_PRIVATE_KEY=MYSSHKEYPATH
 kubectl -n lieutenant run commodore-shell \
-  --image=docker.io/projectsyn/commodore:v0.4.0 \
+  --image=docker.io/projectsyn/commodore:v0.4.2 \
   --env=COMMODORE_API_URL="http://${LIEUTENANT_URL}/" \
   --env=COMMODORE_API_TOKEN=${LIEUTENANT_TOKEN} \
   --env=SSH_PRIVATE_KEY="$(cat ${COMMODORE_SSH_PRIVATE_KEY})" \
