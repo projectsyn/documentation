@@ -61,6 +61,36 @@ This is to allow adding extra config without redefining the full default config.
 ** Multiple files otherwise
 ////
 
+=== Pruning lists and objects
+
+Sometimes, you'll find yourself in the position of wanting to (or having to) remove elements from an array or object.
+It's tempting to simply apply Jsonnet's https://jsonnet.org/ref/stdlib.html#prune[`std.prune()`] after replacing the elements you want to remove with `null` in the containing array or object.
+However, as stated in the documentation, `std.prune()` removes all elements with `null` values *recursively*.
+
+Therefore, to remove `null` top-level values from your array or object, use https://jsonnet.org/ref/stdlib.html#filter[`std.filter()`] unless you require the pruning to happen recursively.
+
+[source,jsonnet]
+----
+local objects = [ /* array of K8s objects, some of which may be of kind Ingress */ ];
+
+// GOOD
+local filtered = std.filter(function(it) it.kind != 'Ingress', objects);
+
+// BAD
+local pruned = std.prune([ if it.kind != 'Ingress' then it for it in objects ]);
+----
+
+Benchmarking the example above with an input array of 10 Kubernetes objects, one of which is an Ingress, shows that `std.prune()` is approximately an order of magnitude slower than `std.filter()`:
+
+[source]
+----
+$ bench-jsonnet.sh
+Filter (50 run avg): 0.01s
+Prune  (50 run avg): 0.13s
+----
+
+The original Jsonnet code from which the investigation started took ~0.7s and ~3.7s to compile for the versions using `std.filter()` and `std.prune()` respectively.
+
 == Component Library Functions
 ////
 * CRDs
