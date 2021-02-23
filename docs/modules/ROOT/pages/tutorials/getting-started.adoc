@@ -18,18 +18,8 @@ Before you start, please make sure to have these requirements available:
 .Getting started on Linux with k3d
 --
 . Download `k3d` (version >= 3.x) from https://github.com/rancher/k3d/releases[GitHub]
-. Create a new cluster
-+
-[source,shell]
-----
-k3d cluster create projectsyn
-----
-. Check that you're connected to this cluster
-+
-[source,shell]
-----
-kubectl cluster-info
-----
+. Create a new cluster: `k3d cluster create projectsyn`
+. Check that you're connected to this cluster: `kubectl cluster-info`
 --
 
 [TIP]
@@ -286,7 +276,7 @@ Replace `MYSSHKEYPATH` with the path to your SSH key file, for example `~/.ssh/i
 ----
 export COMMODORE_SSH_PRIVATE_KEY=MYSSHKEYPATH
 kubectl -n lieutenant run commodore-shell \
-  --image=docker.io/projectsyn/commodore:v0.4.0 \
+  --image=docker.io/projectsyn/commodore:v0.4.2 \
   --env=COMMODORE_API_URL="http://${LIEUTENANT_URL}/" \
   --env=COMMODORE_API_TOKEN=${LIEUTENANT_TOKEN} \
   --env=SSH_PRIVATE_KEY="$(cat ${COMMODORE_SSH_PRIVATE_KEY})" \
@@ -301,7 +291,6 @@ kubectl -n lieutenant run commodore-shell \
 If your SSH key is protected by a passphrase (hopefully so!) no command prompt will be displayed and it will look like it halted at `If you don't see a command prompt, try pressing enter`. Don't just press "enter" but type your SSH key passphrase (an `ssh-agent` is started in the container's entrypoint) and press "enter" after that.
 
 When there is no passphrase on your SSH key, the command prompt should directly show up.
-
 
 Now execute (inside the container):
 
