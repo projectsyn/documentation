@@ -58,10 +58,10 @@ Install *Lieutenant Operator* with the following commands:
 [source,shell]
 ----
 # CRDs (global scope)
-kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.4.2"
+kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.5.2"
 
 # Operator deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.4.2"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.5.2"
 
 # Operator configuration
 kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator \
@@ -85,7 +85,7 @@ Install *Lieutenant API* with the following commands:
 [source,shell]
 ----
 # API deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.4.0"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.4.1"
 
 # API configuration
 kubectl -n lieutenant set env deployment/lieutenant-api -c lieutenant-api \
@@ -95,7 +95,7 @@ kubectl -n lieutenant set env deployment/lieutenant-api -c lieutenant-api \
 if [[ "$OSTYPE" == "darwin"* ]]; then export INGRESS_IP=127.0.0.1; else export INGRESS_IP=$(kubectl -n kube-system get svc traefik -o jsonpath="{.status.loadBalancer.ingress[0].ip}"); fi
 
 kubectl -n lieutenant apply -f -<<EOF
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: lieutenant-api
@@ -105,9 +105,12 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: lieutenant-api
-          servicePort: 80
+          service:
+            name: lieutenant-api
+            port:
+              number: 80
 EOF
 ----
 
