@@ -1,4 +1,7 @@
 = Getting Started with Project Syn
+:commodore_version: v0.4.0
+:lieutenant_operator_version: v0.4.2
+:lieutenant_api_version: v0.4.0
 
 This guide helps to get started with the various Project Syn tools.
 
@@ -55,13 +58,13 @@ kubectl create namespace lieutenant
 
 Install *Lieutenant Operator* with the following commands:
 
-[source,shell]
+[source,shell,subs="attributes"]
 ----
 # CRDs (global scope)
-kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref=v0.4.2"
+kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref={lieutenant_operator_version}"
 
 # Operator deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref=v0.4.2"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref={lieutenant_operator_version}"
 
 # Operator configuration
 kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator \
@@ -82,10 +85,10 @@ These environment variables will configure Lieutenant Operator to:
 
 Install *Lieutenant API* with the following commands:
 
-[source,shell]
+[source,shell,subs="attributes+"]
 ----
 # API deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref=v0.4.0"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-api/deploy?ref={lieutenant_api_version}"
 
 # API configuration
 kubectl -n lieutenant set env deployment/lieutenant-api -c lieutenant-api \
@@ -212,7 +215,7 @@ export GITLAB_USERNAME="MYUSER"
 
 . Create a *Lieutenant Tenant* via the API
 +
-[source,shell]
+[source,shell,subs="attributes"]
 ----
 TENANT_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{\"displayName\":\"My first Tenant\",\"gitRepo\":{\"url\":\"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant\"}}" "http://${LIEUTENANT_URL}/tenants" | jq -r ".id")
 echo $TENANT_ID
@@ -279,11 +282,11 @@ Execute the following command which will start the properly configured Commodore
 
 Replace `MYSSHKEYPATH` with the path to your SSH key file, for example `~/.ssh/id_rsa`. This SSH key will be used to push the generated configuration catalog to the Git repository managed by Lieutenant.
 
-[source,shell]
+[source,shell,subs="attributes"]
 ----
 export COMMODORE_SSH_PRIVATE_KEY=MYSSHKEYPATH
 kubectl -n lieutenant run commodore-shell \
-  --image=docker.io/projectsyn/commodore:v0.4.0 \
+  --image=docker.io/projectsyn/commodore:{commodore_version} \
   --env=COMMODORE_API_URL="http://${LIEUTENANT_URL}/" \
   --env=COMMODORE_API_TOKEN=${LIEUTENANT_TOKEN} \
   --env=SSH_PRIVATE_KEY="$(cat ${COMMODORE_SSH_PRIVATE_KEY})" \
