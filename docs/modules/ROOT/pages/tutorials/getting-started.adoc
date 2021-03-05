@@ -217,7 +217,10 @@ export GITLAB_USERNAME="MYUSER"
 +
 [source,shell,subs="attributes"]
 ----
-TENANT_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{\"displayName\":\"My first Tenant\",\"gitRepo\":{\"url\":\"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant\"}}" "http://${LIEUTENANT_URL}/tenants" | jq -r ".id")
+TENANT_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST \
+  --data "{\"displayName\":\"My first Tenant\",
+           \"gitRepo\":{\"url\":\"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant\"}}" \
+  "http://${LIEUTENANT_URL}/tenants" | jq -r ".id")
 echo $TENANT_ID
 echo https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant
 ----
@@ -228,7 +231,15 @@ TIP: If everything went well, the Lieutenant Operator created a new git reposito
 +
 [source,shell]
 ----
-kubectl -n lieutenant patch tenant $TENANT_ID --type="merge" -p "{\"spec\":{\"clusterTemplate\":{\"gitRepoTemplate\":{\"apiSecretRef\":{\"name\":\"gitlab-com\"},\"path\":\"${GITLAB_USERNAME}\",\"repoName\":\"{{ .Name }}\"},\"tenantRef\":{}}}}"
+kubectl -n lieutenant patch tenant $TENANT_ID --type="merge" -p \
+"{\"spec\":{\"clusterTemplate\": {
+    \"gitRepoTemplate\": {
+      \"apiSecretRef\":{\"name\":\"gitlab-com\"},
+      \"path\":\"${GITLAB_USERNAME}\",
+      \"repoName\":\"{{ .Name }}\"
+    },
+    \"tenantRef\":{}
+}}}"
 ----
 +
 [TIP]
@@ -249,7 +260,19 @@ kubectl -n lieutenant get gitrepo
 +
 [source,shell]
 ----
-CLUSTER_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST --data "{ \"tenant\": \"${TENANT_ID}\", \"displayName\": \"My first Project Syn cluster\", \"facts\": { \"cloud\": \"local\", \"distribution\": \"k3s\", \"region\": \"local\" }, \"gitRepo\": { \"url\": \"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1.git\" } }" "http://${LIEUTENANT_URL}/clusters" | jq -r ".id")
+CLUSTER_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST \
+  --data "{
+            \"tenant\": \"${TENANT_ID}\",
+            \"displayName\": \"My first Project Syn cluster\",
+            \"facts\": {
+              \"cloud\": \"local\",
+              \"distribution\": \"k3s\",
+              \"region\": \"local\"
+            },
+            \"gitRepo\": {
+              \"url\": \"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1.git\"
+          }}" \
+  "http://${LIEUTENANT_URL}/clusters" | jq -r ".id")
 echo $CLUSTER_ID
 echo https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/cluster-gitops1
 ----
