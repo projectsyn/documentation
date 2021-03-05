@@ -219,13 +219,16 @@ export GITLAB_USERNAME="MYUSER"
 ----
 TENANT_ID=$(curl -s -H "$LIEUTENANT_AUTH" -H "Content-Type: application/json" -X POST \
   --data "{\"displayName\":\"My first Tenant\",
-           \"gitRepo\":{\"url\":\"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant\"}}" \
+           \"gitRepo\":{\"url\":\"ssh://git@${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant\"},
+           \"globalGitRepoRevision\":\"{commodore_version}\"}" \
   "http://${LIEUTENANT_URL}/tenants" | jq -r ".id")
 echo $TENANT_ID
 echo https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant
 ----
 +
 TIP: If everything went well, the Lieutenant Operator created a new git repository under https://${GITLAB_ENDPOINT}/${GITLAB_USERNAME}/mytenant, which will be used to store the configuration used by Commodore to create a catalog for a cluster.
++
+NOTE: We use Lieutenant's `globalGitRepoRevision` to ensure that Commodore checks out a version of the global Git repo which is compatible with the Commodore version used in this tutorial.
 
 . Patch the Tenant object directly in Kubernetes to add a Cluster template and set the `globalGitRepoURL`.
 +
