@@ -1,0 +1,76 @@
+= Compile a catalog
+
+Compile and push a cluster catalog from local machine to update dependencies.
+
+== Requirements
+
+* A https://syn.tools/commodore/running-commodore.html[working commodore command].
+* An access token to a running Lieutenant instance. Storing the token as a kubeconfig is recommended.
+* An existing Cluster in Lieutenant.
+
+== Prepare Commodore
+
+The following snippet sets up needed environment variables in your current working directory.
+
+TIP: You can skip this step if you have already defined them already with another method.
+
+[source,bash]
+----
+# Assuming "syn-synfra" is the user in your kubeconfig
+LIEUTENANT_TOKEN=$(kubectl config view -o jsonpath='{.users[?(@.name == "syn-synfra")].user.token}'  --raw)
+LIEUTENANT_URL="the-public-lieutenant-API-URL"
+
+cat << EOF > .env
+LIEUTENANT_AUTH="Authorization:Bearer ${LIEUTENANT_TOKEN}"
+LIEUTENANT_URL="${LIEUTENANT_URL}"
+COMMODORE_API_TOKEN="${LIEUTENANT_TOKEN}"
+COMMODORE_API_URL="${LIEUTENANT_URL}"
+EOF
+
+# Double check the environment variables
+less .env
+
+# Export the variables
+set -a; source .env; set +a
+----
+
+== Compilation
+
+.Choose cluster
+
+. Get the Cluster ID from Lieutenant.
++
+[source,bash]
+----
+commodore catalog list -v
+----
+. Set the cluster ID and prepare directory.
++
+[source,bash]
+----
+export CLUSTER_ID = <target-cluster-name-from-above>
+dir=$(mktemp -d)
+pushd "${dir}"
+----
+
+.Choose operation
+. Compile the catalog and display a diff.
++
+[source,bash]
+----
+commodore catalog compile $CLUSTER_ID
+----
+
+. Compile the catalog and push.
++
+[source,bash]
+----
+commodore catalog compile $CLUSTER_ID --push --interactive
+----
+
+.Cleanup
+[source,bash]
+----
+popd
+rm -rf "${dir}"
+----
