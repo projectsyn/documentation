@@ -1,6 +1,9 @@
 = Project Syn Tools Release Process
 
-All Project Syn Tools follow this release process:
+Releases often just require a new SemVer tag with `v`-prefix to be pushed, for example `v1.2.3`.
+The changelog and GitHub release will then be generated automatically.
+
+All Project Syn Tools that require the container image tag to be in sync with the release, require additional preparation:
 
 . Create a release branch
 +
@@ -9,9 +12,7 @@ All Project Syn Tools follow this release process:
 git checkout -b prepare-release
 ----
 
-. Edit the `CHANGELOG.md` for the release
-
-. Where appropriate, edit `deploy/kustomization.yaml` to point to the to-be-released version
+. Edit `deploy/kustomization.yaml` to point to the to-be-released version
 .. On Lieutenant API also update the Steward tag in `deploy/deployment.yaml`: Environment variable `STEWARD_IMAGE`.
 
 . Commit and push the changes and create a Pull Request
@@ -22,23 +23,9 @@ git commit -a -m "Prepare release vX.Y.Z"
 git push -u
 ----
 
-. After the Pull Request is reviewed and merged, create a new GitHub release
-
-.. Go to https://github.com/projectsyn/$tool/releases/new
-.. Fill in the form:
-+
-----
-Tag version: "v0.2.0"
-Release title: "v0.2.0"
-Describe this release: copy most recent CHANGELOG.md entries (remove square brackets)
-----
-.. Publish the release
-
 . Check and update xref:tutorials/getting-started.adoc[Getting Started guide] and https://syn.tools/tuto/index.html[Tutorial: Writing your First Commodore Component] (These guides need to be up-to-date and work 100% all the time)
 
-After the release is done, switch back the deployment artifacts to point to `latest` again.
-
-== Additional work for full release
+== Additional work for major releases
 
 If a "major" release is being done, the following additional work needs to be done:
 
