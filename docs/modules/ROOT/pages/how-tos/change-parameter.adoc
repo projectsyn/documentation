@@ -1,19 +1,9 @@
 = Change a parameter
 
 Suppose you want to overwrite an inventory parameter for a cluster or tenant.
-This page assumes that you have already set up access to Lieutenant, so that `commodore catalog compile` generally works from any directory.
 
-TIP: To run `commodore` from any directory, it should be in `$PATH` or an alias to a containerized Commodore.
+. xref:how-tos/compile-catalog.adoc[Compile the cluster first] (don't push your changes to git yet)
 
-. Get the Cluster and Tenant ID from Lieutenant and compile the catalog.
-+
-[source,bash]
-----
-export $CLUSTER_ID = <target-cluster-id>
-dir=$(mktemp -d)
-pushd "${dir}"
-commodore catalog compile $CLUSTER_ID
-----
 . Open your editor and edit the files you need to change.
 +
 [TIP]
@@ -42,5 +32,5 @@ popd
 commodore catalog compile $CLUSTER_ID --push --interactive
 # Cleanup
 popd
-rm -r "${dir}"
+rm -rf "${dir}"
 ----
