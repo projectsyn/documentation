@@ -1,8 +1,8 @@
 = SDD 0027 - Dynamic Cluster Facts
 
 :sdd_author:    Fabian Fischer
-:sdd_owner:     
-:sdd_reviewers: 
+:sdd_owner:
+:sdd_reviewers:
 :sdd_date:      2020-XX-XX
 :sdd_status:    draft
 include::partial$meta-info-table.adoc[]
@@ -37,15 +37,15 @@ Providing metrics such as utilization, that change frequently.
 
 == Design Proposal
 
-Dynamic facts are collected periodically by Steward and pushed to the Lieutenant API. 
+Dynamic facts are collected periodically by Steward and pushed to the Lieutenant API.
 The Lieutenant API stores these facts as part of the corresponding Cluster resource.
 The facts can then be accessed either through the REST API or directly form the Cluster resource.
 
 === Fact Collection
 
-Periodically Steward collects all dynamic facts in its cluster. 
+Periodically Steward collects all dynamic facts in its cluster.
 The way it collects these depends on the actual fact but usually involves reading different Kubernetes Resources.
-The collected facts are then pushed to the Lieutenant API. 
+The collected facts are then pushed to the Lieutenant API.
 
 To be able to read all facts, Steward might need additional RBAC permissions.
 
@@ -59,7 +59,7 @@ The current Cluster object in the API definition is extended to include `dynamic
 
 === Fact Store
 
-The Lieutenant API stores the dynamic facts as part of the Cluster resource. 
+The Lieutenant API stores the dynamic facts as part of the Cluster resource.
 It will store it in the Cluster resources status.
 The status subresource was designed to hold the current state of the object, while the specification should contain the desired state of an object.
 Dynamic facts are a prime example of a cluster state and as such should be store in the status subresource.
@@ -69,19 +69,19 @@ If the fact is structured, such as a list of nodes, it should be stored as JSON.
 This approach is highly flexible and adding facts doesn't cause a CRD change.
 
 
-== Alternatives 
+== Alternatives
 
 === Strongly Typed Status
 
-The main advantage of the key-value design described earlier is its flexibility. 
-Its main disadvantage is its lack of structure. 
+The main advantage of the key-value design described earlier is its flexibility.
+Its main disadvantage is its lack of structure.
 It allows us to add and change fact types with minimal code change.
 But it makes the API inherently less stable and the cluster resource status is a lot less readable and harder to process.
 
 An alternative to this key value store design is to put the facts in a more rigid structure.
 By defining the structure of the dynamic facts as part of the Cluster resource status we get a clear API definition.
 
-The following *could* be an definition of such a status. 
+The following *could* be an definition of such a status.
 
 
 ```
@@ -89,10 +89,10 @@ status:
   kubernetesVersion: v1.20.1
   nodes:
     - name: node1
-      labels: 
+      labels:
         foo: bar
     - name: node2
-      labels: 
+      labels:
         foo: bazz
   ingresses:
     - foo.vshn.ch
@@ -120,8 +120,8 @@ The main reason to use this pull approach is that it better aligns with Kubernet
 It's generally cleaner when the controller itself gets fetches the status of its managed resources instead of an external API pushing state into its resources.
 Another advantage is that pull based systems are generally easier to debug.
 
-The major disadvantage however is that pull based approach requires that Steward is accessible to the Lieutenant Operator. 
-This isn't always given. 
+The major disadvantage however is that pull based approach requires that Steward is accessible to the Lieutenant Operator.
+This isn't always given.
 Currently we only require that the Lieutenant API is accessible to Steward.
 Firewalls often don't allow us to access Steward directly.
 
@@ -132,8 +132,8 @@ An alternative to storing the facts in the Cluster resource is to put it into a 
 The main advantage of this approach is that we would keep the complete history of all facts and when they changed.
 
 The main disadvantage is that it introduces a completely new system and splits the available information on the cluster and stores it in two different locations.
-Further the facts aren't really cleanly representable as a timeserie. 
-Finally the advantage of having the complete history of a fact is questionable and a simple last modified timestamp would give us most of the use. 
+Further the facts aren't really cleanly representable as a timeserie.
+Finally the advantage of having the complete history of a fact is questionable and a simple last modified timestamp would give us most of the use.
 
 
 == References
