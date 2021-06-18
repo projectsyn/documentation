@@ -1,0 +1,143 @@
+= SDD 0027 - Dynamic Cluster Facts
+
+:sdd_author:    Fabian Fischer
+:sdd_owner: Fabian Fischer
+:sdd_reviewers: Tobias Brunner, Simon Gerber
+:sdd_date:      2021-06-18
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+
+[NOTE]
+.Summary
+====
+This SDD documents the design of dynamic cluster facts exposed through the Lieutenant API
+====
+
+== Motivation
+
+Dynamic facts are information about a Syn managed Cluster which can be determined from the state of the cluster and may change regularly.
+The main difference to static facts is that these facts aren't configured manually but are determined by the system itself.
+These dynamic facts can be used when compiling Commodore Components, which allows us to write Components that are better adapted to the cluster they're deployed on.
+
+Typical dynamic facts are:
+
+* Kubernetes Version
+* Number of Nodes
+* Node details (Node labels, names, etc.)
+* Ingress objects (What hosts is it serving?)
+
+=== Goals
+
+Provide additional insight in Syn managed clusters and provide dynamic facts such as Kubernetes version, node details etc.
+
+=== Non-Goals
+
+Providing metrics such as utilization, that change frequently.
+
+== Design Proposal
+
+Dynamic facts are collected periodically by Steward and pushed to the Lieutenant API.
+The Lieutenant API stores these facts as part of the corresponding Cluster resource.
+The facts can then be accessed either through the REST API or directly from the Cluster resource.
+
+=== Fact Collection
+
+Steward peridoically collects all dynamic facts in its cluster.
+The way it collects these depends on the actual fact but usually involves reading different Kubernetes Resources.
+The collected facts are then pushed to the Lieutenant API.
+
+To be able to read all facts, Steward might need additional RBAC permissions.
+
+=== REST API
+
+The Lieutenant API and Steward communicate through the exposed REST API.
+The actual push is performed through a `PATCH` of the Cluster resource.
+Authorization is handled by Kubernetes RBAC and happens through the existing authentication method.
+
+The current Cluster object in the API definition is extended to include `dynamicFacts` which is of type `object` and can include arbitrary structured data.
+
+=== Fact Store
+
+The Lieutenant API stores the dynamic facts as part of the Cluster resource.
+It will store them in the Cluster resource's status.
+The status subresource was designed to hold the current state of the object, while the specification should contain the desired state of an object.
+Dynamic facts are a prime example of a cluster state and as such should be stored in the status subresource.
+
+We extend the Cluster resource with a status field `facts`, which contains a map of strings.
+If the fact is structured, such as a list of nodes, it should be stored as JSON.
+This approach is highly flexible and adding facts doesn't cause a CRD change.
+
+
+== Alternatives
+
+=== Strongly Typed Status
+
+The main advantage of the key-value design described earlier is its flexibility.
+Its main disadvantage is its lack of structure.
+It allows us to add and change fact types with minimal code change.
+But it makes the API inherently less stable and the cluster resource status is a lot less readable and harder to process.
+
+An alternative to this key value store design is to put the facts in a more rigid structure.
+By defining the structure of the dynamic facts as part of the Cluster resource status we get a clear API definition.
+
+The following *could* be an definition of such a status.
+
+
+```
+status:
+  kubernetesVersion: v1.20.1
+  nodes:
+    - name: node1
+      labels:
+        foo: bar
+    - name: node2
+      labels:
+        foo: bazz
+  ingresses:
+    - foo.vshn.ch
+    - bar.vshn.net
+  facts:
+    foo: bar
+    buzz: vshn
+```
+
+The main disadvantage is that we need to change the Steward, the CRD, and possibly the Lieutenant API whenever we add a new dynamic fact type.
+While adding a field to a CRD is generally not an issue, changes still automatically get more involved.
+
+
+=== Pulling Facts
+
+The current design proposal uses a push model to get updated facts through the exposed REST API.
+Another approach would be to use a pull based model with a design inspired by Prometheus.
+
+In this design approach, the Lieutenant Operator pulls the dynamic facts from its managed clusters.
+Steward exposes a simple `/facts` endpoint, which returns the facts as JSON.
+Steward collects all necessary facts on demand when it's called.
+The JSON is marshaled into the Cluster resource.
+
+The main reason to use this pull approach is that it better aligns with Kubernetes design.
+It's generally cleaner when the controller itself fetches the status of its managed resources instead of an external API pushing state into its resources.
+Another advantage is that pull based systems are generally easier to debug.
+
+The major disadvantage however is that pull based approach requires that Steward is accessible to the Lieutenant Operator.
+This isn't always given.
+Currently we only require that the Lieutenant API is accessible to Steward.
+Firewalls often don't allow us to access Steward directly.
+
+=== TSDB
+
+An alternative to storing the facts in the Cluster resource is to put them into a timeseries DB.
+
+The main advantage of this approach is that we would keep the complete history of all facts and when they changed.
+
+The main disadvantage is that it introduces a completely new system and splits the available information on the cluster and stores it in two different locations.
+Further the facts aren't really cleanly representable as a timeserie.
+Finally the advantage of having the complete history of a fact is questionable and a simple last modified timestamp would give us most of the use.
+
+
+== References
+
+* https://github.com/projectsyn/lieutenant-api/
+* https://github.com/projectsyn/steward
+* https://github.com/projectsyn/lieutenant-operator
