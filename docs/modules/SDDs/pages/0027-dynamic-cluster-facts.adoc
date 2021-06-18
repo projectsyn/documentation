@@ -1,9 +1,9 @@
 = SDD 0027 - Dynamic Cluster Facts
 
 :sdd_author:    Fabian Fischer
-:sdd_owner:
-:sdd_reviewers:
-:sdd_date:      2020-XX-XX
+:sdd_owner: Fabian Fischer
+:sdd_reviewers: Tobias Brunner, Simon Gerber
+:sdd_date:      2021-06-18
 :sdd_status:    draft
 include::partial$meta-info-table.adoc[]
 
@@ -16,7 +16,7 @@ This SDD documents the design of dynamic cluster facts exposed through the Lieut
 
 == Motivation
 
-Dynamic facts are information about a Syn managed Cluster which can be determined form the state of the cluster and may change regularly.
+Dynamic facts are information about a Syn managed Cluster which can be determined from the state of the cluster and may change regularly.
 The main difference to static facts is that these facts aren't configured manually but are determined by the system itself.
 These dynamic facts can be used when compiling Commodore Components, which allows us to write Components that are better adapted to the cluster they're deployed on.
 
@@ -39,11 +39,11 @@ Providing metrics such as utilization, that change frequently.
 
 Dynamic facts are collected periodically by Steward and pushed to the Lieutenant API.
 The Lieutenant API stores these facts as part of the corresponding Cluster resource.
-The facts can then be accessed either through the REST API or directly form the Cluster resource.
+The facts can then be accessed either through the REST API or directly from the Cluster resource.
 
 === Fact Collection
 
-Periodically Steward collects all dynamic facts in its cluster.
+Steward peridoically collects all dynamic facts in its cluster.
 The way it collects these depends on the actual fact but usually involves reading different Kubernetes Resources.
 The collected facts are then pushed to the Lieutenant API.
 
@@ -60,9 +60,9 @@ The current Cluster object in the API definition is extended to include `dynamic
 === Fact Store
 
 The Lieutenant API stores the dynamic facts as part of the Cluster resource.
-It will store it in the Cluster resources status.
+It will store them in the Cluster resource's status.
 The status subresource was designed to hold the current state of the object, while the specification should contain the desired state of an object.
-Dynamic facts are a prime example of a cluster state and as such should be store in the status subresource.
+Dynamic facts are a prime example of a cluster state and as such should be stored in the status subresource.
 
 We extend the Cluster resource with a status field `facts`, which contains a map of strings.
 If the fact is structured, such as a list of nodes, it should be stored as JSON.
@@ -111,13 +111,13 @@ While adding a field to a CRD is generally not an issue, changes still automatic
 The current design proposal uses a push model to get updated facts through the exposed REST API.
 Another approach would be to use a pull based model with a design inspired by Prometheus.
 
-In this design approach the Lieutenant Operator pulls the dynamic facts from its managed clusters.
+In this design approach, the Lieutenant Operator pulls the dynamic facts from its managed clusters.
 Steward exposes a simple `/facts` endpoint, which returns the facts as JSON.
 Steward collects all necessary facts on demand when it's called.
 The JSON is marshaled into the Cluster resource.
 
 The main reason to use this pull approach is that it better aligns with Kubernetes design.
-It's generally cleaner when the controller itself gets fetches the status of its managed resources instead of an external API pushing state into its resources.
+It's generally cleaner when the controller itself fetches the status of its managed resources instead of an external API pushing state into its resources.
 Another advantage is that pull based systems are generally easier to debug.
 
 The major disadvantage however is that pull based approach requires that Steward is accessible to the Lieutenant Operator.
@@ -127,7 +127,7 @@ Firewalls often don't allow us to access Steward directly.
 
 === TSDB
 
-An alternative to storing the facts in the Cluster resource is to put it into a timeseries DB.
+An alternative to storing the facts in the Cluster resource is to put them into a timeseries DB.
 
 The main advantage of this approach is that we would keep the complete history of all facts and when they changed.
 
