@@ -8,3 +8,17 @@ As with all code, things will change.
 As a result, components will drift apart over time.
 To battle this issue, we make use of https://github.com/voxpupuli/modulesync[ModuleSync] to keep that boilerplate in sync.
 The template repository for Project Syn is located at https://github.com/projectsyn/modulesync-control[modulesync-control].
+
+https://github.com/voxpupuli/modulesync[ModuleSync] allows to have a set of templates in a control repository.
+Those templates then can be applied to several other repositories.
+Originally, ModuleSync was written for Puppet Modules.
+We have found, that this tool also fits our needs for Commodore components.
+
+The templates are located in the folder `moduleroot`.
+Each templates takes a set of variables as input which are defined in a file.
+In the control repository the variables are defined in `config_defaults.yml`.
+In the component they are located in `.sync.yml`.
+
+The managed components are listed in `managed_modules.yml`.
+Each entry refers to a Git repository hosted on GitHub and has the form `<namespaces>/<name>`.
+If no namespace is given, the default namespace in `modulesync.yml` will be used.
