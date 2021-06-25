@@ -28,3 +28,12 @@ If no namespace is given, the default namespace in `modulesync.yml` will be used
 Changes in the control repository pushed to `master` will trigger the execution of ModuleSync.
 A pull request will be created for each managed component.
 That is, if there are changes in the component.
+
+== Overriding variables
+
+Variables define in `config_defaults.yml` in the control repository, can be overwritten in `.sync.yml` within a component.
+
+[CAUTION]
+The merge behaviour is different to the one used within the Syn configuration hierarchy.
+
+// TODO describe merge behaviour.
