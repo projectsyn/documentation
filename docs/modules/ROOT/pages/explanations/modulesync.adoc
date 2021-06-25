@@ -31,9 +31,28 @@ That is, if there are changes in the component.
 
 == Overriding variables
 
-Variables define in `config_defaults.yml` in the control repository, can be overwritten in `.sync.yml` within a component.
+Variables defined in `config_defaults.yml` in the control repository can be overwritten in `.sync.yml` within a component.
 
 [CAUTION]
+====
 The merge behaviour is different to the one used within the Syn configuration hierarchy.
 
-// TODO describe merge behaviour.
+.Content of `config_defaults`
+[source,yaml]
+----
+File:
+  variables:
+    feature1: bar
+    feature2: baz
+----
+If a key is overwritten in the module, it will overwrite the whole `variables` key!
+
+.Content of `.sync.yml`
+[source,yaml]
+----
+File:
+  variables:
+    feature1: customized
+----
+The `feature2` key would be removed in the final config.
+====
