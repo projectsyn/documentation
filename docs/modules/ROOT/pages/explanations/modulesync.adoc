@@ -22,3 +22,9 @@ In the component they are located in `.sync.yml`.
 The managed components are listed in `managed_modules.yml`.
 Each entry refers to a Git repository hosted on GitHub and has the form `<namespaces>/<name>`.
 If no namespace is given, the default namespace in `modulesync.yml` will be used.
+
+== Applying changes
+
+Changes in the control repository pushed to `master` will trigger the execution of ModuleSync.
+A pull request will be created for each managed component.
+That is, if there are changes in the component.
