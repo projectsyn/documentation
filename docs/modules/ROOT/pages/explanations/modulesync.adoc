@@ -56,3 +56,8 @@ File:
 ----
 The `feature2` key would be removed in the final config.
 ====
+
+== Keep your component up to date
+
+A component created with `commodore component create` will be ready to be managed by `modulesync-control` of Project Syn.
+In order for this to happen, you have to add your component to https://github.com/projectsyn/modulesync-control/blob/master/managed_modules.yml[managed_modules.yml].
