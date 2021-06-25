@@ -61,3 +61,23 @@ The `feature2` key would be removed in the final config.
 
 A component created with `commodore component create` will be ready to be managed by `modulesync-control` of Project Syn.
 In order for this to happen, you have to add your component to https://github.com/projectsyn/modulesync-control/blob/master/managed_modules.yml[managed_modules.yml].
+
+== Rules established by `modulesync-control`
+
+Components kept in sync by https://github.com/projectsyn/modulesync-control[modulesync-control] must adhere to some rules.
+
+Do not edit the following files:
+
+* `Makefile`
++
+If you need to add new make targets, you can add them to new files (use `.mk` as file ending.
+You can include them in `Makefile` by adding them to the list variable `Makefile.includes`.
+
+* `.gitignore`
++
+If you have more things to exclude, add them to `.gitignore.additionalEntries`
+
+
+Further:
+
+* Ensure `LICENSE.year` is set to the year your component got created.
