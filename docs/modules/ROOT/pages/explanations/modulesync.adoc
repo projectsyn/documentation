@@ -1,0 +1,10 @@
+= Keep component boilerplate in sync
+
+[abstract]
+The creation of a new Commodore component yield several boilerplate files.
+Some of those files are meant to be altered by a component author.
+Others should be equal throughout all components managed by Project Syn.
+As with all code, things will change.
+As a result, components will drift apart over time.
+To battle this issue, we make use of https://github.com/voxpupuli/modulesync[ModuleSync] to keep that boilerplate in sync.
+The template repository for Project Syn is located at https://github.com/projectsyn/modulesync-control[modulesync-control].
