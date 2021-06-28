@@ -70,7 +70,7 @@ Don't edit the following files:
 
 * `Makefile`
 +
-If you need to add new make targets, you can add them to new files (use `.mk` as file ending.
+If you need to add new make targets, you can add them to new custom Makefiles (suggested file ending `.mk`).
 You can include them in `Makefile` by adding them to the list variable `Makefile.includes`.
 
 * `.gitignore`
@@ -95,7 +95,7 @@ LICENSE:
 ----
 <1> The component name
 <2> A more human friendly component name
-<3> The year the component got created
+<3> The year the component got created (see existing `LICENSE` file)
 
 * Ensure the rules from the previous section are followed
 * Check the https://github.com/projectsyn/commodore/tree/master/commodore/component-template[component template] and the https://github.com/projectsyn/modulesync-control[ModuleSync template] for further things of interest.
