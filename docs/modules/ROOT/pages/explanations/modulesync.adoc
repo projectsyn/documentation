@@ -77,36 +77,6 @@ You can include them in `Makefile` by adding them to the list variable `Makefile
 +
 If you have more things to exclude, add them to `.gitignore.additionalEntries`
 
-== Make your existing component ready for ModuleSync
+== See also
 
-* Create `.sync.yml` with the following content:
-+
-[source,yaml]
-----
-:global:
-  componentName: my-component <1>
-
-docs/antora.yml:
-  name: my-component <1>
-  title: My Component <2>
-
-LICENSE:
-  year: 2021 <3>
-----
-<1> The component name
-<2> A more human friendly component name
-<3> The year the component got created (see existing `LICENSE` file)
-
-* Ensure the rules from the previous section are followed
-* Check the https://github.com/projectsyn/commodore/tree/master/commodore/component-template[component template] and the https://github.com/projectsyn/modulesync-control[ModuleSync template] for further things of interest.
-
-
-[NOTE]
-====
-You can locally test the impact of ModuleSync on an existing component.
-
-* Clone https://github.com/projectsyn/modulesync-control[modulesync-control]
-* Add your component to `managed_modules.yml` (no need to commit/push)
-* Run `make sync:noop`
-* Check the results in `modules/<namespace>/<component name>'
-====
+* xref:how-tos/prepare_for_modulesync.adoc[Make your existing component ready for ModuleSync]
