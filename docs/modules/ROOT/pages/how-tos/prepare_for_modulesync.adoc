@@ -25,6 +25,9 @@ LICENSE:
 [NOTE]
 ====
 You can locally test the impact of ModuleSync on an existing component.
+You need `git` and `docker` to do so.
+Also you need a working SSH agent that can be made accessible within a docker container.
+For more details have a look at the https://github.com/projectsyn/modulesync-control/blob/master/Makefile[`Makefile`].
 
 * Clone https://github.com/projectsyn/modulesync-control[modulesync-control]
 * Add your component to `managed_modules.yml` (no need to commit/push)
