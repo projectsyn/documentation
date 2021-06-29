@@ -39,6 +39,7 @@ include::steward:ROOT:partial$nav-tutorials.adoc[]
 * xref:how-tos/release-process.adoc[Release Process]
 * xref:how-tos/compile-catalog.adoc[Compile a catalog]
 * xref:how-tos/change-parameter.adoc[Change a parameter]
+* xref:how-tos/prepare_for_modulesync.adoc[Prepare component for ModuleSync]
 * Commodore
 +
 --
@@ -87,6 +88,7 @@ include::steward:ROOT:partial$nav-reference.adoc[]
 .Explanation
 * xref:SDDs:index.adoc[Syn Design Documents]
 * xref:explanations/jsonnet.adoc[Jsonnet Best Practices]
+* xref:explanations/modulesync.adoc[Keep components in sync]
 * Commodore
 +
 --
