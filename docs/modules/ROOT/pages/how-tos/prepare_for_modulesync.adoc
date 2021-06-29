@@ -10,13 +10,9 @@
 docs/antora.yml:
   name: my-component <1>
   title: My Component <2>
-
-LICENSE:
-  year: 2021 <3>
 ----
 <1> The component name
 <2> A more human friendly component name
-<3> The year the component got created (see existing `LICENSE` file)
 
 * Ensure the rules from the previous section are followed
 * Check the https://github.com/projectsyn/commodore/tree/master/commodore/component-template[component template] and the https://github.com/projectsyn/modulesync-control[ModuleSync template] for further things of interest.
