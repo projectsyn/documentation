@@ -7,15 +7,10 @@ on:
 jobs:
   linting:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        command:
-          - lint_yaml
-          - docs-vale
     steps:
       - uses: actions/checkout@v2
-      - name: Run ${{ matrix.command }}
-        run: make ${{ matrix.command }}
+      - name: Run YAML lint
+        run: make lint_yaml
 
   editorconfig:
     runs-on: ubuntu-latest
@@ -23,7 +18,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: snow-actions/eclint@v1.0.1
         with:
-          args: 'check'
+          args: "check"
 
   docs:
     runs-on: ubuntu-latest
