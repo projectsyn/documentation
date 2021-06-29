@@ -14,14 +14,14 @@ Those templates then can be applied to several other repositories.
 Originally, ModuleSync was written for Puppet Modules.
 We've found, that this tool also fits our needs for Commodore components.
 
-The templates are located in the folder `moduleroot`.
+The templates are located in the folder https://github.com/projectsyn/modulesync-control/tree/master/moduleroot[`moduleroot`].
 Each templates takes a set of variables as input which are defined in a file.
-In the control repository the variables are defined in `config_defaults.yml`.
+In the control repository the variables are defined in https://github.com/projectsyn/modulesync-control/blob/master/config_defaults.yml[`config_defaults.yml`].
 In the component they're located in `.sync.yml`.
 
-The managed components are listed in `managed_modules.yml`.
+The managed components are listed in https://github.com/projectsyn/modulesync-control/blob/master/managed_modules.yml[`managed_modules.yml`].
 Each entry refers to a Git repository hosted on GitHub and has the form `<namespaces>/<name>`.
-If no namespace is given, the default namespace in `modulesync.yml` will be used.
+If no namespace is given, the default namespace in https://github.com/projectsyn/modulesync-control/blob/master/modulesync.yml[`modulesync.yml`] will be used.
 
 == Applying changes
 
@@ -35,7 +35,7 @@ Variables defined in `config_defaults.yml` in the control repository can be over
 
 [CAUTION]
 ====
-The merge behaviour is different to the one used within the Syn configuration hierarchy.
+The merge behaviour is different to the one used within the Project Syn configuration hierarchy.
 
 .Content of `config_defaults`
 [source,yaml]
@@ -68,12 +68,12 @@ Components kept in sync by https://github.com/projectsyn/modulesync-control[modu
 
 Don't edit the following files:
 
-* `Makefile`
+`Makefile`::
 +
 If you need to add new make targets, you can add them to new custom Makefiles (suggested file ending `.mk`).
 You can include them in `Makefile` by adding them to the list variable `Makefile.includes`.
 
-* `.gitignore`
+`.gitignore`::
 +
 If you have more things to exclude, add them to `.gitignore.additionalEntries`
 
