@@ -66,7 +66,7 @@ This section can be renamed to `Design` once agreed on the design.
 
 === User Stories [optional]
 
-Detail the things that people will be able to do if this KEP is implemented. Include as much detail as possible so that people can understand the "how" of the system. The goal here is to make this feel real for users without getting bogged down.
+Detail the things that people will be able to do if this SDD is implemented. Include as much detail as possible so that people can understand the "how" of the system. The goal here is to make this feel real for users without getting bogged down.
 
 ==== Story 1
 ==== Story 2
@@ -85,10 +85,10 @@ Consider including folks that also work outside the SIG or subproject.
 
 == Drawbacks [optional]
 
-Why should this KEP not be implemented.
+Why should this SDD not be implemented.
 
 == Alternatives [optional]
 
-Similar to the Drawbacks section the Alternatives section is used to highlight and record other possible approaches to delivering the value proposed by a KEP.
+Similar to the Drawbacks section the Alternatives section is used to highlight and record other possible approaches to delivering the value proposed by a SDD.
 
 == References
