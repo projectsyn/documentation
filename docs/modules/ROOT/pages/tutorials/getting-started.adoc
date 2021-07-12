@@ -1,7 +1,7 @@
 = Getting Started with Project Syn
 :commodore_version: v0.8.2
-:lieutenant_operator_version: v0.4.2
-:lieutenant_api_version: v0.4.0
+:lieutenant_operator_version: v0.5.3
+:lieutenant_api_version: v0.6.0
 
 This guide helps to get started with the various Project Syn tools.
 
