@@ -403,6 +403,7 @@ echo $STEWARD_INSTALL
 [source,shell]
 ----
 kubectl apply -f $STEWARD_INSTALL
+if [[ "$INGRESS_IP" == "127.0.0.1" ]]; then; kubectl -n syn set env deployment/steward -c steward STEWARD_API=http://lieutenant-api.lieutenant; fi
 ----
 . Check the validity of the bootstrap token
 +
