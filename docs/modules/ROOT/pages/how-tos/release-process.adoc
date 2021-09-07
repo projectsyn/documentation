@@ -47,13 +47,13 @@ Commodore Components are to be tagged with SemVer with `v<major>.<minor>.<patch>
 
 [NOTE]
 ====
-Generally, using `v0.x` versions are discouraged.
-After the first initial implementation, users are requested to directly release `v1.0.0`.
-Use release candidates suffix (for example `-rc1`) if "beta" versions are really needed.
+Generally, we discourage the use of `v0.x` versions.
+Instead, we recommend that developers directly release `v1.0.0` after the initial implementation is complete.
+If a prerelease version is required, developers can use a release candidate suffix (for example `-rc1`).
 ====
 
-The changelog is generated via GitHub Actions and is based on labelling PullRequests.
-The following GitHub labels require certain SemVer version increments:
+The changelog is generated via GitHub Actions and is based on pull request labels.
+The following GitHub PR labels require certain SemVer version increments:
 
 |===
 | Label | Increment
@@ -68,19 +68,22 @@ The following GitHub labels require certain SemVer version increments:
 | Major
 |===
 
-The release process is relatively simple:
+The release process itself is straightforward:
 
 . Identify which type of pull requests were merged since last release (fixes, enhancements or breaking changes) to decide on the next SemVer version number.
 . Create and push a new Git tag on the default branch.
-. If there are no breaking changes since last release, bump the version number of the released component in the Commodore defaults repository.
+. If there are no breaking changes since the last release, immediately bump the version number of the released component in the Commodore defaults repository.
 
 NOTE: If there _are_ breaking changes, you can only bump the version in the defaults once all clusters have been upgraded to the new version.
 
 === Breaking changes
 
 Pull request authors and reviewers are obliged to correctly identify breaking changes.
-Breaking changes include:
+The following changes are examples of breaking changes:
 
 * Changes of existing parameters in default configuration (new optional or default parameters should't be breaking).
 * Changes that require manual upgrade steps when upgrading the component version.
 * Removal of existing behaviour or features.
+* Upgrade of a dependency which contains breaking changes.
+
+NOTE: This list doesn't cover all possible breaking changes.
