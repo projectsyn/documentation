@@ -3,6 +3,8 @@
 Releases often just require a new SemVer tag with `v`-prefix to be pushed, for example `v1.2.3`.
 The changelog and GitHub release will then be generated automatically.
 
+== Lieutenant API and Operator
+
 All Project Syn Tools that require the container image tag to be in sync with the release, require additional preparation:
 
 . Create a release branch
@@ -25,10 +27,60 @@ git push -u
 
 . Check and update xref:tutorials/getting-started.adoc[Getting Started guide] and https://syn.tools/tuto/index.html[Tutorial: Writing your First Commodore Component] (These guides need to be up-to-date and work 100% all the time)
 
-== Additional work for major releases
+=== Additional work for major releases
 
 If a "major" release is being done, the following additional work needs to be done:
 
 * Update the https://github.com/projectsyn/documentation/blob/master/docs/modules/ROOT/pages/roadmap.adoc[Roadmap]
 * Write a blogpost and spread it on social media
 * Close the associated GitHub project and internal Jira project (if applicable)
+
+== Commodore Components
+
+Commodore Components are to be tagged with SemVer with `v<major>.<minor>.<patch>[-rc<rc>]` pattern (optionally includes Release candidates tagging).
+
+.Version examples
+====
+* `v1.0.0`
+* `v1.2.3-rc1`
+====
+
+[NOTE]
+====
+Generally, using `v0.x` versions are discouraged.
+After the first initial implementation, users are requested to directly release `v1.0.0`.
+Use release candidates suffix (for example `-rc1`) if "beta" versions are really needed.
+====
+
+The changelog is generated via GitHub Actions and is based on labelling PullRequests.
+The following GitHub labels require certain SemVer version increments:
+
+|===
+| Label | Increment
+
+| `bug`, `fix`, `change`, `dependency`
+| Patch
+
+| `enhancement`
+| Minor
+
+| `breaking`
+| Major
+|===
+
+The release process is relatively simple:
+
+. Identify which type of pull requests were merged since last release (fixes, enhancements or breaking changes) to decide on the next SemVer version number.
+. Create and push a new Git tag on the default branch.
+. If there are no breaking changes since last release, bump the version number of the released component in the Commodore defaults repository.
+
+NOTE: If there _are_ breaking changes, you can only bump the version in the defaults once all clusters have been upgraded to the new version.
+
+=== Breaking changes
+
+Pull request authors and reviewers are obliged to correctly identify breaking changes.
+Breaking changes include:
+
+* Changes of existing parameters in default configuration (new optional or default parameters should't be breaking).
+* Changes that require manual upgrade steps when upgrading the component version.
+* Removal of existing behaviour or features.
