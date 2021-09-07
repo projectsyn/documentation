@@ -1,7 +1,40 @@
 = Project Syn Tools Release Process
 
 Releases often just require a new SemVer tag with `v`-prefix to be pushed, for example `v1.2.3`.
-The changelog and GitHub release will then be generated automatically.
+
+== Commodore Components
+
+Commodore Components are to be tagged with SemVer with `v<major>.<minor>.<patch>[-rc<rc>]` pattern (optionally includes Release candidates tagging).
+
+.Version examples
+====
+* `v1.0.0`
+* `v1.2.3-rc1`
+====
+
+[NOTE]
+====
+Generally, we discourage the use of `v0.x` versions.
+Instead, we recommend that developers directly release `v1.0.0` after the initial implementation is complete.
+If a prerelease version is required, developers can use a release candidate suffix (for example `-rc1`).
+====
+
+The release process itself is straightforward:
+
+. Identify which type of pull requests were merged since last release (fixes, enhancements or breaking changes) to decide on the next SemVer version number. See also xref:references/review-guide.adoc[Review Guide] for the pull request label usage.
+. Create and push a new Git tag on the default branch.
+. If there are no breaking changes since the last release, immediately bump the version number of the released component in the Commodore defaults repository.
+
+=== How to deal with breaking changes
+
+There's two broad categories of breaking changes:
+
+. Breaking changes which can be automatically rolled out with appropriate upgrade jobs in the component.
+  In those cases, the component has implemented a automatic upgrade path where no user interaction is required.
+. Breaking changes which require changes in the config hierarchy.
+  This case requires that users bump the version along with the config changes that are documented in the upgrade documentation.
+
+For Project Syn setups that use common or global defaults in their hierarchy, bumping the version in the defaults can usually only be done once all clusters have been upgraded to the new version.
 
 == Lieutenant API and Operator
 
@@ -34,56 +67,3 @@ If a "major" release is being done, the following additional work needs to be do
 * Update the https://github.com/projectsyn/documentation/blob/master/docs/modules/ROOT/pages/roadmap.adoc[Roadmap]
 * Write a blogpost and spread it on social media
 * Close the associated GitHub project and internal Jira project (if applicable)
-
-== Commodore Components
-
-Commodore Components are to be tagged with SemVer with `v<major>.<minor>.<patch>[-rc<rc>]` pattern (optionally includes Release candidates tagging).
-
-.Version examples
-====
-* `v1.0.0`
-* `v1.2.3-rc1`
-====
-
-[NOTE]
-====
-Generally, we discourage the use of `v0.x` versions.
-Instead, we recommend that developers directly release `v1.0.0` after the initial implementation is complete.
-If a prerelease version is required, developers can use a release candidate suffix (for example `-rc1`).
-====
-
-The changelog is generated via GitHub Actions and is based on pull request labels.
-The following GitHub PR labels require certain SemVer version increments:
-
-|===
-| Label | Increment
-
-| `bug`, `fix`, `change`, `dependency`
-| Patch
-
-| `enhancement`
-| Minor
-
-| `breaking`
-| Major
-|===
-
-The release process itself is straightforward:
-
-. Identify which type of pull requests were merged since last release (fixes, enhancements or breaking changes) to decide on the next SemVer version number.
-. Create and push a new Git tag on the default branch.
-. If there are no breaking changes since the last release, immediately bump the version number of the released component in the Commodore defaults repository.
-
-NOTE: If there _are_ breaking changes, you can only bump the version in the defaults once all clusters have been upgraded to the new version.
-
-=== Breaking changes
-
-Pull request authors and reviewers are obliged to correctly identify breaking changes.
-The following changes are examples of breaking changes:
-
-* Changes of existing parameters in default configuration (new optional or default parameters should't be breaking).
-* Changes that require manual upgrade steps when upgrading the component version.
-* Removal of existing behaviour or features.
-* Upgrade of a dependency which contains breaking changes.
-
-NOTE: This list doesn't cover all possible breaking changes.
