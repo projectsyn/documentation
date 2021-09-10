@@ -1,0 +1,37 @@
+= Review Guide
+
+This guide covers aspects to consider when reviewing pull requests.
+
+== Pull request label usage
+
+All components use the https://semver.org/[Semantic Versioning] release strategy with `v` prefix (for example `v1.2.3`).
+The table below should help you identify the type of change and decide what the next version increment is.
+
+The changelog of most GitHub repositories is generated via GitHub Actions and is based on pull request labels.
+The following GitHub pull request labels require certain SemVer version increments:
+
+|===
+| Label | SemVer increment | Usage examples
+
+| `bug`, `fix`,  | Patch | Fix an unintended behaviour
+| `change` | Patch | Reimplementation of existing features, code improvements
+| `change` | Minor | Deprecate an existing feature
+| `dependency` | Patch | Patches or minor updates from a dependency that causes no known significant change
+| `modulesync` | Patch | Changes in CI/CD infrastructure coming from a ModuleSync template repository
+| `enhancement` | Minor | New features
+| `breaking` | Major | See below
+|===
+
+NOTE: If a dependency update causes breaking changes for the users, the label `dependency` shall be replaced with `breaking`.
+
+== Breaking changes
+
+Pull request authors and reviewers are obliged to correctly identify breaking changes.
+The following changes are examples of breaking changes:
+
+* Changes of existing parameters in default configuration (new optional or default parameters should't be breaking).
+* Changes that require manual upgrade steps when upgrading the component version.
+* Removal of existing behaviour or features.
+* Upgrade of a dependency which contains breaking changes (for example exposed Helm chart values).
+
+NOTE: This list doesn't cover all possible breaking changes.
