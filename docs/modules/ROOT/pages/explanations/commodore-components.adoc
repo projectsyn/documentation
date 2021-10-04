@@ -1,0 +1,50 @@
+= Commodore component best practices
+
+== Handling major changes
+
+Generally, it's considered best practice to avoid breaking changes when making larger changes to components.
+
+There's two broad categories of changes that could cause breaking changes in components:
+
+. Major version upgrades of dependencies
+. Structural changes of the component's existing parameters
+
+=== Major version change of a dependency
+
+When updating a component to use a new major version of a dependency, it's considered best practice to make use of ArgoCD's sync hooks to perform steps that are required to upgrade the dependency.
+
+TIP: See https://github.com/projectsyn/component-cert-manager/blob/e955c48f65abadbd3b5cfd9bd924cefe928bbeef/component/upgrade.jsonnet[`upgrade.jsonnet` in component cert-manager] for an example sync hook definition that ensures that ArgoCD can update the existing CRDs on the cluster.
+
+=== Structural changes of a component's existing parameters
+
+It's considered best practice to support both the old and new structure of existing parameters, when a structural change is required.
+Structural change can be detected in Jsonnet by inspecting the parameters type or present fields.
+
+To identify a parameter's type in Jsonnet the standard library function https://jsonnet.org/ref/stdlib.html#type[`std.type()`], or the convenience wrappers, such as `std.isString()` can be used.
+To inspect the fields present in a parameter of type `object`, the Jsonnet function `std.objectFields()` can be used.
+
+The parameter's type can then be used to transform the old structure into the new structure in the implementation, giving users a window to migrate their configurations to the new structure.
+
+==== Example
+
+In this example, we want to change a parameter `foo` from having a value of type string to having a value of type `object`.
+The previous string value is moved to key `value` in the new object value.
+Additionally, the object value has a key `name`, which was previously hard-coded to `FOO_VALUE`.
+
+The following Jsonnet snippet creates a local variable `foo` which will always hold parameter `foo` in the new object form:
+
+[source,jsonnet]
+----
+// We assume that the component's parameters are available as local variable `params`.
+local foo =
+  if std.isString(params.foo) then
+    // Transform legacy string parameter to object
+    {
+      name: 'FOO_VALUE', <1>
+      value: params.foo,
+    }
+  else
+    // Assume object type by default and use the provided object
+    params.foo;
+----
+<1> As mentioned above, we inject `name: 'FOO_VALUE'` to preserve the old behavior of the component for configurations which haven't been updated to the new parameter structure yet.
