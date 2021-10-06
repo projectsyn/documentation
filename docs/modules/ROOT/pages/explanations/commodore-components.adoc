@@ -1,3 +1,0 @@
-= Commodore component best practices
-
-This section of the documentation lists best practices to consider when implementing Commodore components.
