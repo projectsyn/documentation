@@ -1,0 +1,54 @@
+= Using Helm charts in Commodore components
+
+It's considered best practice to expose Helm chart values to the user by introducing a component parameter `helm_values`.
+
+This minimizes the need for duplicated parameters between the Helm chart default values and the component default parameters.
+
+Additionally, it's considered best practice to expose the Helm chart versions for all charts used by the component in parameter `charts`.
+The value of this parameter should be an object, where each field corresponds to a chart name and the value indicates the chart version to use for that chart.
+
+== Example
+
+In this example the component configures some different default values for chart `my-chart`.
+
+.class/defaults.yml
+[source,yaml]
+----
+parameters:
+  my_component:
+    namespace: syn-my-component
+    charts:
+      my-chart: v1.2.3 <1>
+    helm_values: <2>
+      valueA: 2
+      valueB: 'five'
+----
+<1> The Helm chart version for chart `my-chart`.
+<2> Configure default values for Helm values where the chart defaults aren't a good fit for the component.
+Users can provide arbitrary further Helm values by adding them to parameter `helm_values`.
+
+In the component class:
+
+.class/my-component.yml
+[source,yaml]
+----
+parameters:
+  kapitan:
+    dependencies:
+      - type: helm
+        source: https://charts.appuio.ch/
+        chart_name: my-chart
+        version: ${my_component:charts:my-chart}
+    compile:
+      - input_paths:
+          - my-component/helmcharts/my-chart/${my_component:charts:my-chart}
+        input_type: helm
+        output_type: yaml
+        output_path: my-component/01_helmchart
+        helm_values: ${my_component:helm_values} <1>
+        helm_params: <2>
+          release_name: syn-my-chart
+          namespace: ${my_component:namespace}
+----
+<1> Pass through Helm values from component parameters.
+<2> Configure Helm release name and namespace.
