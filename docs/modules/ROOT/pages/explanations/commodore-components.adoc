@@ -8,6 +8,7 @@ There's two broad categories of changes that could cause breaking changes in com
 
 . Major version upgrades of dependencies
 . Structural changes of the component's existing parameters
+. Replacing component parameters
 
 === Major version change of a dependency
 
@@ -48,3 +49,44 @@ local foo =
     params.foo;
 ----
 <1> As mentioned above, we inject `name: 'FOO_VALUE'` to preserve the old behavior of the component for configurations which haven't been updated to the new parameter structure yet.
+
+=== Replacing a component parameter
+
+It's considered best practice to support both the old and the new parameter, when a component parameter needs to be replaced.
+In addition, the implementation should adhere to the following best practices:
+
+* If users supply the old parameter, it takes precedence over the new parameter.
+* The component defaults only contain the new parameter.
+
+[NOTE]
+====
+In Jsonnet, we don't have a clean way to identify users who provide both the old and new parameter.
+Implementations can try to identify user-supplied values for the new parameter by comparing the rendered parameter value with the expected parameter default value.
+However, we don't require best-practice implementations to do so, as there may be cases where it's hard to identify a clear expected parameter default.
+====
+
+==== Example
+
+In this example, we want to replace a parameter `secret` which takes a string with a parameter `secretRef` which takes an object.
+The value of the old parameter `secret` is moved to key `name` in the new parameter's value.
+The component's defaults only have the new parameter:
+
+[source,yaml]
+----
+parameters:
+  my_component:
+    secretRef:
+      name: my-secret
+----
+
+The following Jsonnet snippet creates a local variable `secretRef` which is constructed from the old parameter `secret`, if it exists, and holds the value of parameter `secretRef` otherwise:
+
+[source,jsonnet]
+----
+// We assume that the component's parameters are available as local variable `params`.
+local secretRef =
+  if std.objectHas(params, 'secret') then
+    { name: params.secret }
+  else
+    params.secretRef;
+----
