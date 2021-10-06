@@ -93,3 +93,62 @@ local secretRef =
   else
     params.secretRef;
 ----
+
+== Managing secrets with user-provided data
+
+Some components may need a way to create an arbitrary number of secrets containing user-supplied data.
+See https://github.com/appuio/component-openshift4-authentication/pull/32[component openshift4-authentication PR#32] for an example.
+
+It's considered best practice that components provide a parameter `secrets` with value of type object.
+The component should render each field of the parameter as a secret in the resulting manifests.
+
+The implementation should adhere to the following best practices:
+* The field names ("keys") of the parameter value are used as secret names.
+* The values of each field should be partial `Secret` resources which can be used as-is.
+
+
+=== Example
+
+The component's defaults would have an empty object `secrets`:
+
+[source,yaml]
+----
+parameters:
+  my_component:
+    namespace: syn-my-component
+    secrets: {}
+----
+
+The implementation iterates over the fields of parameter `secrets` and merges the provided values with an empty `Secret` resource:
+
+[source,jsonnet]
+----
+// We assume that
+// * the component's parameters are available as local variable `params`.
+// * kube-libsonnet is available as local variable `kube`.
+local secrets = {
+  kube.Secret(s) {
+    metadata+: {
+      namespace: params.namespace,
+    }
+  } + params.secrets[s]
+  for s in std.objectFields(params.secrets)
+};
+
+{
+  secrets: secrets,
+}
+----
+
+An example use of the parameter:
+
+[source,yaml]
+----
+parameters:
+  my_component:
+    secrets:
+      my-secret:
+        stringData:
+          verysecret: verysecretvalue <1>
+----
+<1> Users are free to use xref:commodore:ROOT:reference/concepts.adoc#_secret_references[Commodore secret references] as values for their secrets.
