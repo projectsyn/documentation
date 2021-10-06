@@ -2,8 +2,6 @@
 
 It's considered best practice to provide component parameter `images` which contains the default container image versions for all images used by the component.
 
-NOTE: This structure may become mandatory to support automated component dependency updates using Renovate.
-
 The value of parameter `images` should be an object where each field name corresponds to a container image used by the component.
 The value of each field should again be an object with fields `registry`, `repository`, and `tag`.
 These fields should correspond to the container image registry, repository in that registry and image tag of the container image.
