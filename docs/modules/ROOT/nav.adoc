@@ -88,7 +88,9 @@ include::steward:ROOT:partial$nav-reference.adoc[]
 
 .Explanation
 * xref:SDDs:index.adoc[Syn Design Documents]
-* xref:explanations/commodore-components.adoc[Commodore component best practices]
+* xref:explanations/commodore-components.adoc[Commodore Component Best Practices]
+** xref:explanations/commodore-components/major.adoc[Major changes]
+** xref:explanations/commodore-components/secrets.adoc[User-provided Secrets]
 * xref:explanations/jsonnet.adoc[Jsonnet Best Practices]
 * xref:explanations/modulesync.adoc[Keep components in sync]
 * Commodore
