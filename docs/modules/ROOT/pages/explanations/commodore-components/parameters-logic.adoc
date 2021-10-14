@@ -1,0 +1,39 @@
+= Supporting conditional configurations in the parameters hierarchy
+
+Some components can benefit from being able to provide different defaults values for a parameter based on the value of another component parameter.
+
+For example, this can be very useful to dynamically set Helm chart values based on another component parameter.
+
+It's considered best practice to use https://github.com/kapicorp/reclass/blob/1c847dbfa743b9fa4876996b97282e1f828541f4/README-extensions.rst#constant-parameters[constant parameters] to implement lookup tables for such cases.
+
+Another common use case for lookup tables is to dynamically select dependency versions based on a component parameter.
+See https://github.com/appuio/component-openshift4-terraform/blob/80c3f550ea16c3018d45548d60959cc99e581788/class/defaults.yml[component openshift4-terraform] for an example lookup table to select the Terraform module version based on the cloud provider for which the component is configured.
+
+== Example
+
+In this example we want to configure a Helm chart to use PodSecurityPolicies on RKE and SecurityContextConstraints on OpenShift 4.
+We get the information about the distribution for which to configure the Helm chart from component parameter `distribution`.
+
+We can implement a lookup table in the component parameters using the following structure:
+
+[source,yaml]
+----
+parameters:
+  my_component:
+    # Component defaults to distribution "rke"
+    distribution: rke <1>
+    =_dist_helm_values: <2>
+      rke:
+        # Use PSPs on RKE
+        psps: true
+        sccs: false
+      openshift4:
+        # Use SCCs on OpenShift
+        psps: false
+        sccs: true
+    helm_values:
+      psps: ${my_component:_dist_helm_values:${my_component:distribution}:psps}
+      sccs: ${my_component:_dist_helm_values:${my_component:distribution}:sccs}
+----
+<1> Parameter which indicates the distribution for which to configure the Helm chart
+<2> Helm value lookup table as a constant parameter, so users can't accidentally overwrite the lookup table contents.

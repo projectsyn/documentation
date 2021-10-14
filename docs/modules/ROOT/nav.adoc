@@ -88,6 +88,12 @@ include::steward:ROOT:partial$nav-reference.adoc[]
 
 .Explanation
 * xref:SDDs:index.adoc[Syn Design Documents]
+* Commodore Component Best Practices
+** xref:explanations/commodore-components/container-images.adoc[Container image versions]
+** xref:explanations/commodore-components/major.adoc[Major changes]
+** xref:explanations/commodore-components/secrets.adoc[User-provided Secrets]
+** xref:explanations/commodore-components/helm-charts.adoc[Using Helm charts]
+** xref:explanations/commodore-components/parameters-logic.adoc[Conditionals in the parameters hierarchy]
 * xref:explanations/jsonnet.adoc[Jsonnet Best Practices]
 * xref:explanations/modulesync.adoc[Keep components in sync]
 * Commodore

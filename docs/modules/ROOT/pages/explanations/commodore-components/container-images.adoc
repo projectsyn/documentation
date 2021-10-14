@@ -1,0 +1,31 @@
+= Managing container image versions
+
+It's considered best practice to provide component parameter `images` which contains the default container image versions for all images used by the component.
+
+The value of parameter `images` should be an object where each field name corresponds to a container image used by the component.
+The value of each field should again be an object with fields `registry`, `repository`, and `tag`.
+These fields should correspond to the container image registry, repository in that registry and image tag of the container image.
+
+== Example
+
+In this example, the component requires a container image which contains `kubectl`.
+By default, the component uses the Bitnami `kubectl` image hosted on Quay.io.
+
+.class/defaults.yml
+[source,yaml]
+----
+parameters:
+  images:
+    kubectl:
+      registry: quay.io
+      repository: bitnami/kubectl
+      tag: '1.21.2'
+----
+
+Unless the implementation has specific requirements, it's strongly recommended to use the following snippet to construct a container image string which is suitable to use as field image in a Kubernetes https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#container-v1-core[`Container`] resource.
+
+[source,jsonnet]
+----
+// We assume that the component parameters are available in local variable `params`.
+local kubectlImage = '%(registry)s/%(repository)s:%(tag)s' % params.images.kubectl;
+----
