@@ -4,9 +4,9 @@ Generally, it's considered best practice to avoid changes which require manual i
 
 This document provides best practices to avoid requiring manual intervention during the component upgrade when making changes of the following types:
 
-. Major version upgrades of dependencies
-. Structural changes of the component's existing parameters
-. Replacing component parameters
+. <<_major_version_change_of_a_dependency,Major version changes of dependencies>>
+. <<_structural_changes_of_a_components_existing_parameters,Structural changes of the component's existing parameters>>
+. <<_replacing_a_component_parameter,Replacing component parameters>>
 
 For structural changes of parameters and replacing parameters, it's considered best practice to apply the principle of _forward only migration_.
 We give examples of how such migrations can be implemented in the sections below.
