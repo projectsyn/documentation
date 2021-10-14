@@ -11,7 +11,7 @@ See https://github.com/appuio/component-openshift4-terraform/blob/80c3f550ea16c3
 
 == Example
 
-In this example we want to configure a Helm chart to use PodSecurityPolicies on RKE and SecurityContextConstraints on OpenShif 4.
+In this example we want to configure a Helm chart to use PodSecurityPolicies on RKE and SecurityContextConstraints on OpenShift 4.
 We get the information about the distribution for which to configure the Helm chart from component parameter `distribution`.
 
 We can implement a lookup table in the component parameters using the following structure:
