@@ -4,7 +4,7 @@ Compile and push a cluster catalog from local machine to update dependencies.
 
 == Requirements
 
-* A https://syn.tools/commodore/running-commodore.html[working commodore command].
+* A https://syn.tools/commodore/explanation/running-commodore.html[working commodore command].
 * An access token to a running Lieutenant instance. Storing the token as a kubeconfig is recommended.
 * An existing Cluster in Lieutenant.
 
