@@ -1,7 +1,7 @@
 = Getting Started with Project Syn
-:commodore_version: v0.9.0
-:lieutenant_operator_version: v0.5.3
-:lieutenant_api_version: v0.6.0
+:commodore_version: v0.12.1
+:lieutenant_operator_version: v1.1.2
+:lieutenant_api_version: v0.8.0
 
 This guide helps to get started with the various Project Syn tools.
 
@@ -61,10 +61,10 @@ Install *Lieutenant Operator* with the following commands:
 [source,shell,subs="attributes"]
 ----
 # CRDs (global scope)
-kubectl apply -k "github.com/projectsyn/lieutenant-operator/deploy/crds?ref={lieutenant_operator_version}"
+kubectl apply -k "github.com/projectsyn/lieutenant-operator/config/crd?ref={lieutenant_operator_version}"
 
 # Operator deployment
-kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/deploy?ref={lieutenant_operator_version}"
+kubectl -n lieutenant apply -k "github.com/projectsyn/lieutenant-operator/config/samples/deployment?ref={lieutenant_operator_version}"
 
 # Operator configuration
 kubectl -n lieutenant set env deployment/lieutenant-operator -c lieutenant-operator \
@@ -98,7 +98,7 @@ kubectl -n lieutenant set env deployment/lieutenant-api -c lieutenant-api \
 if [[ "$OSTYPE" == "darwin"* ]]; then export INGRESS_IP=127.0.0.1; else export INGRESS_IP=$(kubectl -n kube-system get svc traefik -o jsonpath="{.status.loadBalancer.ingress[0].ip}"); fi
 
 kubectl -n lieutenant apply -f -<<EOF
-apiVersion: networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: lieutenant-api
@@ -403,7 +403,7 @@ echo $STEWARD_INSTALL
 [source,shell]
 ----
 kubectl apply -f $STEWARD_INSTALL
-if [[ "$INGRESS_IP" == "127.0.0.1" ]]; then; kubectl -n syn set env deployment/steward -c steward STEWARD_API=http://lieutenant-api.lieutenant; fi
+if [[ "$INGRESS_IP" == "127.0.0.1" ]]; then kubectl -n syn set env deployment/steward -c steward STEWARD_API=http://lieutenant-api.lieutenant; fi
 ----
 . Check the validity of the bootstrap token
 +
@@ -411,7 +411,7 @@ if [[ "$INGRESS_IP" == "127.0.0.1" ]]; then; kubectl -n syn set env deployment/s
 ----
 kubectl -n lieutenant get cluster ${CLUSTER_ID} -o jsonpath="{.status.bootstrapToken.tokenValid}"
 ----
-This command should return `false`.
+This command should return nothing, since the bootstrap token is no longer valid after it's been used.
 . Check that Steward is running and that Argo CD Pods are appearing
 +
 [source,shell]
