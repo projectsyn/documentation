@@ -15,11 +15,12 @@ By default, the component uses the Bitnami `kubectl` image hosted on Quay.io.
 [source,yaml]
 ----
 parameters:
-  images:
-    kubectl:
-      registry: quay.io
-      repository: bitnami/kubectl
-      tag: '1.21.2'
+  component_name:
+    images:
+      kubectl:
+        registry: quay.io
+        repository: bitnami/kubectl
+        tag: '1.21.2'
 ----
 
 Unless the implementation has specific requirements, it's strongly recommended to use the following snippet to construct a container image string which is suitable to use as field image in a Kubernetes https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.22/#container-v1-core[`Container`] resource.
