@@ -4,12 +4,12 @@ Commodore components may introduce new custom resources, and should do so when i
 A component needs to be careful that the provided CRDs are always compatible with the installed operator.
 
 One needs to take special considerations when support for a CRD version is dropped.
-When this happens all existing objects https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#upgrade-existing-objects-to-a-new-stored-version[need to be upgraded to a new stored version.]
+When this happens all existing objects https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#upgrade-existing-objects-to-a-new-stored-version[need to be upgraded to a new stored version].
 This is often not considered a breaking change by the upstream project.
-The component needs to either handle this stored version upgrade in a job or treat such an update as a breaking change and provide an upgrade guide to do so.
+The component needs to either handle this stored version upgrade in a job or treat such an update as a breaking change and provide an upgrade guide for migrating existing objects.
 
-It's considered best practice to provide ClusteRoles that https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles[are aggregated] to the `view`,  `edit`, `admin`, and if applicable `cluster-reader` ClusteRole.
-This is done by setting the label `rbac.authorization.k8s.io/aggregate-to-<role>` on the provided ClusteRoles.
+It's considered best practice to provide ClusterRoles that https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles[are aggregated] to the `view`,  `edit`, `admin`, and if applicable `cluster-reader` ClusteRole.
+This is done by setting the label `rbac.authorization.k8s.io/aggregate-to-<role>` on the provided ClusterRoles.
 
 As the names suggest you should:
 
@@ -20,10 +20,10 @@ As the names suggest you should:
 
 == Example
 
-In this example we look at a component that installs two custom reasource definitions.
+In this example, we look at a component that installs two custom resource definitions:
 The namespaced `foos.foo.example.com` resource, and the cluster-wide `clusterfoos.foo.example.com` resource.
 
-To provide a good user experience the component installs the following three clusterroles.
+To provide a good user experience the component installs the following three ClusterRoles.
 
 [source,yaml]
 ----
@@ -69,7 +69,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    rbac.authorization.k8s.io/aggregate-to-cluster-reader <3>
+    rbac.authorization.k8s.io/aggregate-to-cluster-reader: "true" <3>
   name: foo-cluster-reader
 rules:
 - apiGroups:
