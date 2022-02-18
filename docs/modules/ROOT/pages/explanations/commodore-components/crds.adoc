@@ -1,0 +1,86 @@
+= Installing CRDs in Commodore components
+
+Commodore components may introduce new custom resources, and should do so when installing operators that depend on them.
+A component needs to be careful that the provided CRDs are always compatible with the installed operator.
+
+One needs to take special considerations when support for a CRD version is dropped.
+When this happens all existing objects https://kubernetes.io/docs/tasks/extend-kubernetes/custom-resources/custom-resource-definition-versioning/#upgrade-existing-objects-to-a-new-stored-version[need to be upgraded to a new stored version].
+This is often not considered a breaking change by the upstream project.
+The component needs to either handle this stored version upgrade in a job or treat such an update as a breaking change and provide an upgrade guide for migrating existing objects.
+
+It's considered best practice to provide ClusterRoles that https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles[are aggregated] to the `view`,  `edit`, `admin`, and if applicable `cluster-reader` ClusteRole.
+This is done by setting the label `rbac.authorization.k8s.io/aggregate-to-<role>` on the provided ClusterRoles.
+
+As the names suggest you should:
+
+* Add get, list, and watch permissions for all namespaced custom resources to `view`
+* Add create, update, and delete permissions for all namespaced custom resources to `edit`
+* Add permissions for sensitive custom resources to `admin`
+* Add get, list, and watch permissions for all cluster scoped custom resources to `cluster-reader`
+
+== Example
+
+In this example, we look at a component that installs two custom resource definitions:
+The namespaced `foos.foo.example.com` resource, and the cluster-wide `clusterfoos.foo.example.com` resource.
+
+To provide a good user experience the component installs the following three ClusterRoles.
+
+[source,yaml]
+----
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
+  name: foo-view <1>
+rules:
+- apiGroups:
+  - foo.example.com
+  resources:
+  - foos
+  verbs:
+  - get
+  - list
+  - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-admin: "true" <2>
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+  name: foo-edit
+rules:
+- apiGroups:
+  - foo.example.com
+  resources:
+  - foos
+  verbs:
+  - create
+  - delete
+  - deletecollection
+  - patch
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    rbac.authorization.k8s.io/aggregate-to-cluster-reader: "true" <3>
+  name: foo-cluster-reader
+rules:
+- apiGroups:
+  - foo.example.com
+  resources:
+  - clusterfoos
+  verbs:
+  - get
+  - list
+  - watch
+----
+<1> The default `view` role doesn't provide access to secrets. Be careful to not accidentally give access to secrets through CRDs.
+<2> For most CRDs a dedicated `admin` role isn't necessary, but can be helpful when dealing with resources that give especially high privileges.
+<3> While the `cluster-reader` role is an OpenShift construct, there is no disadvantage to providing such a role for every Kubernetes distribution.
