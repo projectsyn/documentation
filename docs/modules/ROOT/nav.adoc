@@ -94,6 +94,7 @@ include::steward:ROOT:partial$nav-reference.adoc[]
 ** xref:explanations/commodore-components/secrets.adoc[User-provided Secrets]
 ** xref:explanations/commodore-components/helm-charts.adoc[Using Helm charts]
 ** xref:explanations/commodore-components/parameters-logic.adoc[Conditionals in the parameters hierarchy]
+** xref:explanations/commodore-components/crds.adoc[Custom Resource Defintions]
 * xref:explanations/jsonnet.adoc[Jsonnet Best Practices]
 * xref:explanations/modulesync.adoc[Keep components in sync]
 * Commodore
