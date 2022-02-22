@@ -4,8 +4,13 @@ It's considered best practice to expose Helm chart values to the user by introdu
 
 This minimizes the need for duplicated parameters between the Helm chart default values and the component default parameters.
 
-Additionally, it's considered best practice to expose the Helm chart versions for all charts used by the component in parameter `charts`.
-The value of this parameter should be an object, where each field corresponds to a chart name and the value indicates the chart version to use for that chart.
+Additionally, it's considered best practice to expose the Helm chart versions and sources for all charts used by the component in parameter `charts`.
+The value of this parameter should be an object, where each field corresponds to a Helm chart name and the value is another object with fields `source` and `version` indicating the chart repository and version to use for that chart.
+
+[IMPORTANT]
+====
+For Renovate to be able to extract the depedency, the keys in parameter `charts` must match the corresponding Helm chart names exactly.
+====
 
 == Example
 
@@ -18,12 +23,15 @@ parameters:
   my_component:
     namespace: syn-my-component
     charts:
-      my-chart: v1.2.3 <1>
+      my-chart: <1>
+        source: https://charts.appuio.ch/
+        version: v1.2.3
     helm_values: <2>
       valueA: 2
       valueB: 'five'
 ----
-<1> The Helm chart version for chart `my-chart`.
+<1> The Helm chart source and version for chart `my-chart`.
+The key must match the chart's name for Renovate to be able to generate update PRs.
 <2> Configure default values for Helm values where the chart defaults aren't a good fit for the component.
 Users can provide arbitrary further Helm values by adding them to parameter `helm_values`.
 
@@ -36,19 +44,21 @@ parameters:
   kapitan:
     dependencies:
       - type: helm
-        source: https://charts.appuio.ch/
-        chart_name: my-chart
-        version: ${my_component:charts:my-chart}
+        source: ${my_component:charts:my-chart:source}
+        chart_name: my-chart <1>
+        version: ${my_component:charts:my-chart:version}
     compile:
       - input_paths:
-          - my-component/helmcharts/my-chart/${my_component:charts:my-chart}
+          - my-component/helmcharts/my-chart/${my_component:charts:my-chart:version}
         input_type: helm
         output_type: yaml
         output_path: my-component/01_helmchart
-        helm_values: ${my_component:helm_values} <1>
-        helm_params: <2>
+        helm_values: ${my_component:helm_values} <2>
+        helm_params: <3>
           release_name: syn-my-chart
           namespace: ${my_component:namespace}
 ----
-<1> Pass through Helm values from component parameters.
-<2> Configure Helm release name and namespace.
+<1> The Helm chart name.
+This value must match the key in parameter `charts`.
+<2> Pass through Helm values from component parameters.
+<3> Configure Helm release name and namespace.
