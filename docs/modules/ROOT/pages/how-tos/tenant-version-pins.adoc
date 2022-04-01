@@ -1,0 +1,92 @@
+= Renovate version pins
+
+Project Syn comes with a custom https://github.com/renovatebot/renovate[Renovate] extension called https://github.com/projectsyn/commodore-renovate[commodore-renovate].
+
+The extension will help you keep dependencies up-to date.
+Out of the box, it will automatically create PRs for:
+
+* Commodore component versions in both the global default and tenant repositories
+* Container image dependencies in commodore component repositories
+* Helm chart dependencies in commodore component repositories
+
+It won't automatically create PRs for container image and helm chart version pins in global defaults or tenant repositories.
+There is however a way to configure it to do so for specific version pins.
+
+. Let the following be a version pin in a tenant or global defaults repositories
++
+[source,yaml]
+----
+parameters:
+  mycomponent:
+    images:
+      myimage:
+        tag: 0.4.1
+      foo:
+        tag: 1.2.0
+    charts:
+      bar:
+        version: 3.1.4
+----
+
+. Tag the container images and helm chart with the additional necessary information, such as image name and chart source and name
++
+[source,yaml]
+----
+parameters:
+  mycomponent:
+    images:
+      # renovate: image=registry.example.com/company/myimage
+      myimage:
+        tag: 0.4.1
+      # renovate: image=foo
+      foo:
+        tag: 1.2.0
+    charts:
+      bar:
+        # renovate: source=https://charts.example.com/ chart=bar
+        version: 3.1.4
+----
+
+. Add a regex matcher for container images and helm chart by adding the following to the `renovate.json` file in the repository
++
+[source,json]
+----
+  "regexManagers": [
+    {
+      "fileMatch": [".*"], <1>
+      "matchStrings": ["renovate:\\simage=(?<depName>.*?)\\n\\s*tag: (?<currentValue>.*)"],
+      "datasourceTemplate": "docker"
+    },
+    {
+      "fileMatch": [".*"], <2>
+      "matchStrings": ["renovate:\\ssource=(?<registryUrl>.*?)\\schart=(?<depName>.*?)\\n\\s*version: (?<currentValue>.*)"],
+      "datasourceTemplate": "helm"
+    }
+  ]
+----
+<1> A regex manager that matches the docker image version pins
+<1> A regex manager that matches the helm chart version pins
+
+. Push the changes.
+Renovate should now be able to find these version pins and will create PRs for dependency updates
+
+
+[NOTE]
+====
+To update version pinned helm charts and container images, we directly use the https://docs.renovatebot.com/modules/manager/regex/[regex manager] feature of Renovate.
+There is no Project Syn specific tooling involved.
+This means you need to be careful when defining the `matchStrings` expression and the version annotations.
+There is no hidden magic to help you and if there is any mismatch, Renovate will simply not find the dependencies.
+
+A few things to consider:
+
+* *Annotation order matters*: The `matchStrings` field is simply a regex with capture groups.
+That means if you make small changes such as reordering `source` and `chart` in the annotation, the regex won't match anymore and the dependency can't be found.
+* *Avoid quoting versions*: The example regex above won't work when quoting the version/tag.
+Please avoid quotes or modify the regex to handle them.
+* *Be mindful of collisions*: Overly simple `matchStrings` might match other unexpected parameters and create wrong PRs.
+* *Escape slashes*: The `matchStrings` field requires you to escape slashes.
+
+Writing regular expressions can be error prone.
+Online tools such as https://regex101.com/[regex101] can help you.
+====
