@@ -153,7 +153,7 @@ Commodore currently only supports Vault KV as back-end for storing secrets.
 Commodore eliminates the need for users to manually create Kapitan secret files (using `kapitan refs --write ...`), by scanning the configuration parameters (everything defined under `parameters:` in Kapitan classes) for secret references and generating secret files in `catalog/refs` before running `kapitan compile`.
 This ensures that the secret files and the catalog are always in sync.
 All secret references MUST be made in the configuration parameters, otherwise Commodore can't discover them.
-Secret references can use reclass references to define dynamic defaults, for example `?{vaultkv:${customer:name}/${cluster:name}/thesecret/thekey}`.
+Secret references can use reclass references to define dynamic defaults, for example `?{vaultkv:${cluster:tenant}/${cluster:name}/thesecret/thekey}`.
 
 ==== Secret file generation
 
