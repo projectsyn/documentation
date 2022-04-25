@@ -14,6 +14,30 @@ The following snippet sets up needed environment variables in your current worki
 
 TIP: You can skip this step if you have already defined them already with another method.
 
+. Setup required environment variables
++
+.Lieutenant instance using OIDC token
+[%collapsible]
+====
+[source,bash]
+----
+LIEUTENANT_URL="the-public-lieutenant-API-URL"
+
+cat << EOF > .env
+LIEUTENANT_AUTH="Authorization:Bearer \$(commodore fetch-token)"
+LIEUTENANT_URL="${LIEUTENANT_URL}"
+COMMODORE_API_URL="${LIEUTENANT_URL}"
+EOF
+----
+
+[NOTE]
+The command `commodore fetch-token` in variable `LIEUTENANT_AUTH` will be executed when you source the `.env` file.
+You may need to re-source the file when following a longer guide as the OIDC token will usually have a lifetime of only a few minutes.
+====
++
+.Lieutenant instance using long-lived Kubernetes token
+[%collapsible]
+====
 [source,bash]
 ----
 # Assuming "syn-synfra" is the user in your kubeconfig
@@ -26,7 +50,13 @@ LIEUTENANT_URL="${LIEUTENANT_URL}"
 COMMODORE_API_TOKEN="${LIEUTENANT_TOKEN}"
 COMMODORE_API_URL="${LIEUTENANT_URL}"
 EOF
+----
+====
 
+. Activate the configured environment variables
++
+[source,bash]
+----
 # Double check the environment variables
 less .env
 
