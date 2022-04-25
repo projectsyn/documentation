@@ -29,6 +29,10 @@ LIEUTENANT_URL="${LIEUTENANT_URL}"
 COMMODORE_API_URL="${LIEUTENANT_URL}"
 EOF
 ----
+
+[NOTE]
+The command `commodore fetch-token` in variable `LIEUTENANT_AUTH` will be executed when you source the `.env` file.
+You may need to re-source the file when following a longer guide as the OIDC token will usually have a lifetime of only a few minutes.
 ====
 +
 .Lieutenant instance using long-lived Kubernetes token
