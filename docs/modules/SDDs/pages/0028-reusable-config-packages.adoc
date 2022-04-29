@@ -40,51 +40,68 @@ While this approach addresses distribution within an organization, it falls shor
 
 == Design Proposal
 
-* Regardless of discovery/fetching/inclusion in the hierarchy packages will be Git repos
+We propose that each Commodore component configuration package is a Git repository.
+This gives us change history and versioning of configuration packages based on a well-established toolset.
+Making each configuration package a Git repository also fits well with the Project Syn approach of keeping all dependencies (global and tenant config, components) in Git.
+We can also profit from all the already existing logic for cutting releases, and CI tests which we've engineered for Commodore components.
 
-Approach 1:
+The big design question is revolves around the mechanism used to fetch configuration packages.
+We can either fetch configuration packages using Kapitan's remote inventory support or we can enhance Commodore's native dependency fetching logic to support config packages in addition to components.
 
-* Use Kaptian's remote inventory support to include package classes directly in the hierarchy, cf. https://kapitan.dev/inventory/#inventory-classes, section "Remote Inventory"
-* (+) We reuse an existing Kapitan feature
-* (+) Only a few additional lines of custom code required
-* (-) Catalog compilation becomes more convoluted (more calls to Kapitan interspersed & we need to explicitly call Kapitan's `fetch_inventories`)
-* (-) We need to live with the package fetching options provided by Kapitan
+=== Approach 1: Use Kapitan's remote inventory support
 
-Approach 2:
+The first option for fetching config packages during catalog compilation is based on Kapitan's remote inventory support.
+By reusing an existing Kapitan feature we get nice integration into the config hierarchy for free.
+Also, by integrating a Kapitan feature, the amount of new code in Commodore is fairly small (on the order of tens of lines).
 
-* Build our own inventory fetching using a similar structure to component fetching
-* (+) Catalog compilation remains more straightforward, we don't need to awkwardly call more Kapitan internals
-* (+) We can control exactly where/how packages are fetched
-* (+) We already have a proven design for dependency fetching (components) which we can adapt for fetching config packages
-* (-) More custom code
-* (-) We reimplement a feature already provided by Kapitan
+However, by using Kapitan's remote inventories, we're constrained by the options which are available.
+Remote inventories are defined in a reclass list.
+Unfortunately, this means that we can't easily adjust already included remote inventories further down in the config hierarchy.
+Additionally, Kapitan's remote inventory definitions don't separate dependency specification and fetching.
 
-Testability:
+Finally, using Kapitan's remote inventory support will require Commodore to make additional calls to internal Kapitan functions.
+While this hasn't posed a problem so far, the tight coupling by calling Kapitan internals may cause increased maintenance cost in the future.
 
-* Create a template for config packages which provides GitHub actions and a Makefile (similar to the component template)
-* Ensure we've got a way to keep config packages in sync when the template is updated
+=== Approach 2: Enhance Commodore's dependency fetching logic
 
-=== User Stories [optional]
+The second option for fetching config packages during catalog compilation is to implement native support in Commodore for specifying and fetching config packages.
+This approach has the advantage that we can closely mimic the configuration structures used to define and include components in the configuration hierarchy.
+Having similar structures for specifying and including components and config packages should reduce the amount of extra configuration complexity for the users of the new feature.
 
-== Implementation Details/Notes/Constraints
+By using Commodore's dependency fetching, we can easily separate configuration package dependency specification and fetching.
+Additionally, we can control exactly where we download config packages to and how we make them available in the configuration hierarchy.
 
-* Implementation should be integrated into existing catalog compilation logic
+Finally, we add less complexity to the actual catalog compilation by being able to tailor the implementation exactly to our needs.
 
-Approach 1:
+The downside of the Commodore-native approach is that we reimplement a feature which is already provided by Kapitan.
+Implementing native configuration package fetching also increases the size and complexity of the Commodore code base more than reusing a Kapitan feature.
 
-* Commodore needs to invoke Kapitan's fetch_inventories() immediately after cloning the global and tenant repos, to ensure that any packaged configs are made available early in the catalog compilation.
-* Commodore's `kapitan_inventory()` needs to be extended to optionally ignore missing classes, as we otherwise won't be able to get to a point where we can fetch remote inventories.
+=== Testability
 
-Approach 2:
+To test Commodore component configuration packages, we will introduce a new Commodore command to compile a complete package.
+This command will work similarly to `commodore component compile` but will be executed for a package instead of a component.
+The command will use an additional test class which has to provide `parameters.components` with entries for any components that the package includes.
+With the information provided by the test class, the command will fetch the referenced components before compiling the package.
 
-* Commodore needs to fetch the config packages before invoking `kapitan_compile()`.
-* Commodore's `kapitan_inventory()` needs to be extended to optionally ignore missing classes, as we otherwise won't be able to get to a point where we can parse the inventory to determine which config packages need to be fetched.
+A configuration package template which provides GitHub actions and a Makefile will be provided by Project Syn.
+The template will allow users to ensure consistent test and CI configurations for new Commodore component configuration packages.
+Together with the template, a mechanism to merge template updates into existing configuration packages will be provided.
 
-Testability:
-* Use similar approach to component testing, but fetch components defined by the config package first.
-** Add support in Commodore to setup fake catalog which can be used to test config package
+=== Implementation Details/Notes/Constraints
 
-== Risks and Mitigations
+The implementation of configuration packages needs to be integrated into the existing catalog compilation logic.
+Commodore must be able to compile hierarchies which use configuration packages using the same commands as hierarchies which don't use any configuration packages.
+
+Commodore's `kapitan_inventory()` needs to be extended to optionally ignore missing classes.
+This is necessary, as we otherwise won't be able to parse the hierarchy to determine which configuration packages need to be fetched.
+
+Regardless of the chosen mechanism to fetch configuration packages, Commodore needs to fetch configuration packages before fetching components.
+This is required to ensure that configuration packages can specify components to include in the catalog compilation.
+
+For testing we should use a similar approach to component testing, but fetch components defined by the config package first.
+We probably need to implement a new Commodore command to support standalone compilation of a full configuration package.
+
+=== Risks and Mitigations
 
 [horizontal]
 Risk:: Config packages can't be tested easily
@@ -92,8 +109,17 @@ Mitigation:: Add whatever support is necessary in Commodore to allow compiling m
 
 == Alternatives
 
-* Don't formalize config packages, let users define reusable configs in their global defaults repo.
-* Whichever approach we don't choose (*TBD before finalizing draft*)
+=== Ad-hoc configuration packages in the global defaults
+
+We could just document the approach used in the VSHN global defaults at the moment.
+This approach doesn't need any changes in Commodore.
+However, the approach doesn't offer any support for testing configuration packages.
+
+Finally, with this approach, there's no clear boundary between regluar global configurations and config packages.
+
+=== Fetching approach we decide against
+
+*TODO: fill in this section with the config package fetching approach we end up not picking.*
 
 == References
 
