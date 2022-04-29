@@ -1,0 +1,101 @@
+= SDD 0028 - Reusable Commodore Component Configuration Packages
+
+:sdd_author:    Simon Gerber
+:sdd_owner:     Tarazed
+:sdd_reviewers: TBD
+:sdd_date:      2022-04-29
+:sdd_status:    draft
+\include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+The SDD documents a design for reusable Commodore component configuration packages.
+
+The SDD defines how packages are distributed and included in the config hierarchy, and describes how the packages can be tested in CI (for example GitHub actions).
+====
+
+== Motivation
+
+Recently, we've seen that Commodore components have provided more generic defaults.
+One example component which has very generic and minimal defaults is https://github.com/projectsyn/component-syn-kube-prometheus[syn-kube-prometheus].
+While this approach makes the component very versatile -- it can be used to setup a Prometheus-operator based monitoring stack with exactly the desired components -- there's a risk that the same configurations will be replicated in many places, or that configurations will be distributed in an ad-hoc fashion.
+
+To avoid a proliferation of large ad-hoc configuration bundles, this SDD presents a mechanism to package such configurations in a form suitable for reuse and distribution.
+Additionally, by formalizing the packaging of configuration bundles, we can ensure that the chosen format is suitable to allow testing of the packaged configurations.
+
+Currently, we already use an ad-hoc mechanism for reusable configurations in the VSHN https://git.vshn.net/syn/commodore-defaults[Commodore defaults repo (internal)].
+The Commodore defaults repo provides some classes with reusable configurations in folder `apps`.
+These classes can be included in tenants or clusters by including class `global.apps.<name>`.
+While this approach addresses distribution within an organization, it falls short on both reusability in the wider Project Syn ecosystem and testability.
+
+=== Goals
+
+* Provide a mechanism to package and distribute Commodore component configurations.
+* The design must ensure that configuration packages can be tested in CI.
+
+=== Non-Goals
+
+* Programmatic manipulation of component defaults
+
+== Design Proposal
+
+* Regardless of discovery/fetching/inclusion in the hierarchy packages will be Git repos
+
+Approach 1:
+
+* Use Kaptian's remote inventory support to include package classes directly in the hierarchy, cf. https://kapitan.dev/inventory/#inventory-classes, section "Remote Inventory"
+* (+) We reuse an existing Kapitan feature
+* (+) Only a few additional lines of custom code required
+* (-) Catalog compilation becomes more convoluted (more calls to Kapitan interspersed & we need to explicitly call Kapitan's `fetch_inventories`)
+* (-) We need to live with the package fetching options provided by Kapitan
+
+Approach 2:
+
+* Build our own inventory fetching using a similar structure to component fetching
+* (+) Catalog compilation remains more straightforward, we don't need to awkwardly call more Kapitan internals
+* (+) We can control exactly where/how packages are fetched
+* (+) We already have a proven design for dependency fetching (components) which we can adapt for fetching config packages
+* (-) More custom code
+* (-) We reimplement a feature already provided by Kapitan
+
+Testability:
+
+* Create a template for config packages which provides GitHub actions and a Makefile (similar to the component template)
+* Ensure we've got a way to keep config packages in sync when the template is updated
+
+=== User Stories [optional]
+
+== Implementation Details/Notes/Constraints
+
+* Implementation should be integrated into existing catalog compilation logic
+
+Approach 1:
+
+* Commodore needs to invoke Kapitan's fetch_inventories() immediately after cloning the global and tenant repos, to ensure that any packaged configs are made available early in the catalog compilation.
+* Commodore's `kapitan_inventory()` needs to be extended to optionally ignore missing classes, as we otherwise won't be able to get to a point where we can fetch remote inventories.
+
+Approach 2:
+
+* Commodore needs to fetch the config packages before invoking `kapitan_compile()`.
+* Commodore's `kapitan_inventory()` needs to be extended to optionally ignore missing classes, as we otherwise won't be able to get to a point where we can parse the inventory to determine which config packages need to be fetched.
+
+Testability:
+* Use similar approach to component testing, but fetch components defined by the config package first.
+** Add support in Commodore to setup fake catalog which can be used to test config package
+
+== Risks and Mitigations
+
+[horizontal]
+Risk:: Config packages can't be tested easily
+Mitigation:: Add whatever support is necessary in Commodore to allow compiling minimal catalog using the config package
+
+== Alternatives
+
+* Don't formalize config packages, let users define reusable configs in their global defaults repo.
+* Whichever approach we don't choose (*TBD before finalizing draft*)
+
+== References
+
+* https://kapitan.dev/inventory/#inventory-classes
+* https://syn.tools/commodore/reference/architecture.html#_dependency_fetching
