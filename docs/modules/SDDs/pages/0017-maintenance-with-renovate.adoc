@@ -4,7 +4,7 @@
 :sdd_owner:     Simon Rüegg
 :sdd_reviewers:
 :sdd_date:      2019-11-05
-:sdd_status:    accepted
+:sdd_status:    implemented
 include::partial$meta-info-table.adoc[]
 
 [NOTE]
@@ -12,6 +12,8 @@ include::partial$meta-info-table.adoc[]
 ====
 This is the concept how we use https://renovatebot.com/[Renovate] to do maintenance on Git repos. This includes dependencies (Helm, docker) of Commodore components.
 ====
+
+TIP: See https://github.com/projectsyn/commodore-renovate[projectsyn/commodore-renovate] on GitHub for the implementation of this SDD.
 
 == Motivation
 
