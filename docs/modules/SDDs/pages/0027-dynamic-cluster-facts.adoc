@@ -4,7 +4,7 @@
 :sdd_owner: Fabian Fischer
 :sdd_reviewers: Tobias Brunner, Simon Gerber
 :sdd_date:      2021-06-18
-:sdd_status:    draft
+:sdd_status:    implemented
 include::partial$meta-info-table.adoc[]
 
 
