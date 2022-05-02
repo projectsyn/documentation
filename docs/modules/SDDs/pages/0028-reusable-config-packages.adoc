@@ -45,33 +45,49 @@ This gives us change history and versioning of configuration packages based on a
 Making each configuration package a Git repository also fits well with the Project Syn approach of keeping all dependencies (global and tenant config, components) in Git.
 We can also profit from all the already existing logic for cutting releases, and CI tests which we've engineered for Commodore components.
 
+=== Specifying configuration packages
+
+We propose a new top-level parameter `configuration_packages`.
+This parameter holds a dictionary where keys are configuration package _names_ and the values are configuration package _specifications_.
+
+In the hierarchy, users can refer to classes provided by configuration packages by prefixing the class path within the package with the package _name_.
+
+The configuration package _specifications_ indicate the Git repository URL from which the package should be fetched and the Git version of the package to checkout.
+
+The structure of this parameter is modelled after parameter `components`.
+
+=== Including configuration packages
+
+Users can include configuration packages in the hierarchy by adding an entry of the form `pkg.<package-name>` in the applications array.
+Since a period can't appear in a component name, prefixing packages with `pkg.` ensures that there aren't any unintended name collisions with components.
+By using the applications array, users can also deactivate config packages by prefixing them with `~`, analogous to deactivating components.
+
+By separating specification and inclusion of configuration packages, Commodore can only fetch the actually included packages.
+
+=== Fetching configuration packages
+
 The big design question is revolves around the mechanism used to fetch configuration packages.
 We can either fetch configuration packages using Kapitan's remote inventory support or we can enhance Commodore's native dependency fetching logic to support config packages in addition to components.
 
-=== Approach 1: Use Kapitan's remote inventory support
+==== Approach 1: Use Kapitan's remote inventory support
 
-The first option for fetching config packages during catalog compilation is based on Kapitan's remote inventory support.
-By reusing an existing Kapitan feature we get nice integration into the config hierarchy for free.
-Also, by integrating a Kapitan feature, the amount of new code in Commodore is fairly small (on the order of tens of lines).
-
-However, by using Kapitan's remote inventories, we're constrained by the options which are available.
-Remote inventories are defined in a reclass list.
-Unfortunately, this means that we can't easily adjust already included remote inventories further down in the config hierarchy.
-Additionally, Kapitan's remote inventory definitions don't separate dependency specification and fetching.
+To use Kapitan's remote inventory support, we've got to transform the configuration package specifications given in parameter `configuration_packages` into a format which Kapitan understands.
+Kapitan inventory dependencies are specified as a reclass list, similar in structure to Kapitan template dependencies.
+By preprocessing configuration package specifications and saving them in a generated class file containing the Kapitan inventory dependencies, we can use Kapitan's dependency fetching.
+By integrating a Kapitan feature, the amount of new code in Commodore is relatively small (on the order of tens of lines).
 
 Finally, using Kapitan's remote inventory support will require Commodore to make additional calls to internal Kapitan functions.
 While this hasn't posed a problem so far, the tight coupling by calling Kapitan internals may cause increased maintenance cost in the future.
 
-=== Approach 2: Enhance Commodore's dependency fetching logic
+==== Approach 2: Enhance Commodore's dependency fetching logic
 
 The second option for fetching config packages during catalog compilation is to implement native support in Commodore for specifying and fetching config packages.
-This approach has the advantage that we can closely mimic the configuration structures used to define and include components in the configuration hierarchy.
-Having similar structures for specifying and including components and config packages should reduce the amount of extra configuration complexity for the users of the new feature.
+By implementing package fetching natively in Commodore, we don't have to transform the package specifications in another format.
+Additionally, since the format is mostly the same as for components, we can reuse a lot of the existing component fetching code for packages.
+Compared to Kapitan's dependency fetching, we've got more control over where and how we download config packages.
+We can also control exactly how we make packages available in the configuration hierarchy.
 
-By using Commodore's dependency fetching, we can easily separate configuration package dependency specification and fetching.
-Additionally, we can control exactly where we download config packages to and how we make them available in the configuration hierarchy.
-
-Finally, we add less complexity to the actual catalog compilation by being able to tailor the implementation exactly to our needs.
+Finally, we add less complexity to the actual catalog compilation by being able to tailor the implementation exactly to our needs, instead of having to accommodate Kapitan's approach.
 
 The downside of the Commodore-native approach is that we reimplement a feature which is already provided by Kapitan.
 Implementing native configuration package fetching also increases the size and complexity of the Commodore code base more than reusing a Kapitan feature.
