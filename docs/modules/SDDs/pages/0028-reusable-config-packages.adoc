@@ -47,7 +47,7 @@ We can also profit from all the already existing logic for cutting releases, and
 
 === Specifying configuration packages
 
-We propose a new top-level parameter `configuration_packages`.
+We propose a new top-level parameter `packages`.
 This parameter holds a dictionary where keys are configuration package _names_ and the values are configuration package _specifications_.
 
 In the hierarchy, users can refer to classes provided by configuration packages by prefixing the class path within the package with the package _name_.
@@ -71,7 +71,7 @@ We can either fetch configuration packages using Kapitan's remote inventory supp
 
 ==== Approach 1: Use Kapitan's remote inventory support
 
-To use Kapitan's remote inventory support, we've got to transform the configuration package specifications given in parameter `configuration_packages` into a format which Kapitan understands.
+To use Kapitan's remote inventory support, we've got to transform the configuration package specifications given in parameter `packages` into a format which Kapitan understands.
 Kapitan inventory dependencies are specified as a reclass list, similar in structure to Kapitan template dependencies.
 By preprocessing configuration package specifications and saving them in a generated class file containing the Kapitan inventory dependencies, we can use Kapitan's dependency fetching.
 By integrating a Kapitan feature, the amount of new code in Commodore is relatively small (on the order of tens of lines).
