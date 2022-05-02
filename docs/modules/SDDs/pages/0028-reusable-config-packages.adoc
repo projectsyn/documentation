@@ -42,6 +42,7 @@ While this approach addresses distribution within an organization, it falls shor
 
 We propose that each Commodore component configuration package is a Git repository.
 This gives us change history and versioning of configuration packages based on a well-established toolset.
+
 Making each configuration package a Git repository also fits well with the Project Syn approach of keeping all dependencies (global and tenant config, components) in Git.
 We can also profit from all the already existing logic for cutting releases, and CI tests which we've engineered for Commodore components.
 
@@ -62,17 +63,17 @@ Users can include configuration packages in the hierarchy by adding an entry of 
 Since a period can't appear in a component name, prefixing packages with `pkg.` ensures that there aren't any unintended name collisions with components.
 By using the applications array, users can also deactivate config packages by prefixing them with `~`, analogous to deactivating components.
 
-By separating specification and inclusion of configuration packages, Commodore can only fetch the actually included packages.
+By separating specification and inclusion of configuration packages, we can reduce the set of fetched packages to the packages which are actually used by the configuration.
 
 === Fetching configuration packages
 
-While drafting this SDD, we considered two options for implementing fetching of configuration packages.
+While drafting this design document, we considered two options for implementing fetching of configuration packages.
 The alternatives we considered were using Kapitan's remote inventory support or reusing Commodore's component fetching for configuration packages.
 
 Ultimately we've decided to implement the configuration package fetching in Commodore.
 We've outlined the approach using Kapitan's remote inventory fetching in the <<_kapitan_remote_inv_fetch,alternatives section>>.
 
-By implementing package fetching natively in Commodore, we don't have to transform the package specifications in another format.
+By implementing package fetching natively in Commodore, we don't have to transform the package specifications into another format.
 Additionally, since the format is mostly the same as for components, we can reuse a lot of the existing component fetching code for packages.
 Compared to Kapitan's dependency fetching, we've got more control over where and how we download config packages.
 We can also control exactly how we make packages available in the configuration hierarchy.
