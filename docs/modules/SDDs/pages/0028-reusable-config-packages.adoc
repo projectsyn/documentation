@@ -66,7 +66,7 @@ By separating specification and inclusion of configuration packages, Commodore c
 
 === Fetching configuration packages
 
-The big design question is revolves around the mechanism used to fetch configuration packages.
+The big design question revolves around the mechanism used to fetch configuration packages.
 We can either fetch configuration packages using Kapitan's remote inventory support or we can enhance Commodore's native dependency fetching logic to support config packages in addition to components.
 
 ==== Approach 1: Use Kapitan's remote inventory support
