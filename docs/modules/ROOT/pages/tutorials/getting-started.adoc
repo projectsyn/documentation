@@ -108,9 +108,12 @@ spec:
     http:
       paths:
       - path: /
+        pathType: Prefix
         backend:
-          serviceName: lieutenant-api
-          servicePort: 80
+          service:
+            name: lieutenant-api
+            port:
+              number: 80
 EOF
 ----
 
