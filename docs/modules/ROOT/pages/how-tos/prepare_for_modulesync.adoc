@@ -5,14 +5,12 @@
 [source,yaml]
 ----
 :global:
-  componentName: my-component <1>
-
-docs/antora.yml:
-  name: my-component <1>
-  title: My Component <2>
+  componentName: My Component <1>
 ----
-<1> The component name
-<2> A more human friendly component name
+<1> A human friendly component name.
+Used in the component's `README.md` and as the display title for the Antora docs.
+
+TIP: The component's name (or "slug") is derived from the component's GitHub repository name by removing the `component-` prefix.
 
 * Ensure the rules from the previous section are followed
 * Check the https://github.com/projectsyn/commodore/tree/master/commodore/component-template[component template] and the https://github.com/projectsyn/modulesync-control[ModuleSync template] for further things of interest.
