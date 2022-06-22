@@ -1,0 +1,150 @@
+= Commodore Package Best Practices
+
+Commodore Configuration Packages provide a way of reusing configuration presets for one or more components.
+
+In this document we provide a few best practices for writing packages.
+While adhering to these practices isn't mandatory, it makes using packages more consistent and allows Syn tooling, such as the https://github.com/projectsyn/commodore-renovate[Commodores Renovate extension], to interact with them.
+
+== Structure
+
+The structure of Commodore Packages is a lot less rigid than for Commodore Components.
+The only constraint is that they need to provide one or more reclass classes in the form of YAML files.
+
+However, to give packages a consistent look and feel for users and developers we recommend a basic structure:
+
+* A `common.yml` class that includes the base configuration and the parameter defaults (see parameters section below)
+* A class for every supported distribution (for example `openshift4.yml`) that imports and extends the `common.yml` class
+* A `docs/` folder containing the Antora documentation for the package
+* A `tests/` folder containing golden tests for the package
+
+With this structure, a package user only has to import a single class `<package-name>.<distribution>` and can expect a working configuration.
+A package maintainer on the other hand will know where to find tests, documentation, and distribution specific implementation.
+
+[NOTE]
+====
+There might be good reasons to not use this structure.
+Maybe there is no distribution specific configuration, or there are some other domain specific classes.
+
+If you choose to deviate from this structure we strongly recommend documenting the package structure and how to use it.
+====
+
+== Components
+
+A package should always provide all components it's using and should never depend on certain components to be present.
+Further a package has to provide the complete component dependency declaration, including `url` and `version`, and can't depend on them being provided by global defaults.
+
+This is necessary for packages to be able to be compiled independently and to avoid unexpected dependencies.
+
+[source,yaml]
+----
+applications:
+  - my_component
+
+parameters:
+  components:
+    my_component:
+      url: https://github.com/projectsyn/component-example.git
+      version: v1.2.4
+----
+
+NOTE: When following the default package structure we suggest defining all component dependencies in the `common.yml` class.
+
+
+== Parameters
+
+Most configuration packages will need some way to take input form the package user.
+While users always have the option to extend and overwrite the configuration provided by the package, doing so is tedious and changes to the package easily break the user's configuration.
+
+For this reason it's considered best practice to provide *Package Parameters* to configure the package.
+Package parameters are very similar to Component parameters.
+They provide a stable and concise interface for users to configure the package.
+The package can then these parameters in the provided configuration.
+
+If a package decides to provide package parameter they __must__ be defined under the parameter key `pkg.<package-name>` and the package __should__ provide parameter references in its documentation.
+
+Similarly to component parameters there are two parameters that need to have a certain structure if they're provided.
+
+=== `images`
+
+If the package provides an option to configure container images versions, it's considered best practice to provide package parameter `images`.
+
+The value of parameter `images` should be an object where each field name corresponds to a container image used by the component.
+The value of each field should again be an object with fields `registry`, `repository`, and `tag`.
+These fields should correspond to the container image registry, repository in that registry and image tag of the container image.
+
+
+=== `charts`
+
+If the package provides the option to expose the Helm chart versions and sources it's considered best practice to make them configurable in the parameter `charts`.
+The value of this parameter should be an object, where each field corresponds to a Helm chart name and the value is another object with fields `source` and `version` indicating the chart repository and version to use for that chart.
+
+
+[NOTE]
+====
+Unlike component parameters it isn't usually necessary to provide `images` and `charts` parameters for all used Docker images and Helm charts.
+This is only necessary if:
+
+* The package uses images or charts that aren't in the component defaults
+* The package needs to deviate from the components defaults
+* An image or chart is used by multiple components and it's crucial that they use the same version.
+====
+
+
+== Example
+
+With these best practices in mind, a package might look similar to the following example:
+
+
+.`common.yml`
+[source,yaml]
+----
+applications: <1>
+  - my-component
+
+parameters:
+  pkg.example: <2>
+    images: <3>
+      kubectl:
+        registry: quay.io
+        repository: bitnami/kubectl
+        tag: '1.21.2'
+      thanos:
+        registry: quay.io
+        repository: thanos/thanos
+        tag: 'v0.24.0'
+    charts: <3>
+      my-chart:
+        source: https://charts.appuio.ch/
+        version: v1.2.3
+
+    foo:
+      enabled: true
+      bars: []
+
+  components: <1>
+    my_component:
+      url: https://github.com/projectsyn/component-example.git
+      version: v1.2.4
+
+  my_component:
+    images:
+      kubectl: ${pkg.monitoring:images:kubectl} <2>
+    foo:
+      bars: ${pkg.monitoring:foo:bars} <2>
+      ..
+----
+<1> The package uses the `my_component` component and makes sure the component dependency is explicitly defined.
+<2> The parameters under `pkg.example` are managed by the package and can be used to configure the components.
+<3> Helm charts and Docker images are specified in the standard format so they can be parsed by Syn tooling.
+
+.`openshift4.yml`
+[source,yaml]
+----
+classes:
+  - .common <1>
+
+parameters:
+  my_component:
+    disable_security_context: true
+----
+<1> The openshift4 specific class imports the common class and extends it to work on OpenShift4.
