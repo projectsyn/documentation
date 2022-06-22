@@ -1,18 +1,18 @@
 = Commodore Package Best Practices
 
-Commodore Configuration Package provide a way of reusing configuration presets for one or more components.
+Commodore Configuration Packages provide a way of reusing configuration presets for one or more components.
 
-In this document wee provide a few best practices for writing packages.
-While adhering to these practices isn't mandatory, it makes using packages more consistent and allows Syn tooling, such as Commodores Renovate extension, to interact with the package.
+In this document we provide a few best practices for writing packages.
+While adhering to these practices isn't mandatory, it makes using packages more consistent and allows Syn tooling, such as the https://github.com/projectsyn/commodore-renovate[Commodores Renovate extension], to interact with them.
 
 == Structure
 
-The structure of Commodore Configuration Packages is a lot less rigid than for Commodore Components.
+The structure of Commodore Packages is a lot less rigid than for Commodore Components.
 The only constraint is that they need to provide one or more reclass classes in the form of YAML files.
 
-However to have some consistent feel when using and working on packages we recommend a basic structure:
+However, to have some consistent feel when using and working on packages we recommend a basic structure:
 
-* A `common.yml` class that includes the base configuration and the parameter defaults
+* A `common.yml` class that includes the base configuration and the parameter defaults (see parameters section below)
 * A class for every supported distribution (for example `openshift4.yml`) that imports and extends the `common.yml` class
 * A `docs/` folder containing the Antora documentation for the package
 * A `tests/` folder containing golden tests for the package
@@ -25,7 +25,7 @@ A package maintainer on the other hand will know where to find tests, documentat
 There might be good reasons to not use this structure.
 Maybe there is no distribution specific configuration, or there are some other domain specific classes.
 
-However, if you choose to deviate from this structure we strongly recommend documenting the package structure and how to use it.
+If you choose to deviate from this structure we strongly recommend documenting the package structure and how to use it.
 ====
 
 == Components
@@ -47,19 +47,20 @@ parameters:
       version: v1.2.4
 ----
 
-When following the default package structure we suggest defining all component dependencies in the `common.yml` class.
+NOTE: When following the default package structure we suggest defining all component dependencies in the `common.yml` class.
 
 
 == Parameters
 
-Most, if not all, configuration packages will have some ways to further confiure them.
-While package user always have the option to extend the configuration provided by the package, this
+Most configuration packages will need some way to take input form the package user.
+While users always have the option to extend and overwrite the configuration provided by the package, doing so is tedious and changes to the package easily break the user's configuration.
 
-It's considered best practice to provide *Package Parameters* to configure the package.
-Package Parameters are very similar to Component parameters.
+For this reason it's considered best practice to provide *Package Parameters* to configure the package.
+Package parameters are very similar to Component parameters.
 They provide a stable and concise interface for users to configure the package.
+The package can then these parameters in the provided configuration.
 
-If a package decides to provide package parameter they **must** be defined under the parameter key `pkg.<package-name>` and it **should** provide parameter references in its documentation.
+If a package decides to provide package parameter they __must__ be defined under the parameter key `pkg.<package-name>` and it __should__ provide parameter references in its documentation.
 
 Similarly to component parameters there are two parameters that need to have a certain structure if they're provided.
 
@@ -74,13 +75,13 @@ These fields should correspond to the container image registry, repository in th
 
 === `charts`
 
-If the package provides the option to expose the Helm chart versions and sources it's conisdered best practice to make them configurable in the parameter `charts`.
+If the package provides the option to expose the Helm chart versions and sources it's considered best practice to make them configurable in the parameter `charts`.
 The value of this parameter should be an object, where each field corresponds to a Helm chart name and the value is another object with fields `source` and `version` indicating the chart repository and version to use for that chart.
 
 
 [NOTE]
 ====
-Unlike component parameters it isn't usually necessary to provide `images` and `charts` parameters for all used docker images and helm charts.
+Unlike component parameters it isn't usually necessary to provide `images` and `charts` parameters for all used Docker images and Helm charts.
 This is only necessary if:
 
 * The package defines images or charts that aren't in the component defaults
@@ -97,12 +98,12 @@ With these best practices in mind, a package might look similar to the following
 .`common.yml`
 [source,yaml]
 ----
-applications:
+applications: <1>
   - my_component
 
 parameters:
-  pkg.example: <1>
-    images: <2>
+  pkg.example: <2>
+    images: <3>
       kubectl:
         registry: quay.io
         repository: bitnami/kubectl
@@ -116,22 +117,25 @@ parameters:
         source: https://charts.appuio.ch/
         version: v1.2.3
 
-    foo: <4>
+    foo:
       enabled: true
       bars: []
 
-  components: <5>
+  components: <1>
     my_component:
       url: https://github.com/projectsyn/component-example.git
       version: v1.2.4
 
   my_component:
     images:
-      kubectl: ${pkg.monitoring:images:kubectl} <1>
+      kubectl: ${pkg.monitoring:images:kubectl} <2>
     foo:
-      bars: ${pkg.monitoring:foo:bars}
+      bars: ${pkg.monitoring:foo:bars} <2>
       ..
 ----
+<1> The package uses the `my_component` component and makes sure the component dependency is explicitly defined.
+<2> The parameters under `pkg.example` are managed by the package and can be used to configure the components.
+<3> Helm charts and Docker images are specified in the standard format so they can be parsed by Syn tooling.
 
 .`openshift4.yml`
 [source,yaml]
@@ -143,3 +147,4 @@ parameters:
   my_component:
     disable_security_context: true
 ----
+<1> The openshift4 specific class imports the common class and extends it to work on OpenShift4.
