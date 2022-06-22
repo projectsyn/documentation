@@ -10,14 +10,14 @@ While adhering to these practices isn't mandatory, it makes using packages more 
 The structure of Commodore Packages is a lot less rigid than for Commodore Components.
 The only constraint is that they need to provide one or more reclass classes in the form of YAML files.
 
-However, to have some consistent feel when using and working on packages we recommend a basic structure:
+However, to give packages a consistent look and feel for users and developers we recommend a basic structure:
 
 * A `common.yml` class that includes the base configuration and the parameter defaults (see parameters section below)
 * A class for every supported distribution (for example `openshift4.yml`) that imports and extends the `common.yml` class
 * A `docs/` folder containing the Antora documentation for the package
 * A `tests/` folder containing golden tests for the package
 
-With this structure a package user only has to import a single class `<package-name>.<distribution>` and can expect a working configuration.
+With this structure, a package user only has to import a single class `<package-name>.<distribution>` and can expect a working configuration.
 A package maintainer on the other hand will know where to find tests, documentation, and distribution specific implementation.
 
 [NOTE]
@@ -60,7 +60,7 @@ Package parameters are very similar to Component parameters.
 They provide a stable and concise interface for users to configure the package.
 The package can then these parameters in the provided configuration.
 
-If a package decides to provide package parameter they __must__ be defined under the parameter key `pkg.<package-name>` and it __should__ provide parameter references in its documentation.
+If a package decides to provide package parameter they __must__ be defined under the parameter key `pkg.<package-name>` and the package __should__ provide parameter references in its documentation.
 
 Similarly to component parameters there are two parameters that need to have a certain structure if they're provided.
 
@@ -84,7 +84,7 @@ The value of this parameter should be an object, where each field corresponds to
 Unlike component parameters it isn't usually necessary to provide `images` and `charts` parameters for all used Docker images and Helm charts.
 This is only necessary if:
 
-* The package defines images or charts that aren't in the component defaults
+* The package uses images or charts that aren't in the component defaults
 * The package needs to deviate from the components defaults
 * An image or chart is used by multiple components and it's crucial that they use the same version.
 ====
@@ -99,7 +99,7 @@ With these best practices in mind, a package might look similar to the following
 [source,yaml]
 ----
 applications: <1>
-  - my_component
+  - my-component
 
 parameters:
   pkg.example: <2>
