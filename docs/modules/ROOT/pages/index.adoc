@@ -20,6 +20,13 @@ xref:lieutenant-api::index.adoc[Lieutenant API]:: REST API for cluster managemen
 xref:steward::index.adoc[Steward]:: In-Cluster agent.
 
 [discrete]
+=== Related tools
+
+Tools we created but aren't strictly related to Project Syn.
+
+xref:floodgate::index.adoc[Floodgate]:: Floodgate controls https://github.com/rancher/system-upgrade-controller[SUC] channels
+
+[discrete]
 == Documentation
 
 The documentation is inspired by the https://documentation.divio.com/[Divio's documentation structure]:
