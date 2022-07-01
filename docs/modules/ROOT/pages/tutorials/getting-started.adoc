@@ -94,7 +94,7 @@ At this point, Lieutenant is aware of the new K3s cluster, and we can see it the
 kubectl --context minikube get clusters -n lieutenant
 --
 
-This command outputs something similar to this:
+The command above outputs something similar to this:
 
 [source]
 --
