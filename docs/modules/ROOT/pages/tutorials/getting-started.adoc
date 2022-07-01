@@ -75,7 +75,7 @@ Project Syn stores cluster-specific configuration values in that tenant's own co
 
 == Steward
 
-It's time to enable Project Syn on the local K3s cluster using Steward, the in-cluster agent of Project Syn.
+Steward is the in-cluster agent of Project Syn. It runs in each cluster associated with a tenant, automatically reacting to changes in the configuration stored in the corresponding Git repositories.
 
 Install Steward in K3s with one simple command:
 
@@ -86,16 +86,14 @@ curl -fsL https://try.syn.tools/steward | bash
 
 The installation of Steward happens on the K3s cluster via an install URL provided by Lieutenant, using a one-time bootstrap token. The token is only valid once and only for 30 minutes after cluster registration.
 
-Once Steward is installed on the K3s cluster, you can see the pods running:
+Once Steward is installed on the K3s cluster, you can see its pod running:
 
 [source,bash]
 --
 kubectl --context k3d-steward -n syn get pod
 --
 
-The command above should list a few Pods, some of which might still be in `ContainerCreating` status.
-
-At this point, Lieutenant is aware of the new K3s cluster, and we can see it there:
+At this point, Lieutenant is aware of the new K3s cluster, and we can see that through the following command:
 
 [source,bash]
 --
@@ -110,7 +108,7 @@ NAME                  DISPLAY NAME          TENANT                  AGE
 c-long-firefly-9017   Project Syn Cluster   t-autumn-silence-6912   12s
 --
 
-Cluster names are prefixed with `c-`, while tenant names are prefixed with `t-`.
+Cluster names have the `c-` prefix, while tenant names have with `t-` prefix.
 
 // Steward wraps https://argoproj.github.io/cd/[Argo CD], a Cloud-Native continuous deployment and integration tool, continuously observing the GitLab repositories for changes.
 
