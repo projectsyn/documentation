@@ -9,23 +9,29 @@ Before you start, please check the following requirements:
 * A GitLab account.
 * The following tools:
 ** `kubectl`
-** `minikube`
 ** `k3d`
 ** `jq`
 ** `curl`
 
-Start a new Minikube cluster:
+Modify your `/etc/hosts` file and add the following entry:
+
+[source]
+--
+127.0.0.1       host.k3d.internal
+--
+
+Launch two new K3s clusters with `k3d`:
 
 [source,bash]
 --
-minikube start --kubernetes-version=v1.23.8
+k3d cluster create lieutenant --port "35777:8080@loadbalancer" --image=rancher/k3s:v1.23.8-k3s1
 --
 
-Also, launch a new K3s cluster using `k3d`:
+and
 
 [source,bash]
 --
-k3d cluster create steward --image=rancher/k3s:v1.23.8-k3s1
+k3d cluster create steward  --port "35778:8080@loadbalancer" --image=rancher/k3s:v1.23.8-k3s1
 --
 
 In your GitLab account, create a token with the 'API' scope at https://gitlab.com/-/profile/personal_access_tokens.
@@ -45,20 +51,20 @@ Lieutenant is the central inventory service for all Project Syn-managed clusters
 
 Lieutenant is the central API for all other Project Syn tools. Therefore we will install it first so that all other components can do their job.
 
-Install Lieutenant on Minikube with the following command:
+Install Lieutenant on the "lieutenant" cluster with the following command:
 
 [source,bash]
 ----
 curl -fsL https://try.syn.tools | bash
 ----
 
-At the end of this procedure, you will have a Minikube cluster in your computer, running the Lieutenant API and Operator.
+At the end of this procedure, you will have a K3s cluster in your computer, running the Lieutenant API and Operator.
 
 You can explore Lieutenant using `kubectl` running the following command:
 
 [source,bash]
 --
-kubectl --context minikube get tenants -n lieutenant
+kubectl --context k3d-lieutenant get tenants -n lieutenant
 --
 
 The command above returns something like the following:
@@ -97,7 +103,7 @@ At this point, Lieutenant is aware of the new K3s cluster, and we can see that t
 
 [source,bash]
 --
-kubectl --context minikube get clusters -n lieutenant
+kubectl --context k3d-lieutenant get clusters -n lieutenant
 --
 
 The command above outputs something similar to this:
@@ -110,35 +116,27 @@ c-long-firefly-9017   Project Syn Cluster   t-autumn-silence-6912   12s
 
 Cluster names have the `c-` prefix, while tenant names have with `t-` prefix.
 
-// Steward wraps https://argoproj.github.io/cd/[Argo CD], a Cloud-Native continuous deployment and integration tool, continuously observing the GitLab repositories for changes.
+Steward wraps https://argoproj.github.io/cd/[Argo CD], a Cloud-Native continuous deployment and integration tool, continuously observing the GitLab repositories for changes.
 
-// Check that Argo CD was able to sync the changes:
+You can also connect to Argo CD and see its console. Start by exposing the `argocd-server` deployment:
 
-// [source,bash]
-// ----
-// kubectl --context k3d-steward -n syn get app root -o jsonpath="{.status.sync.status}"
-// ----
-// This command should return the `Synced` status.
+[source,bash]
+----
+kubectl --context k3d-steward -n syn expose deployment argocd-server --type=LoadBalancer --port=8080
+----
 
-// You can also connect to Argo CD and see its console. First, retrieve the admin password for Argo CD:
+Open Argo CD in your browser at http://localhost:35778. Log in to Argo CD with the username `admin` and the password returned by this command:
 
-// [source,bash]
-// ----
-// kubectl --context k3d-steward -n syn get secret steward -o json | jq -r .data.token | base64 --decode
-// ----
+[source,bash]
+----
+kubectl --context k3d-steward -n syn get secret steward -o json | jq -r .data.token | base64 --decode
+----
 
-// Access Argo CD by forwarding the port and opening it in your browser with http://localhost:8443. Log in to Argo CD with the username `admin` and the password retrieved in the previous step.
+After these steps, the local K3s cluster is now Syn enabled, and a Git repository called "Project Syn Cluster" is stored in GitLab.
 
-// [source,bash]
-// ----
-// kubectl --context k3d-steward -n syn port-forward svc/argocd-server 8443:443
-// ----
+// == Next Steps
 
-With these steps, the local K3s cluster is now Syn enabled, and a Git repository called "Project Syn Cluster" is stored in GitLab.
-
-== Next Steps
-
-This guide provides a quick overview of Lieutenant and Steward. If you are interested in knowing more about Project Syn, proceed to the second part to learn about Commodore, the third major component of Project Syn.
+// This guide provides a quick overview of Lieutenant and Steward. If you are interested in knowing more about Project Syn, proceed to the second part to learn about Commodore, the third major component of Project Syn.
 
 == Cleaning Up
 
@@ -151,14 +149,9 @@ Once you've gone through all these steps, you can cleanup all generated stuff us
 curl -fsL https://try.syn.tools/cleanup | bash
 ----
 
-. Remove the Minikube and k3d clusters:
+. Remove the K3d clusters:
 +
 [source,bash]
 ----
-minikube delete
-----
-+
-[source,bash]
-----
-k3d cluster delete steward
+k3d cluster delete --all
 ----
