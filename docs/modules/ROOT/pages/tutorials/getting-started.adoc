@@ -58,7 +58,7 @@ You can explore Lieutenant using `kubectl` running the following command:
 
 [source,shell]
 --
-kubectl --context minikube get tenants
+kubectl --context minikube get tenants -n lieutenant
 --
 
 In the context of Project Syn, a "tenant" is an entity to whom clusters are assigned. Tenants could be customers, departments, teams, or any entity responsible for owning a cluster.
@@ -91,34 +91,44 @@ At this point, Lieutenant is aware of the new K3s cluster, and we can see it the
 
 [source,shell]
 --
-kubectl --context minikube get clusters
+kubectl --context minikube get clusters -n lieutenant
 --
 
-Steward wraps https://argoproj.github.io/cd/[Argo CD], a Cloud-Native continuous deployment and integration tool, continuously observing the GitLab repositories for changes.
+This command outputs something similar to this:
 
-Check that Argo CD was able to sync the changes:
+[source]
+--
+NAME                  DISPLAY NAME          TENANT                  AGE
+c-long-firefly-9017   Project Syn Cluster   t-autumn-silence-6912   12s
+--
 
-[source,shell]
-----
-kubectl --context k3d-steward -n syn get app root -o jsonpath="{.status.sync.status}"
-----
-This command should return the `Synced` status.
+Cluster names are prefixed with `c-`, while tenant names are prefixed with `t-`.
 
-You can also connect to Argo CD and see its console. First, retrieve the admin password for Argo CD:
+// Steward wraps https://argoproj.github.io/cd/[Argo CD], a Cloud-Native continuous deployment and integration tool, continuously observing the GitLab repositories for changes.
 
-[source,shell]
-----
-kubectl --context k3d-steward -n syn get secret steward -o json | jq -r .data.token | base64 --decode
-----
+// Check that Argo CD was able to sync the changes:
 
-Access Argo CD by forwarding the port and opening it in your browser with http://localhost:8443. Log in to Argo CD with the username `admin` and the password retrieved in the previous step.
+// [source,shell]
+// ----
+// kubectl --context k3d-steward -n syn get app root -o jsonpath="{.status.sync.status}"
+// ----
+// This command should return the `Synced` status.
 
-[source,shell]
-----
-kubectl --context k3d-steward -n syn port-forward svc/argocd-server 8443:443
-----
+// You can also connect to Argo CD and see its console. First, retrieve the admin password for Argo CD:
 
-With these steps, the local K3s cluster is now Syn enabled, has Argo CD running, and automatically syncs with the Git repository called "Project Syn Cluster" stored in GitLab.
+// [source,shell]
+// ----
+// kubectl --context k3d-steward -n syn get secret steward -o json | jq -r .data.token | base64 --decode
+// ----
+
+// Access Argo CD by forwarding the port and opening it in your browser with http://localhost:8443. Log in to Argo CD with the username `admin` and the password retrieved in the previous step.
+
+// [source,shell]
+// ----
+// kubectl --context k3d-steward -n syn port-forward svc/argocd-server 8443:443
+// ----
+
+With these steps, the local K3s cluster is now Syn enabled, and a Git repository called "Project Syn Cluster" is stored in GitLab.
 
 == Next Steps
 
