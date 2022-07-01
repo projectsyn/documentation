@@ -47,7 +47,7 @@ Lieutenant is the central API for all other Project Syn tools. Therefore we will
 
 Install Lieutenant on Minikube with the following command:
 
-[source,shell]
+[source,bash]
 ----
 curl -fsL https://try.syn.tools | bash
 ----
@@ -56,9 +56,17 @@ At the end of this procedure, you will have a Minikube cluster in your computer,
 
 You can explore Lieutenant using `kubectl` running the following command:
 
-[source,shell]
+[source,bash]
 --
 kubectl --context minikube get tenants -n lieutenant
+--
+
+The command above returns something like the following:
+
+[source]
+--
+NAME             DISPLAY NAME         AGE
+t-aged-pond-24   Project Syn Tenant   13s
 --
 
 In the context of Project Syn, a "tenant" is an entity to whom clusters are assigned. Tenants could be customers, departments, teams, or any entity responsible for owning a cluster.
@@ -80,7 +88,7 @@ The installation of Steward happens on the K3s cluster via an install URL provid
 
 Once Steward is installed on the K3s cluster, you can see the pods running:
 
-[source,shell]
+[source,bash]
 --
 kubectl --context k3d-steward -n syn get pod
 --
@@ -89,7 +97,7 @@ The command above should list a few Pods, some of which might still be in `Conta
 
 At this point, Lieutenant is aware of the new K3s cluster, and we can see it there:
 
-[source,shell]
+[source,bash]
 --
 kubectl --context minikube get clusters -n lieutenant
 --
@@ -108,7 +116,7 @@ Cluster names are prefixed with `c-`, while tenant names are prefixed with `t-`.
 
 // Check that Argo CD was able to sync the changes:
 
-// [source,shell]
+// [source,bash]
 // ----
 // kubectl --context k3d-steward -n syn get app root -o jsonpath="{.status.sync.status}"
 // ----
@@ -116,14 +124,14 @@ Cluster names are prefixed with `c-`, while tenant names are prefixed with `t-`.
 
 // You can also connect to Argo CD and see its console. First, retrieve the admin password for Argo CD:
 
-// [source,shell]
+// [source,bash]
 // ----
 // kubectl --context k3d-steward -n syn get secret steward -o json | jq -r .data.token | base64 --decode
 // ----
 
 // Access Argo CD by forwarding the port and opening it in your browser with http://localhost:8443. Log in to Argo CD with the username `admin` and the password retrieved in the previous step.
 
-// [source,shell]
+// [source,bash]
 // ----
 // kubectl --context k3d-steward -n syn port-forward svc/argocd-server 8443:443
 // ----
@@ -140,19 +148,19 @@ Once you've gone through all these steps, you can cleanup all generated stuff us
 
 . Delete the cluster and tenant objects, removing the GitLab projects at the same time:
 +
-[source,shell]
+[source,bash]
 ----
 curl -fsL https://try.syn.tools/cleanup | bash
 ----
 
 . Remove the Minikube and k3d clusters:
 +
-[source,shell]
+[source,bash]
 ----
 minikube delete
 ----
 +
-[source,shell]
+[source,bash]
 ----
 k3d cluster delete steward
 ----
