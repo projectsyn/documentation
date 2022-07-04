@@ -165,7 +165,7 @@ After these steps, the local K3s cluster is now Syn enabled, and a Git repositor
 
 This guide provided a quick overview of Lieutenant and Steward. If you are interested in knowing more about Project Syn, proceed to the xref:tutorials/getting-started-2.adoc[second part] to learn about Commodore, the third major component of Project Syn.
 
-Please do not execute the steps in the following "Cleaning Up" section if you intend to perform the actions of the second part of this guide. We will reuse the clusters as they are at this point.
+Please don't execute the steps in the following "Cleaning Up" section if you intend to perform the actions of the second part of this guide. We will reuse the clusters in their current state.
 
 == Cleaning Up
 
