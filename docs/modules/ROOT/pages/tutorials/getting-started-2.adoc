@@ -1,0 +1,42 @@
+= Getting Started with Project Syn (Part 2)
+
+This document is the second part of the xref:tutorials/gettings-started.adoc["Getting Started with Project Syn"] tutorial.
+
+== Requirements
+
+If you haven't yet, please execute the steps in the xref:tutorials/gettings-started.adoc["Getting Started with Project Syn"] tutorial before attempting the instructions in this document.
+
+This tutorial assumes that you have both clusters up and running ("k3d-lieutenant" and "k3d-steward") and that you have all the required tools installed.
+
+== Commodore
+
+Commodore is the third component of the Project Syn suite of tools.
+
+Commodore is a command-line tool that compiles the state of your clusters and pushes the changes to the GitLab projects. Steward watches those projects continuously and immediately applies the changes to your clusters.
+
+Compile the information of your `k3d-steward` cluster using Commodore by running the command below.
+
+[source,bash]
+----
+curl -fsL https://try.syn.tools/commodore | bash
+----
+
+At this point, there should be a GitLab project under your profile called `project-syn-cluster` containing all of the configuration and settings of your current cluster.
+
+== Cleaning Up
+
+You can clean up all generated clusters and GitLab projects using the following steps:
+
+. Delete the cluster and tenant objects, removing the GitLab projects at the same time:
++
+[source,bash]
+----
+curl -fsL https://try.syn.tools/cleanup | bash
+----
+
+. Remove the K3d clusters:
++
+[source,bash]
+----
+k3d cluster delete --all
+----

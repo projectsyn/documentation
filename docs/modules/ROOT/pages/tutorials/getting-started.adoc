@@ -4,9 +4,9 @@ This guide provides an introduction to Project Syn and its various tools. It tar
 
 == Why Project Syn?
 
-Let's assume you are a DevOps engineer in charge of many Kubernetes clusters. You must manually update them, deploy applications in some or all of them, schedule backups, and ensure that all security policies are applied and working. You're overworked and need urgent help.
+You are a DevOps engineer in charge of many Kubernetes clusters. You must manually keep them up-to-date, deploy applications in some or all of them, schedule backups, and ensure that all security policies are applied and working. You're overworked and need urgent help.
 
-To make your job easier, you need three tools:
+To make your job easier, you would need:
 
 . A "single point of truth" for your clusters, acting like a "cluster database," including information about each managed cluster: its location, installed applications, settings, and secrets.
 . An "agent" in each cluster, proactively listening for changes in the central catalog and performing modifications as required.
@@ -154,9 +154,15 @@ kubectl --context k3d-steward -n syn get secret steward -o json | jq -r .data.to
 
 After these steps, the local K3s cluster is now Syn enabled, and a Git repository called "Project Syn Cluster" is stored in GitLab.
 
+== What's Next?
+
+This guide provided a quick overview of Lieutenant and Steward. If you are interested in knowing more about Project Syn, proceed to the xref:tutorials/getting-started-2.adoc[second part] to learn about Commodore, the third major component of Project Syn.
+
+Please do not execute the steps in the following "Cleaning Up" section if you intend to perform the actions of the second part of this guide. We will reuse the clusters as they are at this point.
+
 == Cleaning Up
 
-Once you've gone through all these steps, you can clean up all generated stuff using the following steps:
+You can clean up all generated clusters and GitLab projects using the following steps:
 
 . Delete the cluster and tenant objects, removing the GitLab projects at the same time:
 +
@@ -171,7 +177,3 @@ curl -fsL https://try.syn.tools/cleanup | bash
 ----
 k3d cluster delete --all
 ----
-
-== What's Next?
-
-This guide provided a quick overview of Lieutenant and Steward. If you are interested in knowing more about Project Syn, proceed to the second part to learn about Commodore, the third major component of Project Syn.
