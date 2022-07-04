@@ -67,6 +67,8 @@ export GITLAB_TOKEN=xxxxxxxxxxxxxxxx
 
 Lieutenant is the central inventory service for all Project Syn-managed clusters. It consists of the Lieutenant _Operator_ and the Lieutenant _API_. Lieutenant needs API access to a GitLab server to create and manage Git repositories for clusters and tenants.
 
+Lieutenant usually runs in a dedicated Kubernetes cluster, used only to expose its API and allow for manipulating Project Syn-managed clusters from a central location.
+
 Lieutenant is the central API for all other Project Syn tools. Therefore we will install it first so that all other components can do their job.
 
 Install Lieutenant on the "lieutenant" cluster with the following command:
@@ -78,7 +80,7 @@ curl -fsL https://try.syn.tools | bash
 
 At the end of this procedure, you will have a K3s cluster in your computer, running the Lieutenant API and Operator.
 
-You can explore Lieutenant using `kubectl` running the following command:
+You can explore Lieutenant using `kubectl get tenants` running the following command:
 
 [source,bash]
 --
@@ -117,7 +119,7 @@ Once Steward is installed on the K3s cluster, you can see its pod running:
 kubectl --context k3d-steward -n syn get pod
 --
 
-At this point, Lieutenant is aware of the new K3s cluster, and we can see that through the following command:
+At this point, Lieutenant is aware of the new K3s cluster, and we can see that through the `kubectl get clusters` command:
 
 [source,bash]
 --
