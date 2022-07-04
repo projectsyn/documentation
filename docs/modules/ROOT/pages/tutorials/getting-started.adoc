@@ -112,11 +112,16 @@ curl -fsL https://try.syn.tools/steward | bash
 
 The installation of Steward happens on the K3s cluster via an install URL provided by Lieutenant, using a one-time bootstrap token. The token is only valid once and only for 30 minutes after cluster registration.
 
-Once Steward is installed on the K3s cluster, you can see its pod running:
+Once Steward is installed on the K3s cluster, you can see its pods running, including those whose name starts with the `argocd-` prefix:
 
 [source,bash]
 --
-kubectl --context k3d-steward -n syn get pod
+NAME                                  READY   STATUS    RESTARTS   AGE
+steward-dd5b6f897-wsglm               1/1     Running   0          88s
+argocd-redis-6d65dbd578-d2znt         1/1     Running   0          59s
+argocd-server-b5f6b5cff-vqq5x         1/1     Running   0          59s
+argocd-repo-server-569b975697-647r4   1/1     Running   0          59s
+argocd-application-controller-0       1/1     Running   0          57s
 --
 
 At this point, Lieutenant is aware of the new K3s cluster, and we can see that through the `kubectl get clusters` command:
@@ -136,7 +141,9 @@ c-long-firefly-9017   Project Syn Cluster   t-autumn-silence-6912   12s
 
 Cluster names have the `c-` prefix, while tenant names have with `t-` prefix.
 
-Steward wraps https://argoproj.github.io/cd/[Argo CD], a Cloud-Native continuous deployment and integration tool, continuously observing the GitLab repositories for changes.
+=== Accessing Argo CD
+
+As you have seen above, Steward wraps https://argoproj.github.io/cd/[Argo CD], a Cloud-Native continuous deployment and integration tool, continuously observing the GitLab repositories for changes.
 
 You can also connect to Argo CD and see its console. Start by exposing the `argocd-server` deployment:
 
@@ -162,7 +169,7 @@ Please do not execute the steps in the following "Cleaning Up" section if you in
 
 == Cleaning Up
 
-You can clean up all generated clusters and GitLab projects using the following steps:
+If you don't wish to proceed to the xref:tutorials/getting-started-2.adoc[second part] of this tutorial, you can clean up all generated clusters and GitLab projects using the following steps:
 
 . Delete the cluster and tenant objects, removing the GitLab projects at the same time:
 +
