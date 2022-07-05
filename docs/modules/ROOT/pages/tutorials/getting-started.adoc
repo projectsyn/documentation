@@ -14,9 +14,9 @@ To make your job easier, you would need:
 
 Project Syn provides the tools to help you manage many Kubernetes clusters from a central location:
 
-. The https://syn.tools/lieutenant-api/[Lieutenant API] and https://syn.tools/lieutenant-operator/[Operator] as the single point of truth;
-. https://syn.tools/steward/[Steward] as the cluster agent;
-. And https://syn.tools/commodore/[Commodore] as the tool to manipulate the cluster records.
+. Lieutenant as the single point of truth;
+. Steward as the cluster agent;
+. And Commodore as the tool to manipulate the cluster records.
 
 In this guide, we're going to focus on Lieutenant and Steward. The second part will focus on Commodore.
 
@@ -65,7 +65,7 @@ export GITLAB_TOKEN=xxxxxxxxxxxxxxxx
 
 == Lieutenant
 
-Lieutenant is the central inventory service for all Project Syn-managed clusters. It consists of the Lieutenant _Operator_ and the Lieutenant _API_. Lieutenant needs API access to a GitLab server to create and manage Git repositories for clusters and tenants.
+Lieutenant is the central inventory service for all Project Syn-managed clusters. It consists of the https://syn.tools/lieutenant-api/[Lieutenant API] and the https://syn.tools/lieutenant-operator/[Lieutenant Operator]. Lieutenant needs API access to a GitLab server to create and manage Git repositories for clusters and tenants.
 
 Lieutenant usually runs in a dedicated Kubernetes cluster, used only to expose its API and allow for manipulating Project Syn-managed clusters from a central location.
 
@@ -101,7 +101,7 @@ Project Syn stores cluster-specific configuration values in that tenant's own co
 
 == Steward
 
-Steward is the in-cluster agent of Project Syn. It runs in each cluster associated with a tenant, automatically reacting to changes in the configuration stored in the corresponding Git repositories.
+https://syn.tools/steward/[Steward] is the in-cluster agent of Project Syn. It runs in each cluster associated with a tenant, automatically reacting to changes in the configuration stored in the corresponding Git repositories.
 
 Install Steward in K3s with one simple command:
 

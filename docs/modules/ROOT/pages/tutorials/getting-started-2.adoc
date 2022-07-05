@@ -19,7 +19,7 @@ Commodore requires this variable to be able to push changes to the GitLab reposi
 
 == Commodore
 
-Commodore is the third component of the Project Syn suite of tools. It's a command-line tool that compiles the state of your clusters and pushes the changes to the GitLab projects. Steward watches those projects continuously and immediately applies the changes to your clusters, following the GitOps philosophy.
+https://syn.tools/commodore/[Commodore] is the third component of the Project Syn suite of tools. It's a command-line tool that compiles the state of your clusters and pushes the changes to the GitLab projects. Steward watches those projects continuously and immediately applies the changes to your clusters, following the GitOps philosophy.
 
 Compile the information of your `k3d-steward` cluster using Commodore by running the command below, which will create a few environment variables in your shell.
 
