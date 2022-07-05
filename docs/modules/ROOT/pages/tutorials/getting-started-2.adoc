@@ -1,10 +1,10 @@
 = Getting Started with Project Syn (Part 2)
 
-This document is the second part of the xref:tutorials/gettings-started.adoc["Getting Started with Project Syn"] tutorial.
+This document is the second part of the xref:tutorials/getting-started.adoc["Getting Started with Project Syn"] tutorial.
 
 == Requirements
 
-If you haven't yet, please execute the steps in the xref:tutorials/gettings-started.adoc["Getting Started with Project Syn"] tutorial before attempting the instructions in this document.
+If you haven't yet, please execute the steps in the xref:tutorials/getting-started.adoc["Getting Started with Project Syn"] tutorial before attempting the instructions in this document.
 
 This tutorial assumes that you have the "k3d-lieutenant" and "k3d-steward" clusters up and running and that you have installed all required tools.
 
@@ -34,6 +34,8 @@ After the command above, you should be able to see a few variables and functions
 ----
 echo $CLUSTER_ID
 ----
+
+Another thing you should see in your shell is a `commodore` command. Commodore is written in Python, and it requires quite a few external dependencies. To simplify this guide, we are running Commodore as a container inside the "k3d-lieutenant" cluster, but you can install Commodore on its own in your system. Please refer to the xref:commodore:explanation/running-commodore.adoc["Running Commodore"] page in this documentation for details.
 
 The output of this command should be a string similar to "c-floral-wood-9134."
 

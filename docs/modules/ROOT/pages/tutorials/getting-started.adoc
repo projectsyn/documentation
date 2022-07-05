@@ -18,7 +18,7 @@ Project Syn provides the tools to help you manage many Kubernetes clusters from 
 . Steward acts as the cluster agent, wrapping https://argoproj.github.io/cd/[Argo CD], who keeps an eye on said Git repositories;
 . And Commodore serves as the tool used to manipulate the cluster records, saving changes to the Git repositories whenever needed.
 
-In this guide, we're going to focus on Lieutenant and Steward. The xref:tutorials/gettings-started-2.adoc[second part] will focus on Commodore.
+In this guide, we're going to focus on Lieutenant and Steward. The xref:tutorials/getting-started-2.adoc[second part] will focus on Commodore.
 
 == Requirements
 
@@ -59,7 +59,7 @@ Create the following environment variables. The `GITLAB_TOKEN` variable contains
 [source,bash]
 --
 export GITLAB_USERNAME=johndoe        # Use your own GitLab username
-export GITLAB_ENDPOINT=gitlab.com     # Or your own GitLab instance URL
+export GITLAB_ENDPOINT=gitlab.com     # Or your own GitLab instance URL (without the "https://" prefix)
 export GITLAB_TOKEN=xxxxxxxxxxxxxxxx
 --
 
@@ -69,7 +69,7 @@ Lieutenant is the central inventory service for all Project Syn-managed clusters
 
 Lieutenant is the central API for all other Project Syn tools. Therefore we will install it first so that all other components can do their job.
 
-Install Lieutenant on the "lieutenant" cluster with the following command:
+Install Lieutenant on the "k3d-lieutenant" cluster with the following command:
 
 [source,bash]
 ----
@@ -85,7 +85,7 @@ You can explore Lieutenant using `kubectl get tenants` running the following com
 kubectl --context k3d-lieutenant get tenants -n lieutenant
 --
 
-The command above returns something like the following:
+The command above produces output similar to the following:
 
 [source]
 --
