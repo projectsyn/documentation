@@ -95,7 +95,7 @@ NAME             DISPLAY NAME         AGE
 t-aged-pond-24   Project Syn Tenant   13s
 --
 
-In the context of Project Syn, a "tenant" is an entity to whom clusters are assigned. Tenants could be customers, departments, teams, or any entity responsible for owning a cluster.
+In the context of Project Syn, a "tenant" is an entity to whom clusters are assigned. Tenants could be customers, departments, teams, or any entity owning a cluster.
 
 Project Syn stores cluster-specific configuration values in that tenant's own configuration Git repository. You should now have a new project in your GitLab account called "Project Syn Tenant."
 
