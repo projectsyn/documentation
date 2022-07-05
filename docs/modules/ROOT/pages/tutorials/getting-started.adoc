@@ -18,7 +18,7 @@ Project Syn provides the tools to help you manage many Kubernetes clusters from 
 . https://syn.tools/steward/[Steward] as the cluster agent;
 . And https://syn.tools/commodore/[Commodore] as the tool to manipulate the cluster records.
 
-In this guide, we're going to focus on Lieutenant and Steward. The second part will focus on Commodore.
+In this guide, we're going to focus on Lieutenant and Steward. The xref:tutorials/gettings-started-2.adoc[second part] will focus on Commodore.
 
 == Requirements
 
