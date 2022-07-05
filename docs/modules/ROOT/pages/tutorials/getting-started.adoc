@@ -65,9 +65,7 @@ export GITLAB_TOKEN=xxxxxxxxxxxxxxxx
 
 == Lieutenant
 
-Lieutenant is the central inventory service for all Project Syn-managed clusters. It consists of the https://syn.tools/lieutenant-api/[Lieutenant API] and the https://syn.tools/lieutenant-operator/[Lieutenant Operator]. Lieutenant needs API access to a GitLab server to create and manage Git repositories for clusters and tenants.
-
-Lieutenant usually runs in a dedicated Kubernetes cluster, used only to expose its API and allow for manipulating Project Syn-managed clusters from a central location.
+Lieutenant is the central inventory service for all Project Syn-managed clusters. It consists of the https://syn.tools/lieutenant-api/[Lieutenant API] and the https://syn.tools/lieutenant-operator/[Lieutenant Operator]. Lieutenant needs API access to a GitLab server to create and manage Git repositories for clusters and tenants. Lieutenant usually runs in a dedicated Kubernetes cluster, used only to expose its API.
 
 Lieutenant is the central API for all other Project Syn tools. Therefore we will install it first so that all other components can do their job.
 
