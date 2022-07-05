@@ -35,7 +35,7 @@ After the command above, you should be able to see a few variables and functions
 echo $CLUSTER_ID
 ----
 
-Another thing you should see in your shell is a `commodore` command. Commodore is written in Python, and it requires quite a few external dependencies. To simplify this guide, we are running Commodore as a container inside the "k3d-lieutenant" cluster, but you can install Commodore on its own in your system. Please refer to the xref:commodore:explanation/running-commodore.adoc["Running Commodore"] page in this documentation for details.
+Another thing you should see in your shell is a `commodore` command. Commodore is written in Python, and it requires quite a few external dependencies. To simplify this guide, we are running Commodore as a container inside the "k3d-lieutenant" cluster, but you can install Commodore on its own in your system. Please refer to the xref:commodore::explanation/running-commodore.adoc["Running Commodore"] page in this documentation for details.
 
 The output of this command should be a string similar to "c-floral-wood-9134."
 
