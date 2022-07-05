@@ -157,7 +157,7 @@ Open Argo CD in your browser at http://localhost:35778. Log in to Argo CD with t
 kubectl --context k3d-steward -n syn get secret steward -o json | jq -r .data.token | base64 --decode
 ----
 
-After these steps, the local K3s cluster is now Syn enabled, and a Git repository called "Project Syn Cluster" is available in GitLab. But it is worth pointing out that Argo CD has not yet synchronized any changes.
+After these steps, the local K3s cluster is now Syn enabled, and a Git repository called "Project Syn Cluster" is available in GitLab. But it's worth pointing out that Argo CD hasn't yet synchronized any changes.
 
 == What's Next?
 
