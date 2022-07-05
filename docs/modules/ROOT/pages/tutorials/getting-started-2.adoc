@@ -1,4 +1,4 @@
-= Getting Started with Project Syn (Part 2)
+= Getting Started with Project Syn: Working with Commodore
 
 This document is the second part of the xref:tutorials/getting-started.adoc["Getting Started with Project Syn"] tutorial.
 
