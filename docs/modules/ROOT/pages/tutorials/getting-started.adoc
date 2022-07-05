@@ -18,7 +18,7 @@ Project Syn provides the tools to help you manage many Kubernetes clusters from 
 . Steward as the cluster agent;
 . And Commodore as the tool to manipulate the cluster records.
 
-In this guide, we're going to focus on Lieutenant and Steward. The second part will focus on Commodore.
+In this guide, we're going to focus on Lieutenant and Steward. The xref:tutorials/gettings-started-2.adoc[second part] will focus on Commodore.
 
 == Requirements
 
@@ -95,7 +95,7 @@ NAME             DISPLAY NAME         AGE
 t-aged-pond-24   Project Syn Tenant   13s
 --
 
-In the context of Project Syn, a "tenant" is an entity to whom clusters are assigned. Tenants could be customers, departments, teams, or any entity responsible for owning a cluster.
+In the context of Project Syn, a "tenant" is an entity to whom clusters are assigned. Tenants could be customers, departments, teams, or any entity owning a cluster.
 
 Project Syn stores cluster-specific configuration values in that tenant's own configuration Git repository. You should now have a new project in your GitLab account called "Project Syn Tenant."
 
@@ -159,7 +159,7 @@ Open Argo CD in your browser at http://localhost:35778. Log in to Argo CD with t
 kubectl --context k3d-steward -n syn get secret steward -o json | jq -r .data.token | base64 --decode
 ----
 
-After these steps, the local K3s cluster is now Syn enabled, and a Git repository called "Project Syn Cluster" is stored in GitLab.
+After these steps, the local K3s cluster is now Syn enabled, and a Git repository called "Project Syn Cluster" is available in GitLab.
 
 == What's Next?
 
