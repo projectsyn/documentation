@@ -110,7 +110,7 @@ curl -fsL https://try.syn.tools/steward | bash
 
 The installation of Steward happens on the K3s cluster "k3d-steward" via an install URL provided by Lieutenant, using a one-time bootstrap token. The token is valid only once and for 30 minutes after cluster registration.
 
-Once Steward is installed on the K3s cluster "k3d-steward", you can see its pods running, including some whose names start with the `argocd-` prefix:
+Once Steward is installed on the K3s cluster "k3d-steward," you can see its pods running, including some whose names start with the `argocd-` prefix:
 
 [source,bash]
 --
