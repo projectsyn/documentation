@@ -147,7 +147,7 @@ You can also connect to Argo CD and see its console. Start by exposing the `argo
 
 [source,bash]
 ----
-kubectl --context k3d-steward -n syn expose deployment argocd-server --type=LoadBalancer --port=8080
+kubectl --context k3d-steward -n syn expose deployment argocd-server --type=LoadBalancer --port=8080 --name=argocd-server-lb --overrides='{"metadata":{"labels":{"argocd.argoproj.io/instance":null}}}'
 ----
 
 Open Argo CD in your browser at http://localhost:35778. Log in to Argo CD with the username `admin` and the password returned by this command:
