@@ -75,7 +75,7 @@ Install Lieutenant on the "lieutenant" cluster with the following command:
 
 [source,bash]
 ----
-curl -fsL https://try.syn.tools | bash
+curl -fsL https://try.syn.tools/lieutenant | bash
 ----
 
 At the end of this procedure, you will have a K3s cluster in your computer, running the Lieutenant API and Operator.
