@@ -76,13 +76,13 @@ Install Lieutenant on the "k3d-lieutenant" cluster with the following command:
 curl -fsL https://try.syn.tools/lieutenant | bash
 ----
 
-At the end of this procedure, you will have a K3s cluster in your computer, running the Lieutenant API and Operator.
+At the end of this procedure, you will have a K3s cluster named "k3d-lieutenant" in your computer, running the Lieutenant API and Operator.
 
-You can explore Lieutenant using `kubectl get tenants` running the following command:
+You can explore Lieutenant using `kubectl get tenants`:
 
 [source,bash]
 --
-kubectl --context k3d-lieutenant get tenants -n lieutenant
+kubectl --context k3d-lieutenant -n lieutenant get tenants
 --
 
 The command above produces output similar to the following:
@@ -108,9 +108,9 @@ Install Steward in K3s with one simple command:
 curl -fsL https://try.syn.tools/steward | bash
 --
 
-The installation of Steward happens on the K3s cluster via an install URL provided by Lieutenant, using a one-time bootstrap token. The token is only valid once and only for 30 minutes after cluster registration.
+The installation of Steward happens on the K3s cluster "k3d-steward" via an install URL provided by Lieutenant, using a one-time bootstrap token. The token is valid only once and for 30 minutes after cluster registration.
 
-Once Steward is installed on the K3s cluster, you can see its pods running, including those whose name starts with the `argocd-` prefix:
+Once Steward is installed on the K3s cluster "k3d-steward", you can see its pods running, including some whose names start with the `argocd-` prefix:
 
 [source,bash]
 --
@@ -126,7 +126,7 @@ At this point, Lieutenant is aware of the new K3s cluster, and we can see that t
 
 [source,bash]
 --
-kubectl --context k3d-lieutenant get clusters -n lieutenant
+kubectl --context k3d-lieutenant -n lieutenant get clusters
 --
 
 The command above outputs something similar to this:
@@ -163,7 +163,7 @@ After these steps, the local K3s cluster is now Syn enabled, and a Git repositor
 
 This guide provided a quick overview of Lieutenant and Steward. If you are interested in knowing more about Project Syn, proceed to the xref:tutorials/getting-started-2.adoc[second part] to learn about Commodore, the third major component of Project Syn.
 
-Please don't execute the steps in the following "Cleaning Up" section if you intend to perform the actions of the second part of this guide. We will reuse the clusters in their current state.
+Please don't execute the steps in the following "Cleaning Up" section if you intend to perform the actions of the xref:tutorials/getting-started-2.adoc[second part] of this guide. We will reuse the clusters in their current state.
 
 == Cleaning Up
 
