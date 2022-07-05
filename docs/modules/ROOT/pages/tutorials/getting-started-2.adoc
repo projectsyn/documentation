@@ -6,19 +6,49 @@ This document is the second part of the xref:tutorials/gettings-started.adoc["Ge
 
 If you haven't yet, please execute the steps in the xref:tutorials/gettings-started.adoc["Getting Started with Project Syn"] tutorial before attempting the instructions in this document.
 
-This tutorial assumes that you have both clusters up and running ("k3d-lieutenant" and "k3d-steward") and that you have all the required tools installed.
+This tutorial assumes that you have the "k3d-lieutenant" and "k3d-steward" clusters up and running and that you have installed all required tools.
+
+In addition, create the following environment variable with the path of your private key:
+
+[source,bash]
+--
+export COMMODORE_SSH_PRIVATE_KEY=~/.ssh/id_ed25519
+--
+
+Commodore requires this variable to be able to push changes to the GitLab repositories on your behalf.
 
 == Commodore
 
-Commodore is the third component of the Project Syn suite of tools.
+Commodore is the third component of the Project Syn suite of tools. It's a command-line tool that compiles the state of your clusters and pushes the changes to the GitLab projects. Steward watches those projects continuously and immediately applies the changes to your clusters, following the GitOps philosophy.
 
-Commodore is a command-line tool that compiles the state of your clusters and pushes the changes to the GitLab projects. Steward watches those projects continuously and immediately applies the changes to your clusters.
-
-Compile the information of your `k3d-steward` cluster using Commodore by running the command below.
+Compile the information of your `k3d-steward` cluster using Commodore by running the command below, which will create a few environment variables in your shell.
 
 [source,bash]
 ----
-curl -fsL https://try.syn.tools/commodore | bash
+source <(curl -fsL https://try.syn.tools/commodore)
+----
+
+After the command above, you should be able to see a few variables and functions in your shell, for example, the Project Syn ID of your "k3d-steward" cluster:
+
+[source,bash]
+----
+echo $CLUSTER_ID
+----
+
+The output of this command should be a string similar to "c-floral-wood-9134."
+
+Let's now execute Commodore and compile the cluster.
+
+[source,bash]
+----
+commodore catalog compile $CLUSTER_ID
+----
+
+Let's this time compile and push the cluster to GitLab.
+
+[source,bash]
+----
+commodore catalog compile $CLUSTER_ID --push
 ----
 
 At this point, there should be a GitLab project under your profile called `project-syn-cluster` containing all of the configuration and settings of your current cluster.
