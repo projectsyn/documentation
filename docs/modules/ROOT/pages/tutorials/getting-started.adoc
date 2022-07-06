@@ -14,7 +14,7 @@ To make your job easier, you would need:
 
 Project Syn provides the tools to help you manage many Kubernetes clusters from a central location:
 
-. Lieutenant keeps the inventory of tenants and clusters, using a set of Git repositories as the storage mechanism;
+. Lieutenant keeps the inventory of tenants and clusters, using a set of Git repositories as the storage for configurations and catalogs;
 . Steward acts as the cluster agent, wrapping https://argoproj.github.io/cd/[Argo CD], who keeps an eye on said Git repositories;
 . And Commodore serves as the tool used to manipulate the cluster records, saving changes to the Git repositories whenever needed.
 
