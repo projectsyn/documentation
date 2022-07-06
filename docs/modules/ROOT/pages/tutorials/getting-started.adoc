@@ -10,7 +10,7 @@ To make your job easier, you would need:
 
 . A "single point of truth" for your clusters, acting like a "cluster database," including information about each managed cluster: its location, installed applications, settings, and secrets.
 . An "agent" in each cluster, proactively listening for changes in the central catalog and performing modifications as required.
-. Finally, a tool to modify the cluster database's status, updating the clusters' records and associated settings.
+. Finally, a tool to modify the clusters' configuartion, updating the clusters' catalog (the Kubernetes objects which get applied to the cluster).
 
 Project Syn provides the tools to help you manage many Kubernetes clusters from a central location:
 
