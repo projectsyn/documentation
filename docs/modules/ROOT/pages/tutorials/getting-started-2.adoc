@@ -53,7 +53,7 @@ Let's this time compile and push the cluster to GitLab.
 commodore catalog compile $CLUSTER_ID --push
 ----
 
-At this point, there should be a GitLab project under your profile called `project-syn-cluster` containing all of the Kubernetes resouces for your current cluster. And Argo CD automatically starts to synchronize them from the GitLab repository to the managed "k3d-steward" cluster.
+At this point, a GitLab project should be under your profile called `project-syn-cluster` with all of the Kubernetes resources for your current cluster. And Argo CD automatically starts to synchronize them from the GitLab repository to the managed "k3d-steward" cluster.
 
 === Argo CD Status
 

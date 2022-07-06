@@ -10,12 +10,12 @@ To make your job easier, you would need:
 
 . A "single point of truth" for your clusters, acting like a "cluster database," including information about each managed cluster: its location, installed applications, settings, and secrets.
 . An "agent" in each cluster, proactively listening for changes in the central catalog and performing modifications as required.
-. Finally, a tool to modify the clusters' configuartion, updating the clusters' catalog (the Kubernetes objects which get applied to the cluster).
+. Finally, a tool to modify the clusters' configuration, updating the clusters' catalog (the Kubernetes objects applied to the cluster).
 
 Project Syn provides the tools to help you manage many Kubernetes clusters from a central location:
 
 . Lieutenant keeps the inventory of tenants and clusters, using a set of Git repositories as the storage for configurations and catalogs;
-. Steward acts as the cluster agent, wrapping https://argoproj.github.io/cd/[Argo CD], who keeps an eye on the clusters' caltalog Git repository;
+. Steward acts as the cluster agent, wrapping https://argoproj.github.io/cd/[Argo CD], who keeps an eye on the clusters' catalog Git repository;
 . And Commodore serves as the tool used to update a cluster catalog from its configuration.
 
 In this guide, we're going to focus on Lieutenant and Steward. The xref:tutorials/getting-started-2.adoc[second part] will focus on Commodore.
@@ -65,7 +65,7 @@ export GITLAB_TOKEN=xxxxxxxxxxxxxxxx
 
 == Lieutenant
 
-Lieutenant is the central inventory service for all Project Syn-managed clusters. It consists of the https://syn.tools/lieutenant-api/[Lieutenant API] and the https://syn.tools/lieutenant-operator/[Lieutenant Operator]. Lieutenant needs API access to a GitLab server to create and manage Git repositories for clusters and tenants. Lieutenant usually runs in a dedicated Kubernetes cluster, used only to expose its API.
+Lieutenant is the central inventory service for all Project Syn-managed clusters. It consists of an https://syn.tools/lieutenant-api/[API] and an https://syn.tools/lieutenant-operator/[Operator]. Lieutenant needs API access to a GitLab server to create and manage Git repositories for clusters and tenants. Lieutenant usually runs in a dedicated Kubernetes cluster, used only to expose its API.
 
 Lieutenant is the central API for all other Project Syn tools. Therefore we will install it first so that all other components can do their job.
 
@@ -108,7 +108,7 @@ Install Steward in K3s with one simple command:
 curl -fsL https://try.syn.tools/steward | bash
 --
 
-The installation of Steward happens on the K3s cluster "k3d-steward" via an install URL provided by Lieutenant, using a one-time bootstrap token. The token is valid only once and for up to 24 hours after cluster registration.
+The installation of Steward happens on the K3s cluster "k3d-steward" via an install URL provided by Lieutenant, using a one-time bootstrap token. The token is valid only once and up to 24 hours after cluster registration.
 
 Once Steward is installed on the K3s cluster "k3d-steward," you can see its pods running, including some whose names start with the `argocd-` prefix:
 
