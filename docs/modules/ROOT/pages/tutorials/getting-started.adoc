@@ -76,7 +76,7 @@ Install Lieutenant on the "k3d-lieutenant" cluster with the following command:
 curl -fsL https://try.syn.tools/lieutenant | bash
 ----
 
-At the end of this procedure, you will have a K3s cluster named "k3d-lieutenant" in your computer, running the Lieutenant API and Operator.
+At the end of this procedure, you will have a K3s cluster named "k3d-lieutenant" on your computer, running the Lieutenant API and Operator.
 
 You can explore Lieutenant using `kubectl get tenants`:
 
