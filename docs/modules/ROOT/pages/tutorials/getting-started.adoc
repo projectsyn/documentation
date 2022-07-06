@@ -99,7 +99,7 @@ Project Syn stores cluster-specific configuration values in that tenant's own co
 
 == Steward
 
-https://syn.tools/steward/[Steward] is the in-cluster agent of Project Syn. It runs in each cluster associated with a tenant, automatically reacting to changes in the configuration stored in the corresponding Git repositories.
+https://syn.tools/steward/[Steward] is the in-cluster agent of Project Syn. It runs in each cluster associated with a tenant, automatically reacting to changes in the catalog Git repository belonging to that cluster.
 
 Install Steward in K3s with one simple command:
 
