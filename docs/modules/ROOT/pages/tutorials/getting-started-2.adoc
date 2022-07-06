@@ -57,7 +57,21 @@ At this point, there should be a GitLab project under your profile called `proje
 
 === Argo CD Status
 
-If you have kept your Argo CD browser window open at http://localhost:35778 as explained in the "Accessing Argo CD" section of the xref:tutorials/getting-started.adoc[first part] of this tutorial, you would now see quite a bit of activity, with many applications deployed and featured in green color.
+If you have kept your Argo CD browser window open at http://localhost:35778 as explained in the "Accessing Argo CD" section of the xref:tutorials/getting-started.adoc[first part] of this tutorial, you would now see quite a bit of activity, with many applications deployed and featuring "Healthy" and "Synced" statuses.
+
+You can also see the activity in your cluster using the `kubectl top nodes` command:
+
+[source,bash]
+----
+kubectl --context k3d-steward top nodes
+----
+
+The same with the `kubectl top pods -A` command:
+
+[source,bash]
+----
+kubectl --context k3d-steward top pods -A
+----
 
 == Cleaning Up
 
