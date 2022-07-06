@@ -16,7 +16,7 @@ Project Syn provides the tools to help you manage many Kubernetes clusters from 
 
 . Lieutenant keeps the inventory of tenants and clusters, using a set of Git repositories as the storage for configurations and catalogs;
 . Steward acts as the cluster agent, wrapping https://argoproj.github.io/cd/[Argo CD], who keeps an eye on the clusters' caltalog Git repository;
-. And Commodore serves as the tool used to manipulate the cluster records, saving changes to the Git repositories whenever needed.
+. And Commodore serves as the tool used to update a cluster catalog from its configuration.
 
 In this guide, we're going to focus on Lieutenant and Steward. The xref:tutorials/getting-started-2.adoc[second part] will focus on Commodore.
 
