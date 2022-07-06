@@ -1,0 +1,92 @@
+= Getting Started with Project Syn: Working with Commodore
+
+This document is the second part of the xref:tutorials/getting-started.adoc["Getting Started with Project Syn"] tutorial.
+
+== Requirements
+
+If you haven't yet, please execute the steps in the xref:tutorials/getting-started.adoc["Getting Started with Project Syn"] tutorial before attempting the instructions in this document.
+
+This tutorial assumes that you have the "k3d-lieutenant" and "k3d-steward" clusters up and running and that you have installed all required tools.
+
+In addition, create the following environment variable with the path of your private key:
+
+[source,bash]
+--
+export COMMODORE_SSH_PRIVATE_KEY=~/.ssh/id_ed25519
+--
+
+Commodore requires this variable to be able to push changes to the GitLab repositories on your behalf.
+
+== Commodore
+
+https://syn.tools/commodore/[Commodore] is the third component of the Project Syn suite of tools. It's a command-line tool that compiles the state of your clusters and pushes the changes to the GitLab projects. Steward watches those projects continuously and immediately applies the changes to your clusters, following the GitOps philosophy.
+
+Compile the information of your `k3d-steward` cluster using Commodore by running the command below, which will create a few environment variables in your shell.
+
+[source,bash]
+----
+source <(curl -fsL https://try.syn.tools/commodore)
+----
+
+After the command above, you should be able to see a few variables and functions in your shell, for example, the Project Syn ID of your "k3d-steward" cluster:
+
+[source,bash]
+----
+echo $CLUSTER_ID
+----
+
+Another thing you should see in your shell is a `commodore` command. Commodore is written in Python and requires quite a few external dependencies. To simplify this guide, we run Commodore as a container inside the "k3d-lieutenant" cluster, but you can install Commodore on its own in your system. Please refer to the xref:commodore::explanation/running-commodore.adoc["Running Commodore"] page in this documentation for details.
+
+The output of this command should be a string similar to "c-floral-wood-9134."
+
+Let's now execute Commodore and compile the cluster.
+
+[source,bash]
+----
+commodore catalog compile $CLUSTER_ID
+----
+
+Let's this time compile and push the cluster to GitLab.
+
+[source,bash]
+----
+commodore catalog compile $CLUSTER_ID --push
+----
+
+At this point, a GitLab project should be under your profile called `project-syn-cluster` with all of the Kubernetes resources for your current cluster. And Argo CD automatically starts to synchronize them from the GitLab repository to the managed "k3d-steward" cluster.
+
+=== Argo CD Status
+
+If you have kept your Argo CD browser window open at http://localhost:35778 as explained in the "Accessing Argo CD" section of the xref:tutorials/getting-started.adoc[first part] of this tutorial, you would now see quite a bit of activity, with many applications deployed and featuring "Healthy" and "Synced" statuses.
+
+You can also see the activity in your cluster using the `kubectl top nodes` command:
+
+[source,bash]
+----
+kubectl --context k3d-steward top nodes
+----
+
+The same with the `kubectl top pods -A` command:
+
+[source,bash]
+----
+kubectl --context k3d-steward top pods -A
+----
+
+== Cleaning Up
+
+You can clean up all generated clusters and GitLab projects using the following steps:
+
+. Delete the cluster and tenant objects, removing the GitLab projects at the same time:
++
+[source,bash]
+----
+curl -fsL https://try.syn.tools/cleanup | bash
+----
+
+. Remove the K3d clusters:
++
+[source,bash]
+----
+k3d cluster delete --all
+----
