@@ -26,10 +26,10 @@ Before you start, please check the following requirements:
 
 * A GitLab account.
 * The following tools:
-** `kubectl`
-** `k3d`
-** `jq`
-** `curl`
+** https://kubernetes.io/docs/reference/kubectl/[kubectl]
+** https://k3d.io/[k3d]
+** https://stedolan.github.io/jq/[jq]
+** https://curl.se/[curl]
 
 Modify your `/etc/hosts` file and add the following entry:
 
