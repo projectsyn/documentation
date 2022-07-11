@@ -4,7 +4,7 @@ This guide provides an introduction to Project Syn and its various tools. It tar
 
 == Video
 
-The contents of this guide are available as a video in the VSHN YouTube channel at https://vshn.tv[VSHN.tv].
+The contents of this guide are available as a video on the VSHN YouTube channel at https://vshn.tv[VSHN.tv].
 
 video::_6rdYHbIy_M[youtube,width=400,height=225]
 
