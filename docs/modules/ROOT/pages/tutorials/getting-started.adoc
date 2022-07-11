@@ -2,6 +2,12 @@
 
 This guide provides an introduction to Project Syn and its various tools. It targets DevOps engineers in charge of large numbers of Kubernetes clusters.
 
+== Video
+
+The contents of this guide are available as a video on the VSHN YouTube channel at https://vshn.tv[VSHN.tv].
+
+video::_6rdYHbIy_M[youtube,width=400,height=225]
+
 == Why Project Syn?
 
 You are a DevOps engineer in charge of many Kubernetes clusters. You must manually keep them up-to-date, deploy applications in some or all of them, schedule backups, and ensure that all security policies are applied and working. You're overworked and need urgent help.
