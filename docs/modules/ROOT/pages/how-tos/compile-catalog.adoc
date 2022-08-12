@@ -13,26 +13,43 @@ See the next section for details on how to connect to Lieutenant instances with 
 
 The following snippet sets up needed environment variables in your current working directory.
 
-TIP: You can skip this step if you have already defined them already with another method.
+TIP: You can skip this section if you have already defined the required environment variables.
 
-. Setup required environment variables
+. Set Lieutenant API URL
++
+[source,bash]
+----
+COMMODORE_API_URL=https://syn.example.com <1>
+----
+<1> Replace with the URL of your Lieutenant instance
+
+. Determine whether the Lieutenant instance uses OIDC authentication:
++
+[source,bash]
+----
+curl ${COMMODORE_API_URL}
+----
++
+If the response contains field `oidc`, the Lieutenant API instance uses OIDC authentication.
+Otherwise, please check with your Project Syn administrators for details on how to authenticate against the Lieutenant API.
+
+. Setup the `.env` file for Commodore
 +
 .Lieutenant instance using OIDC token
 [%collapsible]
 ====
 [source,bash]
 ----
-LIEUTENANT_URL="the-public-lieutenant-API-URL"
-
 cat << EOF > .env
 LIEUTENANT_AUTH="Authorization:Bearer \$(commodore fetch-token)"
-LIEUTENANT_URL="${LIEUTENANT_URL}"
-COMMODORE_API_URL="${LIEUTENANT_URL}"
+LIEUTENANT_URL="${COMMODORE_API_URL}"
+COMMODORE_API_URL="${COMMODORE_API_URL}"
 EOF
 ----
 
 [NOTE]
-The command `commodore fetch-token` in variable `LIEUTENANT_AUTH` will be executed when you source the `.env` file.
+For some how-tos, you'll need to source the `.env` file.
+In those cases, the command `commodore fetch-token` in variable `LIEUTENANT_AUTH` will be executed at the time you source the `.env` file.
 You may need to re-source the file when following a longer guide as the OIDC token will usually have a lifetime of only a few minutes.
 ====
 +
@@ -41,7 +58,7 @@ You may need to re-source the file when following a longer guide as the OIDC tok
 ====
 [source,bash]
 ----
-# Assuming "syn-synfra" is the user in your kubeconfig
+# Assuming "syn-synfra" is the user for the cluster hosting the Lieutenant API in your kubeconfig
 LIEUTENANT_TOKEN=$(kubectl config view -o jsonpath='{.users[?(@.name == "syn-synfra")].user.token}'  --raw)
 LIEUTENANT_URL="the-public-lieutenant-API-URL"
 
@@ -53,17 +70,12 @@ COMMODORE_API_URL="${LIEUTENANT_URL}"
 EOF
 ----
 ====
-
-. Activate the configured environment variables
 +
-[source,bash]
-----
-# Double check the environment variables
-less .env
-
-# Export the variables
-set -a; source .env; set +a
-----
+[TIP]
+====
+Commodore will automatically load environment variables from file `.env` in the working directory.
+When you're just compiling a cluster catalog, you don't need to source the file.
+====
 
 == Compilation
 
