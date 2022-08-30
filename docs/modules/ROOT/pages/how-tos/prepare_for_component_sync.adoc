@@ -1,0 +1,34 @@
+= Make your existing component ready for template updates
+:page-aliases: how-tos/prepare_for_modulesync.adoc
+
+Components created with `commodore component new` with a Commodore version older than v1.9.0 may not yet contain a `.cruft.json`.
+The easiest way to get a suitable `.cruft.json` for such a component is to run `commodore component new` with command line options which mimic the component's current state.
+
+. Create `.cruft.json` by running
++
+[source,bash]
+----
+commodore component new <component-slug> \ <1>
+  --name "Component Name" \ <2>
+  --golden-tests \ <3>
+  --matrix-tests \ <3>
+  --output-dir . <4>
+----
+<1> `<component-slug>` should be the component's repository name without the `component-` prefix.
+<2> `Component Name` ist the user-friendly name to use for the component documentation.
+<3> Provide command line options based on whether your component uses golden tests, matrix tests, etc.
+<4> Specify that the component should be rendered into a folder in your current working directory.
++
+Check the command line parameter documentation for xref:commodore:ROOT:references/cli.adoc#_component_new[`component new`] for the full list of options.
+
+. Copy the `.cruft.json` from the freshly generated component to an existing checkout of the component you want to make ready.
++
+[TIP]
+====
+You can run `commodore component update --dry-run .` in the component directory to see what will be updated from the template.
+You need a working `commodore` command to do so.
+Please note that the command only works if there's no uncommitted changes in the component repository.
+The command will create a commit with the changes on the current branch.
+====
+
+. Commit the file and push the changes.

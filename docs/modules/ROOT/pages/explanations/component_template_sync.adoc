@@ -1,0 +1,49 @@
+= Keep component boilerplate in sync
+:page-aliases: explanations/modulesync.adoc
+
+[abstract]
+Commodore components contain a number of boilerplate files.
+Some of those files are provided as skeletons to be modified by a component author.
+Other files should be kept equal for all components managed by Project Syn.
+Since we actively maintain and improve the component template, different components will contain different versions of the boilerplate.
+To ensure all components are updated to the latest template version, we use https://github.com/cruft/cruft[Cruft] to keep components in sync with the template.
+The template repository for Project Syn components is hosted on GitHub at https://github.com/projectsyn/commodore-component-template[projectsyn/commodore-component-template].
+
+https://github.com/cruft/cruft[Cruft] is a tool which allows users to keep repositories based on Cookiecutter templates up to date.
+We provide custom Commodore commands `component new`, `component update` and `component sync` which invoke Cruft to create or update component repositories.
+
+Command `component new` uses the Cookiecutter template in https://github.com/projectsyn/commodore-component-template[projectsyn/commodore-component-template] by default.
+Since Cruft stores metadata about the template in the generated component repository, commands `component update` and `component sync` can read that metadata to identify the template from which the component should be updated.
+The template is a completely standard Cookiecutter template.
+
+The managed components are listed in https://github.com/projectsyn/commodore-component-template/blob/master/components.yaml[components.yaml`].
+Each entry refers to a Git repository hosted on GitHub and has the form `<namespaces>/<name>`.
+NOTE: The `namespace` part can't be omitted.
+
+== Applying changes
+
+Changes in the template repository which are pushed to `master` will trigger the execution of `commodore component sync`.
+A pull request will be created for each component listed in `components.yaml` if there's changes that need to be applied to the component.
+If there's already an open pull request for a component, the existing pull request will be updated with the latest changes.
+
+== Changing template configuration
+
+Use command `commodore component update` to change the template configuration.
+See the Commodore command documentation for xref:commodore:ROOT:references/cli.adoc#_component_upate[`component update`] for supported command line flags.
+
+== Keep your component up to date
+
+A component created with `commodore component new` will be ready to be managed with `commodore component sync`.
+In order for this to happen, you have to add your component to https://github.com/projectsyn/commodore-component-template/blob/master/components.yaml[components.yaml`].
+
+== Differences compared to the old setup based on modulesync
+
+In contrast to modulesync, making changes to template files managed by Cruft, for example the `Makefile`, is generally not an issue.
+
+[WARNING]
+====
+There may be changes which cause merge conflicts for the automated updates.
+If that's the case you'll have to run `commodore component update` locally, manually resolve conflicting updates, and commit and push the resolved changes.
+====
+
+* xref:how-tos/prepare_for_modulesync.adoc[Make your existing component ready for ModuleSync]

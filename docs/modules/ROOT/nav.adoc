@@ -39,7 +39,7 @@ include::steward:ROOT:partial$nav-tutorials.adoc[]
 * xref:how-tos/release-process.adoc[Release Process]
 * xref:how-tos/compile-catalog.adoc[Compile a catalog]
 * xref:how-tos/change-parameter.adoc[Change a parameter]
-* xref:how-tos/prepare_for_modulesync.adoc[Prepare component for ModuleSync]
+* xref:how-tos/prepare_for_component_sync.adoc[Prepare component for template updates]
 * xref:how-tos/tenant-version-pins.adoc[Renovate version pins]
 * Commodore
 +
@@ -98,7 +98,7 @@ include::steward:ROOT:partial$nav-reference.adoc[]
 ** xref:explanations/commodore-components/crds.adoc[Custom Resource Defintions]
 * xref:explanations/commodore-packages.adoc[Commodore Packages Best Practices]
 * xref:explanations/jsonnet.adoc[Jsonnet Best Practices]
-* xref:explanations/modulesync.adoc[Keep components in sync]
+* xref:explanations/component_template_sync.adoc[Keep components in sync]
 * Commodore
 +
 --
