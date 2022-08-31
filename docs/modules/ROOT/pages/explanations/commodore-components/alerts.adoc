@@ -1,0 +1,132 @@
+= Providing Prometheus Alert Rules
+
+When writing a component that manages a critical piece of infrastructure, you should provide alerts that notify the operator if it fails.
+Writing good alerts and runbooks is difficult.
+This document should give you some best practices that worked for us so far.
+
+== Writing Alert Rules
+
+In nearly all cases you can provide Prometheus alert rules through the https://prometheus-operator.dev/docs/operator/api/#monitoring.coreos.com/v1.PrometheusRule[PrometheusRule CRD].
+This definition is then picked up by the responsible monitoring component.
+
+For OpenShift cluster this generally means labeling the namespace with `openshift.io/cluster-monitoring: 'true'` and for clusters with rancher monitoring this would mean labeling it with `SYNMonitoring: 'main'`
+
+
+
+* *Alerts need to be actionable*
++
+Try to imagine what you would do if you received this alert.
+If the answer is "I don't know" or wait and see if it resolves itself, you probably shouldn't emit this alert.
+
+* *Label your alert*
++
+Label your alerts, so that they can be routed effectively.
+At the very least add labels `syn: 'true'` and `syn_component: 'COMPONENT_NAME'` to indicate that this alert is managed by the syn component, and a label `severity`.
+
+* *Assess severity*
++
+How critical is this alert?
+We generally differentiate three severity levels.
++
+`info` for alerts that don't need urgent intervention.
+These are things that someone should look into, but it can usually wait up to a few days.
+Info alerts could also often just be part of a dashboard.
++
+`warning` for alerts that should be looked at as soon as possible, but it can usually wait until regular office hours.
++
+`critical` for alerts that need immediate attention, even outside office hours.
++
+Carefully decide in which category your alert should be and add the appropriate `severity` label.
+But keep in mind that if all alerts are critical none of them are.
+
+* *Make alerts tunable*
++
+You most likely won't be able to write a perfect alert out of the box.
+It will either be too noisy, not sensitive enough, or in some other way not relevant for the user.
+With that in mind, give the user a way to tune your alert.
++
+At the very least provide ways to selectively enable or disable individual alerts.
+It's considered best practice to let the user overwrite all of the alert specification if they wish.
+However, it's a good idea to also provide some more convenient parameters to tune configuration that often need to be adapted such as alert labels or alert specific parameters like a list of relevant namespaces.
++
+Try to imagine what a user might need to change and make tuning it as easy as possible.
+
+* *Provide a runbook*
++
+You should always provide a link to a runbook in an annotation `runbook_url`.
+See the section below on writing good runbooks.
+
+
+Following these guidelines, you should get a usable alert.
+There are still some pitfalls when writing Prometheus alerts, but there are also many guides to help you write them.
+You can look at https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[the official documentation] or check out how https://blog.cloudflare.com/monitoring-our-monitoring/[Cloudscale writes alert rules].
+
+[WARNING]
+====
+When installing third party software there are often upstream alerts.
+It's a good idea to reuse these alerts, but the best practices still apply.
+
+Don't blindly include all upstream alerts.
+Check if they're actionable, add labels, make them tunable, and provide a runbook, even if you didn't write the alert yourself.
+====
+
+== Writing Runbooks
+
+Every alert rule should have a runbook.
+The runbook is the first place a user looks to get information on the alert and how to debug it.
+
+It should tell the reader:
+
+* *What does this alert mean?*
++
+Tell the reader why they got the alert.
+What exactly doesn't work as it should?
+Maybe also tell the user how the alert was measured and if there might be false positive.
+* *What's the impact?*
++
+Who and what's effected?
+How fast should the reader react?
+The alert labels should already give an impression how critical the alert is, but try to be more explicit in the runbook.
+* *How do I diagnose this?*
++
+Provide some input on how to debug this.
+Where might the reader get the relevant events or logs?
+How to narrow down the possible root causes?
+* *How may I mitigate the issue?*
++
+List some possible mitigation strategies or ways to resolve this alert for good.
++
+NOTE: Ideally, you shouldn't alert on issues that could be fixed automatically.
+If you have one clear way to resolve this alert, check if you could resolve this automatically.
+* *How do I tune the alert?*
++
+Maybe this alert wasn't actionable, or maybe the alert was raised far too late.
+Give the reader options to tune the alert to make it less noisy or more sensitive.
+
+Whenever possible try to provide code snippets and precise instructions.
+If the reader got a critical alert, they don't have the time or nerves to build the `jq` query they need right now or to find out exactly which controller is responsible for this CRD.
+
+It's considered best practice to put all your runbooks at `docs/modules/ROOT/pages/runbooks/ALERTNAME.adoc`, but there might be good reasons to deviate from this.
+Just make sure to adjust the runbook links as necessary.
+
+Finally, a runbook doesn't have to be perfect.
+Maybe you don't really know how this might fail or how to debug this, or maybe you simply don't have the resources right now to write a comprehensive runbook.
+Add one anyway.
+Any input can be valuable when debugging an alert and at the very least there is now a basis on which to improve on when we learn more.
+
+[IMPORTANT]
+====
+.Removing or Renaming Alert Rules
+
+Sometimes alerts become obsolete.
+Maybe the system can now resolve the issue automatically, or the responsible part simply doesn't exist anymore.
+
+However, you need to make sure that you *never* break a runbook link.
+There might be people using older releases of your component and their runbook links should still lead to valid runbooks.
+
+* Don't remove runbook remarks if they get obsolete, but make a note that they're only relevant for older versions.
+* Don't remove runbooks, but simply remove them from the navigation.
+* If you rename an alert or move the runbook, use https://docs.antora.org/antora/latest/page/page-aliases/[page aliases] to keep old links valid.
+
+If you follow these three rules, runbook links should always stay relevant.
+====
