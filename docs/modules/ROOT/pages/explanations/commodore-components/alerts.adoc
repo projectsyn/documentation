@@ -59,7 +59,7 @@ See the section below on writing good runbooks.
 
 Following these guidelines, you should get a usable alert.
 There are still some pitfalls when writing Prometheus alerts, but there are also many guides to help you write them.
-You can look at https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[the official documenation] or check out how https://blog.cloudflare.com/monitoring-our-monitoring/[Cloudscale writes alert rules].
+You can look at https://prometheus.io/docs/prometheus/latest/configuration/alerting_rules/[the official documentation] or check out how https://blog.cloudflare.com/monitoring-our-monitoring/[Cloudscale writes alert rules].
 
 [WARNING]
 ====
@@ -91,7 +91,7 @@ The alert labels should already give an impression how critical the alert is, bu
 +
 Provide some input on how to debug this.
 Where might the reader get the relevant events or logs?
-How can he narrow down the possible root causes.
+How to narrow down the possible root causes?
 * *How may I mitigate the issue?*
 +
 List some possible mitigation strategies or ways to resolve this alert for good.
