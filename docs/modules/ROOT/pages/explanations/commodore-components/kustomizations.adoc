@@ -1,0 +1,126 @@
+= Using kustomizations in Commodore components
+
+[IMPORTANT]
+====
+To use kustomizations, a `kustomize` binary must be present on the system.
+====
+
+It's considered best practice to expose kustomization inputs to the user by introducing a component parameter `kustomize_input`
+
+This minimizes the need for duplicated parameters between the kustomization configuration and the component default parameters.
+
+Additionally, it's considered best practice to expose the kustomization URL in parameter `kustomization_url` and the kustomization version (if applicable) in parameter `manifests_version`.
+
+Finally, it's considered best practice to expose the container images used by the kustomization as documented in the xref:explanations/commodore-components/container-images.adoc[container image versions] best practice documentation.
+
+We recommend that the component renders an overlay which refers to the kustomization in Jsonnet, and calls `kustoize build` on the resulting YAML file.
+
+
+== Example
+
+In this example, we present a fictional component `slo` which renders a kustomization for `fancy-sli-controller`.
+
+
+In `class/defaults.yml`, we provide the parameters to use when rendering the kustomization, as discussed above.
+
+.class/defaults.yml
+[source,yaml]
+----
+parameters:
+  slo:
+    namespace: syn-slo
+    kustomization_url: https://syn.example.com/fancy-sli-controller//config/default <1>
+    manifests_version: '1.0.0'
+    images:
+      fancy-sli-controller:
+        registry: quay.io
+        repository: syn/fancy-sli-controller
+        tag: '1.0.0'
+    kustomize_input:
+      namePrefix: syn-slo-
+      namespace: ${slo:namespace}
+----
+<1> If the kustomization is stored in a subpath of the repository, use `//` to separate the repository URL from the path inside the repository.
+
+In `component/fancy-sli-controller-overlay.jsonnet`, we render a `kustomization.yaml` which refers to the kustomization specified in `class/defaults.yml` and ensures the resulting Kubernetes resources use the image registry, repository and tags as specified in the parameters.
+We also merge the provided `kustomize_input` into the `kustomization.yaml`.
+This allows users to make arbitrary changes to the kustomization.
+
+.component/fancy-sli-controller-overlay.jsonnet
+[source,jsonnet]
+----
+// Template to render kustomization overlay
+local com = import 'lib/commodore.libjsonnet';
+local kap = import 'lib/kapitan.libjsonnet';
+
+local inv = kap.inventory();
+local params = inv.parameters.slo;
+
+local image = params.images.fancy_sli_controller;
+
+com.Kustomization( <1>
+  params.kustomization_url,
+  params.manifests_version,
+  {
+    'quay.io/syn/fancy-sli-controller': {
+      newTag: image.tag,
+      newName: '%(registry)s/%(repository)s' % image,
+    },
+  },
+  params.kustomize_input,
+)
+----
+<1> This function generates an object which is suitable as a Jsonnet output.
+The resulting output will consist of a single `kustomization.yaml` file which is suitable as a `kustomize build` input.
+The provided `kustomization_url` and `manifests_version` will be rendered as an entry in the kustomization's `resource` field.
+The contents of the third parameter will be used to render entries for the kustomization's `images` field.
+See the xref:commodore:ROOT:reference/commodore-libjsonnet.adoc#_kustomizationbase_url_base_version_images_kustomize_input[`commodore.libjsonnet`] documentation for details.
+
+In `class/slo.yml`, we render the `kustomization.yaml` and pass it `kustomize build` to generate the Kubernetes resources to commit to the cluster catalog.
+
+.class/slo.yml
+[source,yaml]
+----
+parameters:
+  kapitan:
+    inputs:
+      # render kustomization overlay into <component dir>/fancy-sli-controller
+      - input_paths:
+          - ${_base_directory}/component/fancy-sli-controller-overlay.jsonnet
+        input_type: jsonnet
+        output_path: ${_base_directory}/fancy-sli-controller
+
+      # Run kustomize on the rendered overlay.
+      # NOTE: Kapitan ignores `output_path` for `input_type=external`
+      - input_type: external
+        output_path: .
+        input_paths:
+          - ${_kustomize_wrapper} <1>
+        env_vars:
+          INPUT_DIR: ${_base_directory}/fancy-sli-controller <2>
+        args:
+          - \${compiled_target_dir}/${_instance}/fancy-sli-controller-deployment <3>
+          <4>
+
+      # Finally, delete the kustomize overlay which we rendered, so it doesn't
+      # accidentally get committed to the component repository.
+      - input_paths:
+          - ${_base_directory}/fancy-sli-controller
+        input_type: remove
+        output_path: .
+----
+<1> The input path for `input_type=external` is the path to the external binary to call.
+Commodore provides parameter `_kustomize_wrapper`  which expands to the absolute path of the Kustomize wrapper script which is distributed with Commodore.
+The wrapper script always executes `kustomize build`.
+<2> The Commodore kustomize wrapper expects the input directory in environment variable `INPUT_DIR`.
+<3> The Commodore wrapper script reuqires the first argument to be the output directory for `kustomize`.
+This allows us to avoid having to reimplement Kustomize's argument parsing in the wrapper script to find the output directory.
++
+[IMPORTANT]
+====
+Always use `\${compiled_target_dir}` in the output path to ensure the generated Kubernetes resources are written to the Kapitan compilation target directory.
+This is a special variable which Kapitan substitutes with the absolute path of the target directory into which the component is compiled for compile steps with `input_type=external`.
+To ensure the variable is passed as `${compiled_target_dir}` to Kapitan, we must escape it to ensure it's not treated as a reclass variable.
+====
+<4> Users can provide arbitrary further arguments after the output directory which are passed to `kustomize` verbatim.
+Check `kustomize build --help` for supported arguments.
