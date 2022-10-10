@@ -113,7 +113,7 @@ parameters:
 Commodore provides parameter `_kustomize_wrapper`  which expands to the absolute path of the Kustomize wrapper script which is distributed with Commodore.
 The wrapper script always executes `kustomize build`.
 <2> The Commodore kustomize wrapper expects the input directory in environment variable `INPUT_DIR`.
-<3> The Commodore wrapper script reuqires the first argument to be the output directory for `kustomize`.
+<3> The Commodore wrapper script requires the first argument to be the output directory for `kustomize`.
 This allows us to avoid having to reimplement Kustomize's argument parsing in the wrapper script to find the output directory.
 +
 [IMPORTANT]
