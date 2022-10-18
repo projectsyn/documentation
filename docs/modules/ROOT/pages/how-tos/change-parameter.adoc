@@ -13,6 +13,8 @@ Suppose you want to overwrite an inventory parameter for a cluster or tenant.
 ====
 +
 TIP: You can compile the catalog locally to verify your changes with `commodore catalog compile $CLUSTER_ID --local`.
++
+TIP: If you want to locally test adding a component to a cluster, please see the Commodore xref:commodore:ROOT:how-to/local-mode-component.adoc[how-to on adding components to a cluster in local mode].
 
 . Navigate into the tenant or global directory, depending on which files you've edited, and commit your changes.
 +
