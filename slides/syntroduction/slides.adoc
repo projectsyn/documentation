@@ -178,8 +178,10 @@ Configuration Git repositories       ^                 |                        
 * Configuration Management for Kubernetes
 * Full GitOps Operations and Automation
 * Reusable Configuration Management Components
+** Component Hub federates documentation of available components
 * Secrets Management
 * Multi-Cluster and Multi-Tenant Management (Inventory)
+* GitLab CI pipeline for catalog generation
 
 [.notes]
 --
@@ -188,20 +190,18 @@ This is just a conclusion what Project Syn offers
 
 == What's coming
 
-Development is in full swing:
+Development is ongoing, we're working on:
 
-* Renaming of tools
-* Automated catalog generation
+* Improved catalog generation
 * API replacement by plain Kubernetes API
 * User experience improvements
 * Syn CLI
-* Component Hub
 
 Roadmap: https://syn.tools/syn/about/roadmap.html
 
 [.notes]
 --
-* Although Project Syn is used in production and in several projects, it's still in full development towards a 1.0 release.
+* Although Project Syn is used in production and in several projects, some components haven't yet reached a v1.0 release.
 * Roadmap is subject to change and has a lot more details.
 * Planning happens all on GitHub with issues and projects there.
 --
@@ -225,6 +225,7 @@ and try it out for yourself
 
 * Project site: https://syn.tools
 * Commodore Component Tutorial: https://syn.tools/tuto/index.html
+* Commodore Component Hub: https://hub.syn.tools
 * GitHub: https://github.com/projectsyn
 
 [.notes]
