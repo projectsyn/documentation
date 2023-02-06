@@ -6,7 +6,13 @@
 :revnumber: 1.0
 :revdate: {docdate}
 :copyright: CC-BY-SA 3.0
-:title-image: project-syn.png
+
+:footer-text: Project Syn - by VSHN
+:footer-image: projectsyn_footer.svg
+:revealjs_customtheme: theme/projectsyn.css
+:title-slide-background-image:
+:title-slide-background-size: cover
+:title-image: project-syn.svg
 
 = Title
 
