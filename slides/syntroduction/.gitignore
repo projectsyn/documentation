@@ -1,3 +1,5 @@
 .vscode
 theme
 node_modules
+Caddyfile
+Guardfile
