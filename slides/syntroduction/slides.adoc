@@ -164,7 +164,7 @@ Configuration Git repositories       ^                 |                        
 --
 * Commodore is the main tool, generating configuration adapted and parametrized for a clusters
 * The generated catalog is pushed to a Git repository per cluster
-* Commodore get's all the information from Lieutenant and from input Git repositories
+* Commodore gets all the information from Lieutenant and from input Git repositories
 * Commodore components are the reusable parts to compose configuration
 * Lieutenant stores Tenants and Clusters and manages Git repositories
 * Steward bootstraps Argo CD into a cluster and configures it
