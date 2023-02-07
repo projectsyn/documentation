@@ -16,7 +16,7 @@
 
 = Title
 
-image::{title-image}[width=750]
+image::{title-image}[width=500]
 
 [.notes]
 --
@@ -234,7 +234,7 @@ and try it out for yourself
 
 == Thanks!
 
-image::{title-image}[width=750]
+image::{title-image}[width=500]
 
 {author} – {email}
 
