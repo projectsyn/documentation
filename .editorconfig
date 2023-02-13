@@ -28,3 +28,6 @@ indent_style = tab
 [*.html]
 trim_trailing_whitespace = false
 insert_final_newline = false
+
+[*.svg]
+insert_final_newline = unset

@@ -1,5 +1,0 @@
-:8080
-file_server {
-    index slides.html
-}
-encode zstd gzip
