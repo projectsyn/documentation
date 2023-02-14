@@ -10,8 +10,7 @@ jobs:
     strategy:
       matrix:
         command:
-          - lint_yaml
-          - docs-vale
+          - check
     steps:
       - uses: actions/checkout@v2
       - name: Run ${{ matrix.command }}
@@ -23,7 +22,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: snow-actions/eclint@v1.0.1
         with:
-          args: 'check'
+          args: "check"
 
   docs:
     runs-on: ubuntu-latest
