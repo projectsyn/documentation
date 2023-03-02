@@ -55,7 +55,7 @@ parameters:
         output_path: my-component/01_helmchart
         helm_values: ${my_component:helm_values} <2>
         helm_params: <3>
-          release_name: syn-my-chart
+          name: syn-my-chart
           namespace: ${my_component:namespace}
 ----
 <1> The Helm chart name.
