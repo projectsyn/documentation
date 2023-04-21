@@ -1,0 +1,140 @@
+= SDD 0029 - Local Commodore Development Environment
+
+:sdd_author:    Simon Gerber
+:sdd_owner:     VSHN Tech Alignment WG
+:sdd_reviewers: Reviewer names
+:sdd_date:      2023-XX-XX
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This SDD outlines a local development environment which is easy to use, quick to bootstrap and which supports local development backed by a full cluster catalog.
+====
+
+== Motivation
+
+While we have a development environment for working on a single component in isolation (`commodore component compile`), we don't currently have a simple development environment for working on complex configurations which consist of multiple components.
+
+Additionally, the currently available `commodore component compile` hits limits when working on more complex components, for example when advanced ArgoCD features are required for correct installation of the software managed by a component.
+
+Finally, with a more full-fledged local development environment we also enable ourselves to provide a better getting started experience with Commodore and we can explore new avenues for integration testing in component CI pipelines.
+
+=== Goals
+
+We want the local development environment to
+
+* Support quick edit-compile-deploy cycles for single components
+* Enable users to test single- or multi-component configurations in a local Kubernetes cluster (e.g. `kind`, or `k3d`) without having to register the cluster in a Lieutenant instance
+
+=== Non-Goals
+
+* Replace Lieutenant infrastructure for production installations
+
+== User Stories
+
+=== As a *component developer* I want *quick and easy edit-compile-deploy cycles* so that *I can quickly iterate on my changes*
+
+==== Background
+
+We've seen Helm charts which make heavy use of install hooks to perform some initialization steps in the right order, which aren't supported at all with the currently available tools.
+We also develop multiple components which use ArgoCD's sync job or sync wave mechanisms to orchestrate more complex installations or upgrades.
+Some changes to these components can't be tested without having a fully Syn-managed cluster available.
+
+Depending on how many components are installed on a shared dev cluster, compile times for the dev cluster's cluster catalog may be in the multiple minutes range, which isn't really acceptable for iterating on changes.
+
+==== With the current tooling
+
+Jane tests components by compiling them locally with `commodore component compile` and the applies the resulting manifests on her kind cluster with `kubectl apply -Rf compiled/`.
+However, because the component she's trying to test installs a Helm chart which uses Helm hooks to perform some in-cluster configuration that needs to happen in a specific order, she isn't able to get the software installed by the Helm chart to work properly.
+At this point, Jane may start chasing red herrings, such as "The installation works fine with `helm install`, so something in Commodore's Helm rendering must be wrong".
+Alternatively, if she's seen a similar issue previously, she'll either test the component on a shared dev cluster or she'll register her local cluster in a Lieutenant instance, since she's aware that ArgoCD will execute helm hooks in the correct order.
+
+With either of those approaches, the compile-deploy cycle for Jane has jumped from a few seconds to tens of seconds since she now needs a full `commodore catalog compile` followed by either manually syncing her component's App in ArgoCD or waiting for ArgoCD's sync cycle.
+If she's decided to test her component on the shared dev cluster because she doesn't want to spend upwards of 15 minutes to get her local cluster Syn-managed, the compile-deploy cycle may even take multiple minutes depending on how many other components are installed on the shared cluster.
+
+==== With the proposed tooling
+
+Jane tests components locally by running `commodore component install` while having her local kind cluster selected in her `kubectl` config.
+After a few seconds, she sees her changes getting applied in her local kind cluster.
+
+=== As a *component maintainer* I want *integration tests in the component CI pipeline* so that *I can see issues with dependency updates when looking at PRs*
+
+==== With the current tooling
+
+We've not engineered any support for running integration tests (i.e. installing components in a kind cluster) in CI pipelines.
+Therefore, John needs to setup a local kind cluster, make it Syn-managed, and install the dependency update branch of the component he's reviewing by adding the component and all of its dependencies to the newly created Syn cluster config for his local cluster.
+Alternatively, John can update the component to the dependency branch on the shared dev cluster without any local tests, and accept that he may break the dev environment with a so-far completely untested dependency update.
+
+
+==== With the proposed tooling
+
+John can create a local kind cluster, and install the dependency update branch of the component into his local cluster by running `commodore component install`.
+
+=== As a *system engineer* I want to *locally test configuration changes touching multiple components* so that *I can confidently say that the changes are safe to roll out*
+
+==== With the current tooling
+
+Project Syn currently has no support for cleanly testing configuration changes which touch multiple components without compiling a full cluster catalog.
+Therefore, Jane usually tests such changes on the dev cluster, accepting that she'll wait multiple minutes for each iteration of her change before she sees the catalog diff.
+If she wants to actually test iterations of the configuration change on the cluster, she has to push or merge each iteration of the change into the master branch of the dev cluster's tenant repo, and then compile and push the catalog changes.
+
+==== With the proposed tooling
+
+Jane sets up a local kind cluster and ensures her current `kubectl` context points to it.
+She then defines a local cluster spec which installs all the components affected by her configuration change.
+She copies or references the current configuration from the regular config hierarchy and runs `commodore catalog install cluster-spec.yml`, to render a local catalog and install it into her local kind cluster.
+
+== Design Proposal
+
+TBD
+
+=== Implementation Details/Notes/Constraints [optional]
+
+== Drawbacks [optional]
+
+== Alternatives
+
+=== Local cluster spec in Reclass
+
+One approach which fits relatively nicely into the current Commodore design is to introduce new Commodore commands which don't fetch data from Lieutenant or remote global or tenant repos.
+Instead, those commands will consume local Reclass classes which are used in place of `global.commodore` and `params.cluster` in any Kapitan targets that get generated.
+With this approach, we can reuse the catalog compilation implementation with minimal changes.
+The resulting catalog will be committed in a local Git repository for further consumption.
+
+To support secret references for this approach, we can extend Commodore's secret reference handling to emit https://kapitan.dev/references/[Kapitan plain references].
+For this, users provide secret values locally in a well-defined format and Commodore generates plain references instead of Vault KV references.
+
+With this approach, we can even give users the option to fetch a remote global or tenant repo, although by default the command will only use local data.
+In any case, the command will still fetch remote component repos,
+
+By implementing these new features we cover arbitrary test cluster compilation locally and in CI pipelines.
+For straightforward configurations, the resulting cluster catalog can be deployed with `kubectl apply -Rf`.
+
+However, for more complex components, for example components which use ArgoCD sync waves or hooks, `kubectl apply` isn't sufficient.
+For such components, we'd have to provide a way to bootstrap an ArgoCD instance which pulls from the local catalog.
+
+To do so we introduce a new tool (or a new mode of operation for Steward) which bootstraps ArgoCD in a local cluster (kind, k3d, minikube).
+The tool will define some required configurations for local clusters, for example the local cluster catalog repo must be mounted into the cluster as a volume that ArgoCD can consume.
+Optionally, the tool can be extended to deploy the local cluster itself.
+
+Testing changes during component development can also be streamlined with this setup, although it's not quite as seamless as with running `commodore component compile` directly in ArgoCD.
+With this approach, testing component changes will require developers to define a minimal local cluster spec and go through the same process as for testing config changes locally.
+
+=== Run `commodore component compile` in ArgoCD
+
+One option to provide "live editing" of Commodore components is bootstrap an ArgoCD instance in a local cluster (kind, k3d, minikube,...) which has access to the developer's local working directory.
+To do so, we introduce a new tool (or a new mode of operation for Steward) which bootstraps the ArgoCD in a local cluster.
+This tool generates an ArgoCD app for the component which runs `commodore component compile` on each sync.
+By enabling auto-sync for this app, we get live updates of the deployed component based on the current state of the developer's working directory every couple minutes.
+
+While this approach might be a nice option for local development of single components, it doesn't provide a full local development environment.
+
+=== Fake Lieutenant API managed by Commodore
+
+Having Commodore spin up an HTTP endpoint mimicking the Lieutenant API is an alternative to defining the cluster spec as a local reclass class.
+However, users would still have to provide the cluster spec and a suitable replacement for `global.commodore` in some form.
+Overall, this approach doesn't seem to bring a lot of benefits over just defining local Reclass classes which can be used as drop-in replacements for the class generated from Lieutenant responses and `global.commodore`.
+
+== References

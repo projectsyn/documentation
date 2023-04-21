@@ -24,3 +24,4 @@ The all are using the xref:sdd-template.adoc[SDD Template].
 * xref:0026-commodore-component-testing.adoc[0026 - Commodore Component Testing]
 * xref:0027-dynamic-cluster-facts.adoc[0027 - Dynamic Cluster Facts]
 * xref:0028-reusable-config-packages.adoc[0028 - Reusable Commodore Component Configuration Packages]
+* xref:0029-local-dev-environment.adoc[0029 - Local Commodore Development Environment]
