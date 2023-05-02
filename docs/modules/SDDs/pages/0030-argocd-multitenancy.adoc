@@ -1,0 +1,101 @@
+= SDD 0030 - Project Syn ArgoCD multi-tenant support
+
+:sdd_author:    Simon Gerber
+:sdd_owner:     Project Syn IG
+:sdd_reviewers: Aldebaran, Schedar
+:sdd_date:      2023-05-02
+:sdd_status:    draft
+
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This describes how we want to extend the Project Syn-managed ArgoCD instance to allow multiple teams to have independent ArgoCD projects and root applications as well as enabling cluster operators to assign operational responsibility per application.
+====
+
+== Motivation
+
+Currently, on Project Syn-managed clusters where multiple teams deploy applications through Project Syn, there's no clean separation between each team's applications.
+For example, a team currently can't pause ArgoCD's auto sync for their applications without pausing auto sync for the ArgoCD root application.
+
+Additionally, there's currently no easy way to assign operational responsibility for applications managed by the Project Syn ArgoCD instance to different teams.
+
+=== Goals
+
+* Enable multiple teams to manage independent sets of ArgoCD applications
+* Operational responsibility can be assigned for each Commodore component instance
+
+=== Non-Goals
+
+* Allow deploying arbitrary applications through the Project Syn ArgoCD instance
+* Allow deploying applications from Git repositories other than the cluster catalog
+* Create a well-defined structure for per-team configurations in the Project Syn tenant repository
+
+== Design Proposal
+
+We propose to adjust the Project Syn-managed ArgoCD to support an ArgoCD Project and https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern[[root application ("app of apps")] per team.
+This approach needs some careful engineering work, since a lot of Project Syn tooling (at least https://github.com/projectsyn/steward/blob/c25ea41615340ab8b6a78888d03fe710f77d86de/pkg/argocd/argocd.go#L88-L94[Steward], https://github.com/projectsyn/component-argocd/blob/1227b46c2db6e6959ce75aa7ab44db975f33bb3e/component/app.jsonnet[component argocd] and the https://github.com/projectsyn/commodore-component-template/blob/cfd150bd41deaa0ad10d522ec5fd0abafed65800/%7B%7B%20cookiecutter.slug%20%7D%7D/class/%7B%7B%20cookiecutter.slug%20%7D%7D.yml#L4-L7[component template]) currently assumes that there's exactly one ArgoCD project and root application for all applications managed through Project Syn.
+
+With this approach, the team responsible for the cluster itself can continue using the current ArgoCD project (`syn`) and root application (`root`).
+If there are no applications managed by another team, this approach allows the team owning the cluster to continue working as before.
+
+However, if another team wants to deploy applications on the cluster through Project Syn, an additional ArgoCD project and root application can be bootstrapped.
+Each team's root application is managed independently from the default root application (`root`).
+
+The bootstrap process for the additional root applications is initiated by defining the team in the configuration hierarchy in parameter `syn_teams`.
+This parameter is not associated with a specific component and becomes a reserved parameter name which components can't use.
+
+To ensure components can be assigned to teams, the argocd component library needs to be made "team-aware".
+For each team, the list of component instances owned by that team is specified in `syn_teams.<team-name>.instances`.
+This list must always be processed with the `renderArray()` Jsonnet function (or an equivalent).
+The https://github.com/projectsyn/component-argocd/blob/1227b46c2db6e6959ce75aa7ab44db975f33bb3e/lib/argocd.libjsonnet[argocd component library] can read this list to determine whether the instance which is being rendered should be assigned to a team's root application or the default root application.
+If a component instance is listed in `instances` of multiple teams a compilation error is raised.
+Any component instance which isn't listed in `instances` of any team is assigned to the default root application.
+
+To ensure each team's applications are independent, each team's ArgoCD application manifests (including the team's root application) are stored in path `apps-<team-name>/` in the cluster catalog repository.
+To do so, each component's `kapitan.compile` entry for the ArgoCD application needs to be adjusted to write the application manifest into a well-defined path matching the owning team's ArgoCD project.
+This change can be implemented globally in the component template.
+By implementing the dynamic apps path in the catalog in the component template, we don't need to adjust Commodore's logic for copying the output of `kapitan compile` into the cluster catalog.
+
+Since we want each team's root application to be independent from the default root application, we need to have explicit logic outside ArgoCD to create the initial version of the root application in the cluster.
+By creating the initial root application outside ArgoCD, we enable further management of the root application through itself by simply storing each team's root application manifest in `apps-<team-name>/` in the cluster catalog.
+
+=== Implementation Details/Notes/Constraints
+
+Dynamic application manifests path::
+There's multiple ways to render a component's application manifest into the dynamic team-specific path.
+One option is to adjust the `kapitan.compile` output_path value based on the instance's owning team.
+However, that option would need a extremely verbose version of the component instance to team mapping.
++
+Instead, we'll probably adjust the default `app.jsonnet` to emit the application manifest in a subpath and set `output_path: .` for `app.jsonnet` in the component class.
+
+Team root application bootstrap::
+One option is to do the initial creation of a team's root application through an ArgoCD sync job which executes `kubectl create -f ... || exit 0`.
+Another option is to extend Steward to support creating additional root application resources.
+
+== Alternatives
+
+=== Add team label to ArgoCD apps
+
+One alternative is to keep the current setup (one ArgoCD instance with one https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-bootstrapping/#app-of-apps-pattern[root application ("app of apps")]) and inject additional information in the form of labels on the ArgoCD applications.
+
+This approach can easily be tested by injecting suitable application labels manually in Commodore components.
+Additionally, engineering streamlined support for this approach is straightforward and can be done in the https://github.com/projectsyn/component-argocd/blob/1227b46c2db6e6959ce75aa7ab44db975f33bb3e/lib/argocd.libjsonnet[argocd component library] and the configuration hierarchy.
+A potential implementation would be to provide a mapping of component instance names to team names in the configuration hierarchy.
+This would enable the component library to lookup the value for the team label with minimal requirements.
+
+However, while this approach allows assigning ownership, it doesn't really make each team's set of applications independent from each other.
+
+=== Create separate ArgoCD instance per team
+
+Another alternative would be to bootstrap a separate ArgoCD instance per additional team managing a part of the applications on a cluster.
+The primary Project Syn ArgoCD instance (in namespace `syn`) would be assigned to the primary team which operates the cluster itself.
+This team would then bootstrap an additional ArgoCD instance for each other team who manages a number of applications on the cluster through Project Syn.
+
+This approach needs the same additional logic to ensure each team's root application is fully independent as the proposed design.
+Compared to the proposed design, this approach requires significantly more cluster resources.
+
+== References
+
+* https://kb.vshn.ch/oc4/explanations/decisions/syn-argocd-sharing.html[Decision to share Project Syn ArgoCD for multiple teams on OpenShift 4]
