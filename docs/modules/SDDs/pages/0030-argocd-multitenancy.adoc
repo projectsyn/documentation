@@ -54,9 +54,12 @@ If a component instance is listed in `instances` of multiple teams a compilation
 Any component instance which isn't listed in `instances` of any team is assigned to the default root application.
 
 To ensure each team's applications are independent, each team's ArgoCD application manifests (including the team's root application) are stored in path `apps-<team-name>/` in the cluster catalog repository.
-To do so, each component's `kapitan.compile` entry for the ArgoCD application needs to be adjusted to write the application manifest into a well-defined path matching the owning team's ArgoCD project.
-This change can be implemented globally in the component template.
-By implementing the dynamic apps path in the catalog in the component template, we don't need to adjust Commodore's logic for copying the output of `kapitan compile` into the cluster catalog.
+To enable this, component authors must ensure that the `kapitan.compile` entry for the ArgoCD application writes the application manifest into `apps-<team-name>/`.
+We will update the ArgoCD component library to determine the component instance's owning team by querying the data provided in parameter `syn_teams`.
+In a first phase, we introduce a new component metadata field `_metadata.multi_tenant` which component authors can set to `true` if the component is able to create the ArgoCD application manifest in the team directory.
+If a component whose `_metadata.multi_tenant` is set to `false` is assigned to a team other than the team owning the cluster, catalog compilation fails with an error.
+After the initial implementation is complete, we can update the component template to generate multi-tenant capable components by default.
+By implementing the dynamic apps path in the cluster catalog repository in the ArgoCD component library and the component template, we don't need to adjust Commodore's logic for copying the output of `kapitan compile` into the cluster catalog.
 
 Since we want each team's root application to be independent from the default root application, we need to have explicit logic outside ArgoCD to create the initial version of the root application in the cluster.
 By creating the initial root application outside ArgoCD, we enable further management of the root application through itself by simply storing each team's root application manifest in `apps-<team-name>/` in the cluster catalog.
