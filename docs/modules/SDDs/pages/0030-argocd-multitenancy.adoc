@@ -43,19 +43,23 @@ If there are no applications managed by another team, this approach allows the t
 However, if another team wants to deploy applications on the cluster through Project Syn, an additional ArgoCD project and root application can be bootstrapped.
 Each team's root application is managed independently from the default root application (`root`).
 
-The bootstrap process for the additional root applications is initiated by defining the team in the configuration hierarchy in parameter `syn_teams`.
+The bootstrap process for the additional root applications is initiated by defining the team in the configuration hierarchy in parameter `syn`.
 This parameter is not associated with a specific component and becomes a reserved parameter name which components can't use.
+The parameter has two fields `owner` and `teams`.
+Field `owner` makes the team who owns the cluster explicit.
+This allows the implementation to ensure that the owning team's applications are always managed through the default `root` application, even if that team has some explicit assignments for applications in `syn.teams`.
 
 To ensure components can be assigned to teams, the argocd component library needs to be made "team-aware".
-For each team, the list of component instances owned by that team is specified in `syn_teams.<team-name>.instances`.
+For each team, the list of component instances owned by that team is specified in `syn.teams.<team-name>.instances`.
 This list must always be processed with the `renderArray()` Jsonnet function (or an equivalent).
 The https://github.com/projectsyn/component-argocd/blob/1227b46c2db6e6959ce75aa7ab44db975f33bb3e/lib/argocd.libjsonnet[argocd component library] can read this list to determine whether the instance which is being rendered should be assigned to a team's root application or the default root application.
 If a component instance is listed in `instances` of multiple teams a compilation error is raised.
 Any component instance which isn't listed in `instances` of any team is assigned to the default root application.
+Component instances which are assigned to the team specified in `syn.owner` are assigned to the default root application.
 
 To ensure each team's applications are independent, each team's ArgoCD application manifests (including the team's root application) are stored in path `apps-<team-name>/` in the cluster catalog repository.
 To enable this, component authors must ensure that the `kapitan.compile` entry for the ArgoCD application writes the application manifest into `apps-<team-name>/`.
-We will update the ArgoCD component library to determine the component instance's owning team by querying the data provided in parameter `syn_teams`.
+We will update the ArgoCD component library to determine the component instance's owning team by querying the data provided in parameters `syn.teams` and `syn.owner`.
 In a first phase, we introduce a new component metadata field `_metadata.multi_tenant` which component authors can set to `true` if the component is able to create the ArgoCD application manifest in the team directory.
 If a component whose `_metadata.multi_tenant` is set to `false` is assigned to a team other than the team owning the cluster, catalog compilation fails with an error.
 After the initial implementation is complete, we can update the component template to generate multi-tenant capable components by default.
