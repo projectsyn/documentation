@@ -2,9 +2,9 @@
 
 :sdd_author:    Simon Gerber
 :sdd_owner:     Project Syn IG
-:sdd_reviewers: Aldebaran, Schedar
-:sdd_date:      2023-05-02
-:sdd_status:    draft
+:sdd_reviewers: Christian Häusler, Fabian Fischer
+:sdd_date:      2023-05-05
+:sdd_status:    accepted
 
 include::partial$meta-info-table.adoc[]
 
