@@ -37,6 +37,7 @@ include::steward:ROOT:partial$nav-tutorials.adoc[]
 
 .How-to guides
 * xref:how-tos/release-process.adoc[Release Process]
+* xref:how-tos/list-clusters.adoc[]
 * xref:how-tos/compile-catalog.adoc[Compile a catalog]
 * xref:how-tos/change-parameter.adoc[Change a parameter]
 * xref:how-tos/prepare_for_component_sync.adoc[Prepare component for template updates]
