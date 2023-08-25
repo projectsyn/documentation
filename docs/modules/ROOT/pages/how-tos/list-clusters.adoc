@@ -1,0 +1,120 @@
+= List Lieutenant clusters
+
+Compile and push a cluster catalog from local machine to update dependencies.
+
+== Requirements
+
+* A https://syn.tools/commodore/explanation/running-commodore.html[working commodore command].
+* Access to a running Lieutenant instance.
+See the next section for details on how to connect to Lieutenant instances with OIDC or long-lived tokens.
+* `jq`
+
+== Prepare Commodore
+
+The following snippet sets up needed environment variables in your current working directory.
+
+TIP: You can skip this section if you have already defined the required environment variables.
+
+. Set Lieutenant API URL
++
+[source,bash]
+----
+COMMODORE_API_URL=https://syn.example.com <1>
+----
+<1> Replace with the URL of your Lieutenant instance
+
+. Determine whether the Lieutenant instance uses OIDC authentication:
++
+[source,bash]
+----
+curl ${COMMODORE_API_URL}
+----
++
+If the response contains field `oidc`, the Lieutenant API instance uses OIDC authentication.
+Otherwise, please check with your Project Syn administrators for details on how to authenticate against the Lieutenant API.
+
+. Setup the `.env` file for Commodore
++
+.Lieutenant instance using OIDC token
+[%collapsible]
+====
+[source,bash]
+----
+cat << EOF > .env
+LIEUTENANT_AUTH="Authorization:Bearer \$(commodore fetch-token)"
+LIEUTENANT_URL="${COMMODORE_API_URL}"
+COMMODORE_API_URL="${COMMODORE_API_URL}"
+EOF
+----
+
+[NOTE]
+For some how-tos, you'll need to source the `.env` file.
+In those cases, the command `commodore fetch-token` in variable `LIEUTENANT_AUTH` will be executed at the time you source the `.env` file.
+You may need to re-source the file when following a longer guide as the OIDC token will usually have a lifetime of only a few minutes.
+====
++
+.Lieutenant instance using long-lived Kubernetes token
+[%collapsible]
+====
+[source,bash]
+----
+# Assuming "syn-synfra" is the user for the cluster hosting the Lieutenant API in your kubeconfig
+LIEUTENANT_TOKEN=$(kubectl config view -o jsonpath='{.users[?(@.name == "syn-synfra")].user.token}'  --raw)
+LIEUTENANT_URL="the-public-lieutenant-API-URL"
+
+cat << EOF > .env
+LIEUTENANT_AUTH="Authorization:Bearer ${LIEUTENANT_TOKEN}"
+LIEUTENANT_URL="${LIEUTENANT_URL}"
+COMMODORE_API_TOKEN="${LIEUTENANT_TOKEN}"
+COMMODORE_API_URL="${LIEUTENANT_URL}"
+EOF
+----
+====
++
+[TIP]
+====
+Commodore will automatically load environment variables from file `.env` in the working directory.
+When you're just compiling a cluster catalog, you don't need to source the file.
+====
+
+== List clusters
+
+.List all clusters known to Lieutenant
+[source,bash]
+----
+commodore catalog list
+----
+
+.List all clusters for a specific tenant
+[source,bash]
+----
+TENANT_ID=t-tenant-id-1234 <1>
+commodore catalog list -t $TENANT_ID
+----
+<1> Replace with the Tenant ID for which you want to list clusters
+
+
+.List all clusters with fact `distribution` set to `openshift4`
+[source,bash]
+----
+commodore catalog list -ojson | jq -r '.[] | select(.facts.distribution == "openshift4") | .id'
+----
+
+.List all clusters with fact `cloud` set to `cloudscale`
+[source,bash]
+----
+commodore catalog list -ojson | jq -r '.[] | select(.facts.cloud == "cloudscale") | .id'
+----
+
+.List all clusters with K8s version < 1.24 (requires recent Steward)
+[source,bash]
+----
+commodore catalog list -ojson | \
+  jq -r '.[] | select(.dynamicFacts.kubernetesVersion.minor//"0"|tonumber < 24) | .id'
+----
+
+[NOTE]
+====
+Clusters which don't have a reported K8s version as a dynamic fact will be listed.
+To change this behavior, replace `//"0"` with `//"24"` in the `jq` expression.
+====
