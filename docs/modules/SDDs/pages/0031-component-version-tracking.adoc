@@ -1,0 +1,143 @@
+= SDD 0031 - Central Component Version tracking
+
+:sdd_author:    Sebastian Widmer
+:sdd_owner:     Project Syn IG
+:sdd_reviewers: -
+:sdd_date:      2024-05-13
+:sdd_status:    pending
+
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This describes how we want to extend the Lieutenant API, CRD, and operator to allow for central component version tracking.
+====
+
+== Motivation
+
+Currently, component versions used in a Commodore compile are tracked in the cluster catalog repository.
+They are stored in the commit message.
+
+This approach has several drawbacks:
+* The version information is not easily accessible programmatically.
+* To get an overview one needs to find every repository and check the commit history.
+
+To improve this situation, we want to introduce a central component version tracking system.
+The system should be centralized and accessible programmatically.
+
+Lieutenant is the central component for managing the cluster catalogs and already has a REST API.
+It is backed by a CRD which already stores some state information and cluster metadata.
+
+We want to extend the Lieutenant API, CRD, and operator to store version information for each Commodore compile.
+
+=== Goals
+
+* Enable a central, programmatically accessible component and configuration repos (global, tenant) version tracking system
+* Allow Grafana or other monitoring tools to display component version information
+
+=== Non-Goals
+
+* Show class from which the version is derived
+* Show the version of the images, charts, or libraries used in the component
+
+== Design Proposal
+
+=== CRD
+
+We add a new field to the `Cluster` CRD, under the `.status` key, called `compileMeta`.
+
+The `compileMeta` field lists all component versions under the `components` key.
+It contains a timestamp of the last Commodore compile under the `lastCompile` key.
+Additionally it tracks the configuration repository versions under the `global` and `tenant` key.
+
+Each version entry contains the following fields:
+
+* `url`: The URL of the component repository
+* `version`: The configured version of the component
+Can be a branch name, tag, or commit hash.
+The `version` can point to different commits depending on when the compile was done.
+* `gitSha`: The commit hash of the commit referenced by the `version` field
+With the `gitSha` and the `url` it is possible to uniquely identify the commit.
+
+[source,yaml]
+----
+apiVersion: syn.tools/v1alpha1
+kind: Cluster
+metadata:
+  name: my-cluster
+status:
+  compileMeta:
+    lastCompile: "2024-05-13T12:00:00Z"
+    packages:
+      appcat:
+        url: https://github.com/vshn/component-appcat
+        version: master
+        gitSha: "125a78afd733f47d50d3eee9cd7c5bcaca2282b2"
+    components:
+      alerts-exporter:
+        url: https://github.com/appuio/component-alerts-exporter.git
+        version: "master"
+        gitSha: "3244ddb83a91279fb378f011358ac118987747a2"
+      rook-ceph:
+        url: https://github.com/projectsyn/component-rook-ceph.git
+        version: "v8.0.1"
+        gitSha: "3a3d940ff53d73307f4a86955af2a8e1a0b7961f"
+    global:
+      url: git.syn.tools/my-org/global-config.git
+      version: "master"
+      gitSha: "a64d207a11bb595702470917beffed9df0227a36"
+    tenant:
+      url: git.syn.tools/chewserver/syn-tenant-repo.git
+      version: "master"
+      gitSha: "4e6699968153c608f048b140f6af351816b14303"
+----
+
+=== API
+
+The Lieutenant API will be extended to have a push endpoint `POST /clusters/{clusterId}/compileMeta` with the same token authentication as the current API.
+The API accepts a JSON payload with the contents of the `compileMeta` field and handles the update of the `Cluster` CRD.
+
+=== Operator
+
+The Lieutenant operator will be extended to create Prometheus / OpenMetrics metrics for the component versions.
+The metrics should contain all the information from the `compileMeta` field.
+
+[source]
+----
+syn_lieutenant_cluster_compile_meta_last_compile{cluster="my-cluster"} 1.624e+12
+syn_lieutenant_cluster_compile_meta_component{cluster="my-cluster", component="alerts-exporter", url="https://...", version="master", gitSha="..."} 1
+syn_lieutenant_cluster_compile_meta_component{cluster="my-cluster", component="rook-ceph", url="https://...", version="v8.0.1", gitSha="..."} 1
+syn_lieutenant_cluster_compile_meta_global{cluster="my-cluster", url="https://...", version="master", gitSha="..."} 1
+syn_lieutenant_cluster_compile_meta_tenant{cluster="my-cluster", url="https://...", version="master", gitSha="..."} 1
+----
+
+=== Implementation Details/Notes/Constraints
+
+Different versions for different component instances::
+https://github.com/projectsyn/commodore/issues/563[projectsyn/commodore#563] wants to allow different versions for different component instances.
+Since the component name is currently the key to the version information, this can't be supported.
+One idea is to call the field `instances` instead of `components`, use the instance name as the key, and add the component name as a field in the value.
+
+Configuration packages::
+Configuration package versions are not yet added to the commit message.
+We need to add them to the commit message and the Lieutenant API.
+
+== Alternatives
+
+=== Store version information on the cluster and use metric forwards
+
+VSHN has a centralized metrics system and all VSHN managed clusters send metrics to it.
+
+Instead of storing the version information in the Lieutenant CRD, we could store it in a config map in the cluster.
+Steward or kube-state-metrics could then make the information available as metrics.
+
+This approach requires a lot of additional setup for Commodore users without a centralized metrics system.
+It also requires the cluster to be able to reach the metrics system.
+
+We want to avoid this approach since it removes some of the batteries included philosophy of Commodore.
+
+== References
+
+* https://github.com/projectsyn/commodore/issues/389[projectsyn/commodore#389 Component version reporting]
+* https://github.com/projectsyn/commodore/issues/388[projectsyn/commodore!388 Draft PR]
