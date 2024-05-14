@@ -130,7 +130,12 @@ syn_lieutenant_cluster_compile_meta_instance{cluster="my-cluster", name="keycloa
 syn_lieutenant_cluster_compile_meta_global{cluster="my-cluster", url="https://...", version="master", gitSha="..."} 1
 syn_lieutenant_cluster_compile_meta_tenant{cluster="my-cluster", url="https://...", version="master", gitSha="..."} 1
 ----
+=== Commodore
 
+Commodore will be extended to send updated compilation information for catalog compilations which actually push a new catalog commit.
+Any other catalog compilations will not update the compile metadata on the Lieutenant API.
+
+Commodore will use its existing API token to push the compilation metadata to Lieutenant.
 === Implementation Details/Notes/Constraints
 
 Different versions for different component instances::
