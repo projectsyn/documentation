@@ -140,4 +140,4 @@ We want to avoid this approach since it removes some of the batteries included p
 == References
 
 * https://github.com/projectsyn/commodore/issues/389[projectsyn/commodore#389 Component version reporting]
-* https://github.com/projectsyn/commodore/issues/388[projectsyn/commodore!388 Draft PR]
+* https://github.com/projectsyn/commodore/pull/388[projectsyn/commodore#388 Draft PR]
