@@ -2,7 +2,7 @@
 
 :sdd_author:    Sebastian Widmer
 :sdd_owner:     Project Syn IG
-:sdd_reviewers: -
+:sdd_reviewers: Simon Gerber
 :sdd_date:      2024-05-13
 :sdd_status:    pending
 
