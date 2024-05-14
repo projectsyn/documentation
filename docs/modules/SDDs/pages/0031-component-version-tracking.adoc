@@ -68,13 +68,14 @@ The `version` can point to different commits depending on when the compile was d
 * `gitSha`: The commit hash of the commit referenced by the `version` field
 With the `gitSha` and the `url` it is possible to uniquely identify the commit.
 
+The `packages` and `instances` fields additionally contain:
+
+* `path`: The path in the repository where the package is located.
+This field is optional.
+
 The `instances` field additionally contains:
 
 * `component`: The name of the component, might be different from the instance name if the instance is aliased.
-
-The `packages` field additionally contains:
-
-* `path`: The path in the repository where the package is located.
 
 [source,yaml]
 ----
@@ -139,6 +140,7 @@ Commodore will be extended to send updated compilation information for catalog c
 Any other catalog compilations will not update the compile metadata on the Lieutenant API.
 
 Commodore will use its existing API token to push the compilation metadata to Lieutenant.
+
 === Implementation Details/Notes/Constraints
 
 Different versions for different component instances::
