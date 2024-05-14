@@ -47,8 +47,15 @@ We want to extend the Lieutenant API, CRD, and operator to store version informa
 
 We add a new field to the `Cluster` CRD, under the `.status` key, called `compileMeta`.
 
-The `compileMeta` field lists all component versions under the `components` key.
-It contains a timestamp of the last Commodore compile under the `lastCompile` key.
+The `compileMeta` field lists all component versions under the `instances` key.
+The key is the name of the component instance, the value contains the name of the component.
+With aliased instances the component name can be different from the instance name.
+Aliased instances are defined using `alias as component` in the Commodore configuration.
+Currently Commodore only supports one version per component, but this structure allows for reporting multiple versions per component in the future.
+
+Configuration packages are tracked under the `packages` key.
+
+The `compileMeta` field also contains a timestamp of the last Commodore compile under the `lastCompile` key.
 Additionally it tracks the configuration repository versions under the `global` and `tenant` key.
 
 Each version entry contains the following fields:
@@ -59,6 +66,14 @@ Can be a branch name, tag, or commit hash.
 The `version` can point to different commits depending on when the compile was done.
 * `gitSha`: The commit hash of the commit referenced by the `version` field
 With the `gitSha` and the `url` it is possible to uniquely identify the commit.
+
+The `instances` field additionally contains:
+
+* `component`: The name of the component, might be different from the instance name if the instance is aliased.
+
+The `packages` field additionally contains:
+
+* `path`: The path in the repository where the package is located.
 
 [source,yaml]
 ----
@@ -72,17 +87,20 @@ status:
     packages:
       appcat:
         url: https://github.com/vshn/component-appcat
+        path: package
         version: master
         gitSha: "125a78afd733f47d50d3eee9cd7c5bcaca2282b2"
-    components:
+    instances:
       alerts-exporter:
+        component: alerts-exporter
         url: https://github.com/appuio/component-alerts-exporter.git
         version: "master"
         gitSha: "3244ddb83a91279fb378f011358ac118987747a2"
-      rook-ceph:
-        url: https://github.com/projectsyn/component-rook-ceph.git
-        version: "v8.0.1"
-        gitSha: "3a3d940ff53d73307f4a86955af2a8e1a0b7961f"
+      keycloak-prod:
+        component: keycloak
+        url: https://github.com/projectsyn/component-keycloak.git
+        version: v15.0.0
+        gitSha: "008b8d1ad07001eec17c197270d5667b7ae66d98"
     global:
       url: git.syn.tools/my-org/global-config.git
       version: "master"
@@ -106,8 +124,9 @@ The metrics should contain all the information from the `compileMeta` field.
 [source]
 ----
 syn_lieutenant_cluster_compile_meta_last_compile{cluster="my-cluster"} 1.624e+12
-syn_lieutenant_cluster_compile_meta_component{cluster="my-cluster", component="alerts-exporter", url="https://...", version="master", gitSha="..."} 1
-syn_lieutenant_cluster_compile_meta_component{cluster="my-cluster", component="rook-ceph", url="https://...", version="v8.0.1", gitSha="..."} 1
+syn_lieutenant_cluster_compile_meta_package{cluster="my-cluster", name="appcat", url="https://...", version="master", path="package", gitSha="..."} 1
+syn_lieutenant_cluster_compile_meta_instance{cluster="my-cluster", name="alerts-exporter", component="alerts-exporter", url="https://...", version="master", gitSha="..."} 1
+syn_lieutenant_cluster_compile_meta_instance{cluster="my-cluster", name="keycloak-prod", component="keycloak", url="https://...", version="v15.0.0", gitSha="..."} 1
 syn_lieutenant_cluster_compile_meta_global{cluster="my-cluster", url="https://...", version="master", gitSha="..."} 1
 syn_lieutenant_cluster_compile_meta_tenant{cluster="my-cluster", url="https://...", version="master", gitSha="..."} 1
 ----
@@ -116,8 +135,7 @@ syn_lieutenant_cluster_compile_meta_tenant{cluster="my-cluster", url="https://..
 
 Different versions for different component instances::
 https://github.com/projectsyn/commodore/issues/563[projectsyn/commodore#563] wants to allow different versions for different component instances.
-Since the component name is currently the key to the version information, this can't be supported.
-One idea is to call the field `instances` instead of `components`, use the instance name as the key, and add the component name as a field in the value.
+The current design with instance name as the top key allows for this.
 
 Configuration packages::
 Configuration package versions are not yet added to the commit message.
