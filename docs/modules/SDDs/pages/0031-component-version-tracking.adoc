@@ -51,6 +51,7 @@ The `compileMeta` field lists all component versions under the `instances` key.
 The key is the name of the component instance, the value contains the name of the component.
 With aliased instances the component name can be different from the instance name.
 Aliased instances are defined using `alias as component` in the Commodore configuration.
+See xref:reference/architecture.html#_component_instantiation[Component instantiation and aliasing] for more information.
 Currently Commodore only supports one version per component, but this structure allows for reporting multiple versions per component in the future.
 
 Configuration packages are tracked under the `packages` key.
@@ -164,3 +165,4 @@ We want to avoid this approach since it removes some of the batteries included p
 
 * https://github.com/projectsyn/commodore/issues/389[projectsyn/commodore#389 Component version reporting]
 * https://github.com/projectsyn/commodore/pull/388[projectsyn/commodore#388 Draft PR]
+* xref:reference/architecture.html#_component_instantiation[Component instantiation and aliasing]
