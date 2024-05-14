@@ -117,6 +117,8 @@ status:
 The Lieutenant API will be extended to have a push endpoint `POST /clusters/{clusterId}/compileMeta` with the same token authentication as the current API.
 The API accepts a JSON payload with the contents of the `compileMeta` field and handles the update of the `Cluster` CRD.
 
+The CRD update should be done with server side merge to avoid frequent API errors due to concurrent, unrelated updates with the operator or other clients.
+
 === Operator
 
 The Lieutenant operator will be extended to create Prometheus / OpenMetrics metrics for the component versions.
