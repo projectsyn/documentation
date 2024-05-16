@@ -77,6 +77,8 @@ The `instances` field additionally contains:
 
 * `component`: The name of the component, might be different from the instance name if the instance is aliased.
 
+The `commodore` field contains a `map[string]string` with freeform Commodore build information.
+
 [source,yaml]
 ----
 apiVersion: syn.tools/v1alpha1
@@ -86,6 +88,9 @@ metadata:
 status:
   compileMeta:
     lastCompile: "2024-05-13T12:00:00Z"
+    commodoreBuildInfo:
+      version: "v1.20.1"
+      gitSha: "9c743fb0bc92018dfa3bc21e72554f7a7b0dfcf8"
     packages:
       appcat:
         url: https://github.com/vshn/component-appcat
@@ -128,6 +133,7 @@ The metrics should contain all the information from the `compileMeta` field.
 [source]
 ----
 syn_lieutenant_cluster_compile_meta_last_compile{cluster="my-cluster"} 1.624e+12
+syn_lieutenant_cluster_compile_meta_commodore_build_info{cluster="my-cluster", version="v1.20.1", gitSha="9c743fb0bc92018dfa3bc21e72554f7a7b0dfcf8"} 1
 syn_lieutenant_cluster_compile_meta_package{cluster="my-cluster", name="appcat", url="https://...", version="master", path="package", gitSha="..."} 1
 syn_lieutenant_cluster_compile_meta_instance{cluster="my-cluster", name="alerts-exporter", component="alerts-exporter", url="https://...", version="master", gitSha="..."} 1
 syn_lieutenant_cluster_compile_meta_instance{cluster="my-cluster", name="keycloak-prod", component="keycloak", url="https://...", version="v15.0.0", gitSha="..."} 1
