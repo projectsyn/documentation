@@ -4,7 +4,7 @@
 :sdd_owner:     Tarazed
 :sdd_reviewers: Christian Häusler, Fabian Fischer
 :sdd_date:      2022-05-02
-:sdd_status:    accepted
+:sdd_status:    implemented
 include::partial$meta-info-table.adoc[]
 
 [NOTE]

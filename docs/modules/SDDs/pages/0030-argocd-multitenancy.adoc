@@ -4,7 +4,7 @@
 :sdd_owner:     Project Syn IG
 :sdd_reviewers: Christian Häusler, Fabian Fischer
 :sdd_date:      2023-05-05
-:sdd_status:    accepted
+:sdd_status:    implemented
 
 include::partial$meta-info-table.adoc[]
 
