@@ -4,7 +4,7 @@
 :sdd_owner:     Project Syn IG
 :sdd_reviewers: Simon Gerber
 :sdd_date:      2024-05-13
-:sdd_status:    pending
+:sdd_status:    implemented
 
 include::partial$meta-info-table.adoc[]
 
