@@ -1,0 +1,153 @@
+= SDD 0031 - Central Component Version tracking
+
+:sdd_author:    Aline Abler
+:sdd_owner:     Project Syn IG
+:sdd_date:      2024-06-13
+:sdd_status:    draft
+
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This describes how we want to implement CI/CD for Project Syn using a Commodore compile pipeline, which enables automatic compilation of cluster catalogs whenever the corresponding tenant repository is modified.
+
+Furthermore, it explains how want to extend the functionality of Lieutenant to enable it to automatically configure the compile pipeline on tenant repositories.
+====
+
+== Motivation
+
+Having a continuous integration solution unlocks a number of benefits:
+It solves the problem of configuration drift, where changes to the tenant repository might not be reflected in every cluster catalog because not all of them have since been compiled, and it lessens the burden on catalog maintainers who otherwise would need to locally compile each cluster individually.
+
+It is already fairly straightforward to manually set up basic auto-compilation for individual tenant repositories without special support from Project Syn itself.
+At VSHN, such a solution has been in use for several years.
+
+However, certain features (such as automatic configuration of the compile pipeline) are hard to implement in a standalone fashion.
+As such features are now desired, it makes sense to fully integrate the compile pipeline into Project Syn.
+
+By making Project Syn "CI-aware", we can implement more seamless management of compile pipeline configuration on the tenant repositories, including automated setup and automated token rotation.
+This will go hand-in-hand with the existing repository management features in Lieutenant.
+
+Currently, we're looking at a solution that is specific to GitLab CI/CD, and to tenant and catalog repositories that are stored on GitLab.
+Other CI solutions and other repository hosts might be supported in the future.
+
+=== Goals
+
+* Provide pipeline definitions for GitLab CI/CD to automatically compile and push cluster catalogs on a tenant repository.
+* Enable Lieutenant to autonomously manage the configuration required to set up the compile pipeline for a cluster catalog.
+
+=== Non-Goals
+
+* Support for CI solutions other than GitLab CI/CD.
+
+== Design Proposal
+
+=== Gitlab CI/CD Pipeline for Commodore
+
+The pipeline definitions for the Commodore compile pipeline are managed in a dedicated GitLab repository (the pipeline repository).
+Tenant repositories can then include these pipeline definitions in their `gitlab-ci.yml`.
+
+Execution of the pipeline is controlled via GitLab CI/CD Variables, which can be set on the tenant repository.
+The variables control which catalog is compiled, and are used to provide access to the catalog repository via GitLab Project Access Token, as well as to the Lieutenant API via Commodore API token.
+
+In particular, the pipeline accepts the following CI/CD variables:
+
+* `ACCESS_TOKEN_CLUSTERNAME`, where `CLUSTERNAME` is the name of a specific cluster, with `-` replaced by `_`. This contains a GitLab Project Access Token, which must have read-write access the corresponding cluster's catalog repository.
+* `COMMODORE_API_URL`. This contains the URL at which the Lieutenant API can be accessed.
+* `COMMODORE_API_TOKEN`. This contains an access token for the Lieutenant API.
+* `CLUSTERS`. This contains a space-separated list of cluster IDs which should be compiled and pushed automatically.
+
+=== CRD
+
+We add a new field to the `GitRepoTemplate` (and, by extension, the `GitRepo`) CRD, under the `.spec` key, called `compilePipeline`.
+
+The `compilePipeline` field contains configuration pertaining to the automatic setup of the compile pipeline on the tenant repository.
+It is optional.
+Absence of the field disables automatic setup and management of the compile pipeline.
+
+The `compilePipeline` field contains a dict with the following fields:
+
+* `gitlabCatalogProjectAccessSecretRef`: (for cluster catalog repos) Reference to a secret containing the GitLab Project Access Token that can be used to access this repository. (Managed by Lieutenant)
+* `pipelineFiles`: Dictionary containing file paths as keys, and file contents as values.
+   These files will be committed to the tenant repository when the compile pipeline is configured, if they do not exist already.
+
+We add a new field to the `Cluster` CRD, under the `.status` key, called `compileMeta`.
+
+
+[source,yaml]
+----
+apiVersion: syn.tools/v1alpha1
+kind: Cluster
+metadata:
+  name: my-cluster
+spec:
+  gitRepoTemplate:
+    compilePipeline:
+      gitlabCatalogProjectAccessSecretRef: c-my-cluster-project-access
+      pipelineFiles:
+        .gitlab-ci.yml: |
+          include:
+            - project: syn/commodore-compile-pipeline
+              ref: master
+              file: /.gitlab/commodore-common.yml
+
+----
+
+=== Operator
+
+The Lieutenant Operator will be extended to automatically manage the compile pipeline for repositories where this is enabled (by way of configuring the `compilePipeline` field).
+
+Since the compile pipeline has to interact with both the tenant repo as well as the cluster catalog repo, it must be enabled on both corresponding `gitRepo` definitions for the configuration to be functioning.
+This way, it is possible to enable auto-compilation for some, but not all clusters on a tenant.
+And furthermore, it is possible to easily disable auto-compilation for a whole tenant without having to touch each cluster's `gitRepo` definition.
+
+When `compilePipeline` is configured on a cluster repository (catalog repository), Lieutenant does the following:
+
+* Create a new `Project Access Token` on the catalog repository via the GitLab API, using the cluster repository's configured apiSecretRef.
+* Store the new access token in a new secret.
+* Store a reference to the new secret in `catalogProjectAccessSecretRef`.
+* Add a new CI/CD variable to the corresponding tenant repository via the GitLab API, using the tenant repository's configured apiSecretRef. The value is named `ACCESS_TOKEN_CLUSTERNAME` (where `CLUSTERNAME` is the cluster ID with `-` replaced by `_`) and contains the GitLab project access token as its value.
+* Update the CI/CD variable `CLUSTERS` on the corresponding tenant repository to ensure it includes the cluster's ID.
+
+When `compilePipeline` is configured on a *managed* tenant repository, Lieutenant does the following:
+
+* Render the `pipelineFiles` configured on the tenant repository, and commit them.
+* Add a new CI/CD variable `COMMODORE_API_URL` to the tenant repository, containing the API URL for Lieutenant.
+* Add a new CI/CD variable `COMMODORE_API_TOKEN` to the tenant repository, containing the API token for Lieutenant.
+
+When the `compilePipeline` field is removed from a repository, all the corresponding resources should be cleaned up.
+
+Unmanaged repositories cannot have automatically configured compile pipelines.
+
+==== Rotation of Project Access Tokens
+
+GitLab's project access tokens have a limited lifespan.
+Lieutenant should automatically rotate them as required.
+
+To this end, a scheduled task should run in the operator that checks the token's expiration date via the GitLab API, and rotates any that are close to expiring.
+
+To rotate a token:
+
+* Use the GitLab API to rotate the existing token.
+* Update the corresponding catalog project access secret.
+* Update the corresponding CI/CD variable (`ACCESS_TOKEN_CLUSTERNAME`) in the tenant repository.
+
+=== Implementation Details/Notes/Constraints
+
+Existing compile pipeline configuration::
+If a setup already includes a bunch of tenant repositories with manually configured CI/CD, some care has to be taken to ensure the new implementation can "adopt" this configuration.
++
+In particular, these repositories would already have a working `.gitlab-ci.yml` that probably can be left as-is.
++
+Any existing manually created Project Access Tokens will be superseded by new auto-generated ones.
+This will lead to a bunch of now-unused tokens needing to be cleaned up.
+
+External Catalog Repositories::
+There may be cases where the catalog repositories are not hosted on the same repository host as the tenant repository, in which case API access for the purpose of creating Project Access Tokens is unavailable.
+The Commodore Compile Pipeline can still be used against such catalog repositories by specifying an SSH key to access them.
++
+This can still be configured manually, and the automated configuration would not interfere.
+
+== References
+
