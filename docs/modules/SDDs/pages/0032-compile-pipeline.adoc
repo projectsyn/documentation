@@ -2,6 +2,7 @@
 
 :sdd_author:    Aline Abler
 :sdd_owner:     Project Syn IG
+:sdd_reviewers: Simon Gerber
 :sdd_date:      2024-06-13
 :sdd_status:    draft
 
@@ -45,8 +46,10 @@ Other CI solutions and other repository hosts might be supported in the future.
 
 === Gitlab CI/CD Pipeline for Commodore
 
-The pipeline definitions for the Commodore compile pipeline are managed in a dedicated GitLab repository (the pipeline repository).
-Tenant repositories can then include these pipeline definitions in their `gitlab-ci.yml`.
+The pipeline definitions for the Commodore compile pipeline are managed in a dedicated Git repository (the pipeline repository).
+This repository can be hosted anywhere.
+Tenant repositories can then include these pipeline definitions in their `gitlab-ci.yml` as a "remote" include.
+See the https://docs.gitlab.com/ee/ci/yaml/includes.html#include-a-single-configuration-file[GitLab CI/CD documentation] for details.
 
 Execution of the pipeline is controlled via GitLab CI/CD Variables, which can be set on the tenant repository.
 The variables control which catalog is compiled, and are used to provide access to the catalog repository via GitLab Project Access Token, as well as to the Lieutenant API via Commodore API token.
@@ -72,7 +75,6 @@ The `compilePipeline` field contains a dict with the following fields:
 * `pipelineFiles`: Dictionary containing file paths as keys, and file contents as values.
    These files will be committed to the tenant repository when the compile pipeline is configured, if they do not exist already.
 
-We add a new field to the `Cluster` CRD, under the `.status` key, called `compileMeta`.
 
 
 [source,yaml]
@@ -98,7 +100,7 @@ spec:
 
 The Lieutenant Operator will be extended to automatically manage the compile pipeline for repositories where this is enabled (by way of configuring the `compilePipeline` field).
 
-Since the compile pipeline has to interact with both the tenant repo as well as the cluster catalog repo, it must be enabled on both corresponding `gitRepo` definitions for the configuration to be functioning.
+Since the compile pipeline has to interact with both the tenant repository as well as the cluster catalog repositories, it must be enabled on both corresponding `gitRepo` definitions for the configuration to be functional.
 This way, it is possible to enable auto-compilation for some, but not all clusters on a tenant.
 And furthermore, it is possible to easily disable auto-compilation for a whole tenant without having to touch each cluster's `gitRepo` definition.
 
@@ -114,7 +116,7 @@ When `compilePipeline` is configured on a *managed* tenant repository, Lieutenan
 
 * Render the `pipelineFiles` configured on the tenant repository, and commit them.
 * Add a new CI/CD variable `COMMODORE_API_URL` to the tenant repository, containing the API URL for Lieutenant.
-* Add a new CI/CD variable `COMMODORE_API_TOKEN` to the tenant repository, containing the API token for Lieutenant.
+* Add a new CI/CD variable `COMMODORE_API_TOKEN` to the tenant repository, containing the tenant's API token for Lieutenant.
 
 When the `compilePipeline` field is removed from a repository, all the corresponding resources should be cleaned up.
 
