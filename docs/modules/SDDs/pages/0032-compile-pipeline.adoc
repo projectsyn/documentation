@@ -30,9 +30,6 @@ As such features are now desired, it makes sense to fully integrate the compile 
 By making Project Syn "CI-aware", we can implement more seamless management of compile pipeline configuration on the tenant repositories, including automated setup and automated token rotation.
 This will go hand-in-hand with the existing repository management features in Lieutenant.
 
-Currently, we're looking at a solution that is specific to GitLab CI/CD, and to tenant and catalog repositories that are stored on GitLab.
-Other CI solutions and other repository hosts might be supported in the future.
-
 === Goals
 
 * Provide pipeline definitions for GitLab CI/CD to automatically compile and push cluster catalogs on a tenant repository.
@@ -44,26 +41,65 @@ Other CI solutions and other repository hosts might be supported in the future.
 
 == Design Proposal
 
-=== Gitlab CI/CD Pipeline for Commodore
+=== Requirements for Pipeline Configuration
 
-The pipeline definitions for the Commodore compile pipeline are managed in a dedicated Git repository (the pipeline repository).
-This repository can be hosted anywhere.
-Tenant repositories can then include these pipeline definitions in their `gitlab-ci.yml` as a "remote" include.
-See the https://docs.gitlab.com/ee/ci/yaml/includes.html#include-a-single-configuration-file[GitLab CI/CD documentation] for details.
+Lieutenant imposes certain assumptions on the configuration of the pipeline:
+Namely, the pipeline has to be set up on the tenant repository by way of adding (arbitrary) files to the repository,
+and it is configured through setting CI/CD variables on the repository.
 
-Execution of the pipeline is controlled via GitLab CI/CD Variables, which can be set on the tenant repository.
-The variables control which catalog is compiled, and are used to provide access to the catalog repository via GitLab Project Access Token, as well as to the Lieutenant API via Commodore API token.
+In particular, Lieutenant configures the following CI/CD variables:
 
-In particular, the pipeline accepts the following CI/CD variables:
-
-* `ACCESS_TOKEN_CLUSTERNAME`, where `CLUSTERNAME` is the name of a specific cluster, with `-` replaced by `_`. This contains a GitLab Project Access Token, which must have read-write access the corresponding cluster's catalog repository.
+* `ACCESS_TOKEN_CLUSTERNAME`, where `CLUSTERNAME` is the name of a specific cluster, with `-` replaced by `_`.
+  This contains a GitLab Project Access Token, which must have read-write access the corresponding cluster's catalog repository.
 * `COMMODORE_API_URL`. This contains the URL at which the Lieutenant API can be accessed.
 * `COMMODORE_API_TOKEN`. This contains an access token for the Lieutenant API.
 * `CLUSTERS`. This contains a space-separated list of cluster IDs which should be compiled and pushed automatically.
 
-=== CRD
+=== GitRepo CRD
 
-We add a new field to the `GitRepoTemplate` (and, by extension, the `GitRepo`) CRD, under the `.spec` key, called `compilePipeline`.
+We add two new fields to the `GitRepoTemplate` (and, by extension, the `GitRepo`) CRD, under the `.spec` key, called `accessTokenSecretRef` and `ciVariables`.
+
+The `accessTokenSecretRef` field contains a reference to a secret.
+If it is set, the Lieutenant operator will store an access token into this secret, which can be used to access the git repository.
+In the case of GitLab, this would be a Project Access Token with read-write access to the repository.
+
+The `ciVariables` field contains a dictionary describing variable names and corresponding values.
+These variables are added to the git repository as CI/CD variables.
+
+[source,yaml]
+----
+apiVersion: syn.tools/v1alpha1
+kind: GitRepo
+metadata:
+  name: my-repo
+spec:
+  accessTokenSecretRef: my-repo-access-token
+  ciVariables:
+    COMMODORE_API_URL: ...
+    COMMODORE_API_TOKEN: ...
+----
+
+=== Cluster CRD
+
+We add a new field to the `Cluster` CRD, under the `.spec` key, called `enableCompilePipeline`.
+
+The field contains a boolean flag, which controls whether the compile pipeline should be enabled or disabled for this cluster.
+
+It is optional; not specifying it is equivalent to setting it to `false`.
+
+[source,yaml]
+----
+apiVersion: syn.tools/v1alpha1
+kind: Cluster
+metadata:
+  name: c-my-cluster
+spec:
+  enableCompilePipeline: true
+----
+
+=== Tenant CRD
+
+We add a new field to the `Tenant` CRD, under the `.spec` key, called `compilePipeline`.
 
 The `compilePipeline` field contains configuration pertaining to the automatic setup of the compile pipeline on the tenant repository.
 It is optional.
@@ -71,71 +107,69 @@ Absence of the field disables automatic setup and management of the compile pipe
 
 The `compilePipeline` field contains a dict with the following fields:
 
-* `gitlabCatalogProjectAccessSecretRef`: (for cluster catalog repos) Reference to a secret containing the GitLab Project Access Token that can be used to access this repository. (Managed by Lieutenant)
+* `clusters`: List of cluster IDs of clusters for which the compile pipeline should be executed.
+  This field is managed by the operator.
 * `pipelineFiles`: Dictionary containing file paths as keys, and file contents as values.
-   These files will be committed to the tenant repository when the compile pipeline is configured, if they do not exist already.
-
-
+   These files will be added to the tenant's `gitRepoTemplate.templateFiles` by the Lieutenant operator.
+   This field is optional; if absent, no new template files are added to the `gitRepoTemplate`.
 
 [source,yaml]
 ----
 apiVersion: syn.tools/v1alpha1
-kind: Cluster
+kind: Tenant
 metadata:
-  name: my-cluster
+  name: t-my-tenant
 spec:
-  gitRepoTemplate:
-    compilePipeline:
-      gitlabCatalogProjectAccessSecretRef: c-my-cluster-project-access
-      pipelineFiles:
-        .gitlab-ci.yml: |
-          include:
-            - project: syn/commodore-compile-pipeline
-              ref: master
-              file: /.gitlab/commodore-common.yml
+  compilePipeline:
+    clusters:
+      - c-my-cluster
+    pipelineFiles:
+      .gitlab-ci.yml: |
+        include:
+          - project: syn/commodore-compile-pipeline
+            ref: master
+            file: /.gitlab/commodore-common.yml
 
 ----
 
 === Operator
 
-The Lieutenant Operator will be extended to automatically manage the compile pipeline for repositories where this is enabled (by way of configuring the `compilePipeline` field).
+The Lieutenant Operator will be extended to automatically manage the compile pipeline for repositories where this is enabled (by way of configuring the `compilePipeline` field on the tenant and the `enableCompilePipeline` field on the cluster).
 
-Since the compile pipeline has to interact with both the tenant repository as well as the cluster catalog repositories, it must be enabled on both corresponding `gitRepo` definitions for the configuration to be functional.
+Since the compile pipeline has to interact with both the tenant repository as well as the cluster catalog repositories, it must be enabled on both corresponding resources for the configuration to be functional.
 This way, it is possible to enable auto-compilation for some, but not all clusters on a tenant.
-And furthermore, it is possible to easily disable auto-compilation for a whole tenant without having to touch each cluster's `gitRepo` definition.
 
-When `compilePipeline` is configured on a cluster repository (catalog repository), Lieutenant does the following:
+The operator will reconcile *GitRepos* as follows:
 
-* Create a new `Project Access Token` on the catalog repository via the GitLab API, using the cluster repository's configured apiSecretRef.
-* Store the new access token in a new secret.
-* Store a reference to the new secret in `catalogProjectAccessSecretRef`.
-* Add a new CI/CD variable to the corresponding tenant repository via the GitLab API, using the tenant repository's configured apiSecretRef. The value is named `ACCESS_TOKEN_CLUSTERNAME` (where `CLUSTERNAME` is the cluster ID with `-` replaced by `_`) and contains the GitLab project access token as its value.
-* Update the CI/CD variable `CLUSTERS` on the corresponding tenant repository to ensure it includes the cluster's ID.
+* When `spec.accessTokenSecretRef` is set, the operator generates an access token for the corresponding repository (via the repository host's API, using the API secret in `.spec.apiSecretRef`), and writes this token into a secret with the given name.
+  In the case of GitLab, this is a Project Access Token.
+  The operator also runs a scheduled job which refreshes these tokens when they are close to expiring, or when they no longer exist on the repository host.
+* The content of `.spec.ciVariables` is written to the repository's configuration on the git host.
+  In the case of GitLab, it is written as CI/CD variables.
 
-When `compilePipeline` is configured on a *managed* tenant repository, Lieutenant does the following:
+NOTE: If the GitRepo is of type `unmanaged`, none of these steps will be executed.
 
-* Render the `pipelineFiles` configured on the tenant repository, and commit them.
-* Add a new CI/CD variable `COMMODORE_API_URL` to the tenant repository, containing the API URL for Lieutenant.
-* Add a new CI/CD variable `COMMODORE_API_TOKEN` to the tenant repository, containing the tenant's API token for Lieutenant.
+The operator will reconcile *Clusters* as follows:
 
-When the `compilePipeline` field is removed from a repository, all the corresponding resources should be cleaned up.
+* When `.spec.enableCompilePipeline` is set to `true`, the tenant's `spec.compilePipeline.clusters` is updated to contain the cluster ID.
+* Similarly, when the field is set to `false` or missing, the tenant's `spec.compilePipeline.clusters` is updated to not contain the cluster ID.
 
-Unmanaged repositories cannot have automatically configured compile pipelines.
+The operator will reconcile *Tenants* as follows:
 
-==== Rotation of Project Access Tokens
-
-GitLab's project access tokens have a limited lifespan.
-Lieutenant should automatically rotate them as required.
-
-To this end, a scheduled task should run in the operator that checks the token's expiration date via the GitLab API, and rotates any that are close to expiring.
-
-To rotate a token:
-
-* Use the GitLab API to rotate the existing token.
-* Update the corresponding catalog project access secret.
-* Update the corresponding CI/CD variable (`ACCESS_TOKEN_CLUSTERNAME`) in the tenant repository.
+* When `.spec.compilePipeline` exists and isn't empty, the following entries are added to the tenant repository GitRepo's `.spec.ciVariables`:
+** `COMMODORE_API_URL`, containing the URL at which the Lieutenant API can be accessed.
+** `COMMODORE_API_TOKEN`, containing the tenant's access token for the Lieutenant API.
+** `CLUSTERS`, containing a space-separated list of cluster IDs taken directly from `.spec.compilePipeline.clusters`.
+* For each entry in `.spec.compilePipeline.pipelineFiles` whose value isn't `{remove}`, a new corresponding entry is added to the tenant's `.spec.gitRepoTemplate.templateFiles`.
+* For each entry in `.spec.compilePipeline.pipelineFiles` whose value is `{remove}`, the corresponding entry is removed from the tenant's `.spec.gitRepoTemplate.templateFiles`.
+* For each entry in `.spec.compilePipeline.clusters`, another entry is added to the tenant repository GitRepo's `spec.ciVariabes`.
+  The key is `ACCESS_TOKEN_CLUSTERNAME`, where `CLUSTERNAME` is the ID of a specific cluster, with `-` replaced by `_`.
+  The value is the access token to access that cluster's catalog repository, taken from the secret specified in the catalog GitRepo configuration under `.spec.accessTokenSecretRef`.
 
 === Implementation Details/Notes/Constraints
+
+Currently, we're looking at a solution that is specific to GitLab CI/CD, and to tenant and catalog repositories that are stored on GitLab.
+Other CI solutions and other repository hosts might be supported in the future.
 
 Existing compile pipeline configuration::
 If a setup already includes a bunch of tenant repositories with manually configured CI/CD, some care has to be taken to ensure the new implementation can "adopt" this configuration.
@@ -153,3 +187,5 @@ This can still be configured manually, and the automated configuration would not
 
 == References
 
+* https://docs.gitlab.com/ee/ci/variables/[GitLab CI Variables]
+* https://docs.gitlab.com/ee/user/project/settings/project_access_tokens.html[GitLab Project Access Tokens]
