@@ -44,8 +44,7 @@ This will go hand-in-hand with the existing repository management features in Li
 === Requirements for Pipeline Configuration
 
 Lieutenant imposes certain assumptions on the configuration of the pipeline:
-Namely, the pipeline has to be set up on the tenant repository by way of adding (arbitrary) files to the repository,
-and it is configured through setting CI/CD variables on the repository.
+Namely, the pipeline has to be set up on the tenant repository by way of adding (arbitrary) files to the repository, and it is configured through setting CI/CD variables on the repository.
 
 In particular, Lieutenant configures the following CI/CD variables:
 
@@ -57,10 +56,10 @@ In particular, Lieutenant configures the following CI/CD variables:
 
 === GitRepo CRD
 
-We add two new fields to the `GitRepoTemplate` (and, by extension, the `GitRepo`) CRD, under the `.spec` key, called `accessTokenSecretRef` and `ciVariables`.
+We add two new fields to the `GitRepoTemplate` (and, by extension, the `GitRepo`) CRD, under the `.spec` key, called `accessTokenSecretName` and `ciVariables`.
 
-The `accessTokenSecretRef` field contains a reference to a secret.
-If it is set, the Lieutenant operator will store an access token into this secret, which can be used to access the git repository.
+The `accessTokenSecretName` field contains a reference to a secret.
+If it is set, the Lieutenant operator will store an access token into this secret, which can be used to access the Git repository.
 In the case of GitLab, this would be a Project Access Token with read-write access to the repository.
 
 The `ciVariables` field contains a dictionary describing variable names and corresponding values.
@@ -73,10 +72,15 @@ kind: GitRepo
 metadata:
   name: my-repo
 spec:
-  accessTokenSecretRef: my-repo-access-token
+  accessTokenSecretName: my-repo-access-token
   ciVariables:
-    COMMODORE_API_URL: ...
-    COMMODORE_API_TOKEN: ...
+    - name: COMMODORE_API_URL
+      value: ...
+    - name: COMMODORE_API_TOKEN
+      valueFrom:
+        secretKeyRef:
+          name: api-token-secret
+          key: token
 ----
 
 === Cluster CRD
@@ -109,9 +113,6 @@ The `compilePipeline` field contains a dict with the following fields:
 
 * `clusters`: List of cluster IDs of clusters for which the compile pipeline should be executed.
   This field is managed by the operator.
-* `pipelineFiles`: Dictionary containing file paths as keys, and file contents as values.
-   These files will be added to the tenant's `gitRepoTemplate.templateFiles` by the Lieutenant operator.
-   This field is optional; if absent, no new template files are added to the `gitRepoTemplate`.
 
 [source,yaml]
 ----
@@ -123,7 +124,23 @@ spec:
   compilePipeline:
     clusters:
       - c-my-cluster
-    pipelineFiles:
+----
+
+=== In-Repo CI/CD pipeline configuration
+
+Configuring the CI pipeline usually happens through files committed to the corresponding repository.
+For a Lieutenant-managed pipeline configuration, these files should be managed by Lieutenant.
+To achieve this, we can leverage the existing mechanism to commit template files to git repositories:
+
+[source,yaml]
+----
+apiVersion: syn.tools/v1alpha1
+kind: Tenant
+metadata:
+  name: t-my-tenant
+spec:
+  gitRepoTemplate:
+    templateFiles:
       .gitlab-ci.yml: |
         include:
           - project: syn/commodore-compile-pipeline
@@ -131,6 +148,7 @@ spec:
             file: /.gitlab/commodore-common.yml
 
 ----
+
 
 === Operator
 
@@ -141,7 +159,7 @@ This way, it is possible to enable auto-compilation for some, but not all cluste
 
 The operator will reconcile *GitRepos* as follows:
 
-* When `spec.accessTokenSecretRef` is set, the operator generates an access token for the corresponding repository (via the repository host's API, using the API secret in `.spec.apiSecretRef`), and writes this token into a secret with the given name.
+* When `spec.accessTokenSecretName` is set, the operator generates an access token for the corresponding repository (via the repository host's API, using the API secret in `.spec.apiSecretRef`), and writes this token into a secret with the given name.
   In the case of GitLab, this is a Project Access Token.
   The operator also runs a scheduled job which refreshes these tokens when they are close to expiring, or when they no longer exist on the repository host.
 * The content of `.spec.ciVariables` is written to the repository's configuration on the git host.
@@ -158,13 +176,11 @@ The operator will reconcile *Tenants* as follows:
 
 * When `.spec.compilePipeline` exists and isn't empty, the following entries are added to the tenant repository GitRepo's `.spec.ciVariables`:
 ** `COMMODORE_API_URL`, containing the URL at which the Lieutenant API can be accessed.
-** `COMMODORE_API_TOKEN`, containing the tenant's access token for the Lieutenant API.
+** `COMMODORE_API_TOKEN`, containing a reference to the secret which contains the tenant's access token for the Lieutenant API.
 ** `CLUSTERS`, containing a space-separated list of cluster IDs taken directly from `.spec.compilePipeline.clusters`.
-* For each entry in `.spec.compilePipeline.pipelineFiles` whose value isn't `{remove}`, a new corresponding entry is added to the tenant's `.spec.gitRepoTemplate.templateFiles`.
-* For each entry in `.spec.compilePipeline.pipelineFiles` whose value is `{remove}`, the corresponding entry is removed from the tenant's `.spec.gitRepoTemplate.templateFiles`.
 * For each entry in `.spec.compilePipeline.clusters`, another entry is added to the tenant repository GitRepo's `spec.ciVariabes`.
   The key is `ACCESS_TOKEN_CLUSTERNAME`, where `CLUSTERNAME` is the ID of a specific cluster, with `-` replaced by `_`.
-  The value is the access token to access that cluster's catalog repository, taken from the secret specified in the catalog GitRepo configuration under `.spec.accessTokenSecretRef`.
+  The value is a reference to the secret containing the access token to access that cluster's catalog repository, taken from the secret specified in the catalog GitRepo configuration under `.spec.accessTokenSecretName`.
 
 === Implementation Details/Notes/Constraints
 
