@@ -2,7 +2,7 @@
 
 :sdd_author:    Aline Abler
 :sdd_owner:     Project Syn IG
-:sdd_reviewers: Simon Gerber
+:sdd_reviewers: Simon Gerber, Tobias Brunner
 :sdd_date:      2024-06-13
 :sdd_status:    draft
 
@@ -62,8 +62,10 @@ The `accessTokenSecretName` field contains a reference to a secret.
 If it is set, the Lieutenant operator will store an access token into this secret, which can be used to access the Git repository.
 In the case of GitLab, this would be a Project Access Token with read-write access to the repository.
 
-The `ciVariables` field contains a dictionary describing variable names and corresponding values.
-These variables are added to the git repository as CI/CD variables.
+The `ciVariables` field contains a list of objects describing variable names and corresponding values.
+Each object in the list has a type that's modeled after a Kubernetes container's `env` field.
+In contrast to container environment variables, our variables only support specifying values directly (via field `value`) or by referencing a `Secret` resource (via field `valueFrom.secretKeyRef`).
+These variables are added to the Git repository as CI/CD variables.
 
 [source,yaml]
 ----
@@ -113,6 +115,9 @@ The `compilePipeline` field contains a dict with the following fields:
 
 * `clusters`: List of cluster IDs of clusters for which the compile pipeline should be executed.
   This field is managed by the operator.
+* `pipelineFiles`: Dictionary containing file paths as keys, and file contents as values.
+  These files will be added to the tenant's `gitRepoTemplate.templateFiles` by the Lieutenant operator.
+  This field is optional; if absent, no new template files are added to the `gitRepoTemplate`.
 
 [source,yaml]
 ----
@@ -124,35 +129,17 @@ spec:
   compilePipeline:
     clusters:
       - c-my-cluster
-----
-
-=== In-Repo CI/CD pipeline configuration
-
-Configuring the CI pipeline usually happens through files committed to the corresponding repository.
-For a Lieutenant-managed pipeline configuration, these files should be managed by Lieutenant.
-To achieve this, we can leverage the existing mechanism to commit template files to git repositories:
-
-[source,yaml]
-----
-apiVersion: syn.tools/v1alpha1
-kind: Tenant
-metadata:
-  name: t-my-tenant
-spec:
-  gitRepoTemplate:
-    templateFiles:
+    pipelineFiles:
       .gitlab-ci.yml: |
         include:
           - project: syn/commodore-compile-pipeline
             ref: master
             file: /.gitlab/commodore-common.yml
-
 ----
-
 
 === Operator
 
-The Lieutenant Operator will be extended to automatically manage the compile pipeline for repositories where this is enabled (by way of configuring the `compilePipeline` field on the tenant and the `enableCompilePipeline` field on the cluster).
+The Lieutenant Operator will be extended to automatically manage the compile pipeline for repositories where this is enabled (by way of deploying the CI config file in the tenant and the `enableCompilePipeline` field on the cluster).
 
 Since the compile pipeline has to interact with both the tenant repository as well as the cluster catalog repositories, it must be enabled on both corresponding resources for the configuration to be functional.
 This way, it is possible to enable auto-compilation for some, but not all clusters on a tenant.
@@ -162,7 +149,7 @@ The operator will reconcile *GitRepos* as follows:
 * When `spec.accessTokenSecretName` is set, the operator generates an access token for the corresponding repository (via the repository host's API, using the API secret in `.spec.apiSecretRef`), and writes this token into a secret with the given name.
   In the case of GitLab, this is a Project Access Token.
   The operator also runs a scheduled job which refreshes these tokens when they are close to expiring, or when they no longer exist on the repository host.
-* The content of `.spec.ciVariables` is written to the repository's configuration on the git host.
+* The content of `.spec.ciVariables` is written to the repository's configuration on the Git host.
   In the case of GitLab, it is written as CI/CD variables.
 
 NOTE: If the GitRepo is of type `unmanaged`, none of these steps will be executed.
@@ -181,6 +168,7 @@ The operator will reconcile *Tenants* as follows:
 * For each entry in `.spec.compilePipeline.clusters`, another entry is added to the tenant repository GitRepo's `spec.ciVariabes`.
   The key is `ACCESS_TOKEN_CLUSTERNAME`, where `CLUSTERNAME` is the ID of a specific cluster, with `-` replaced by `_`.
   The value is a reference to the secret containing the access token to access that cluster's catalog repository, taken from the secret specified in the catalog GitRepo configuration under `.spec.accessTokenSecretName`.
+* For each entry in `.spec.compilePipeline.pipelineFiles`, a new corresponding entry is added to the tenant's `.spec.gitRepoTemplate.templateFiles`.
 
 === Implementation Details/Notes/Constraints
 
