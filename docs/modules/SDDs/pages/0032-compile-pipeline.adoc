@@ -1,8 +1,8 @@
-= SDD 0031 - Central Component Version tracking
+= SDD 0032 - Commodore Compile Pipeline for GitLab
 
 :sdd_author:    Aline Abler
 :sdd_owner:     Project Syn IG
-:sdd_reviewers: Simon Gerber, Tobias Brunner
+:sdd_reviewers: Simon Gerber, Tobias Brunner, Sebastian Widmer
 :sdd_date:      2024-06-13
 :sdd_status:    draft
 
@@ -11,7 +11,7 @@ include::partial$meta-info-table.adoc[]
 [NOTE]
 .Summary
 ====
-This describes how we want to implement CI/CD for Project Syn using a Commodore compile pipeline, which enables automatic compilation of cluster catalogs whenever the corresponding tenant repository is modified.
+This describes how we want to implement GitLab CI/CD for Project Syn using a Commodore compile pipeline, which enables automatic compilation of cluster catalogs whenever the corresponding tenant repository is modified.
 
 Furthermore, it explains how want to extend the functionality of Lieutenant to enable it to automatically configure the compile pipeline on tenant repositories.
 ====
@@ -174,6 +174,8 @@ The operator will reconcile *Tenants* as follows:
 
 Currently, we're looking at a solution that is specific to GitLab CI/CD, and to tenant and catalog repositories that are stored on GitLab.
 Other CI solutions and other repository hosts might be supported in the future.
+The implementation takes care to gracefully skip the CI steps if not on GitLab.
+We leave the implementation extensible enough to add further Git management tools and CI systems without needing breaking changes.
 
 Existing compile pipeline configuration::
 If a setup already includes a bunch of tenant repositories with manually configured CI/CD, some care has to be taken to ensure the new implementation can "adopt" this configuration.
