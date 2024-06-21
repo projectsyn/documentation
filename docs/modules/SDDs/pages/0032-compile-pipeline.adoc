@@ -1,4 +1,4 @@
-= SDD 0031 - Central Component Version tracking
+= SDD 0032 - Commodore Compile Pipeline
 
 :sdd_author:    Aline Abler
 :sdd_owner:     Project Syn IG
