@@ -2,7 +2,7 @@
 
 :sdd_author:    Aline Abler
 :sdd_owner:     Project Syn IG
-:sdd_reviewers: Simon Gerber, Tobias Brunner
+:sdd_reviewers: Simon Gerber, Tobias Brunner, Sebastian Widmer
 :sdd_date:      2024-06-13
 :sdd_status:    draft
 
@@ -183,8 +183,12 @@ The operator will reconcile *Tenants* as follows, if and only if `spec.compilePi
 
 === Implementation Details/Notes/Constraints
 
-Currently, we're looking at a solution that is specific to GitLab CI/CD, and to tenant and catalog repositories that are stored on GitLab.
+Currently, we're looking at implementing this solution for GitLab CI/CD only, and for tenant and catalog repositories that are stored on GitLab.
 Other CI solutions and other repository hosts might be supported in the future.
+
+The implementation takes care to gracefully skip the CI steps if not on GitLab.
+
+We leave the implementation extensible enough to add further Git management tools and CI systems without needing breaking changes.
 
 Existing compile pipeline configuration::
 If a setup already includes a bunch of tenant repositories with manually configured CI/CD, in the general case, the new implementation can "adopt" this configuration.
