@@ -4,7 +4,7 @@
 :sdd_owner:     Project Syn IG
 :sdd_reviewers: Simon Gerber, Tobias Brunner, Sebastian Widmer
 :sdd_date:      2024-06-13
-:sdd_status:    draft
+:sdd_status:    accepted
 
 include::partial$meta-info-table.adoc[]
 
@@ -34,12 +34,13 @@ This will go hand-in-hand with the existing repository management features in Li
 
 === Goals
 
-* Provide pipeline definitions for GitLab CI/CD to automatically compile and push cluster catalogs on a tenant repository.
+* Specify the interface that Commodore CI pipeline definitions need to implement in order to work with the managed CI/CD configuration
 * Enable Lieutenant to autonomously manage the configuration required to set up the compile pipeline for a cluster catalog.
 
 === Non-Goals
 
 * Support for CI solutions other than GitLab CI/CD.
+* Provide pipeline definitions to automatically compile and push cluster catalogs on a tenant repository.
 
 == Design Proposal
 
