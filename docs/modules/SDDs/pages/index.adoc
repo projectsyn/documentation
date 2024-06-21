@@ -26,4 +26,4 @@ The all are using the xref:sdd-template.adoc[SDD Template].
 * xref:0028-reusable-config-packages.adoc[0028 - Reusable Commodore Component Configuration Packages]
 * xref:0030-argocd-multitenancy.adoc[0030 - Project Syn ArgoCD Multi-Tenant Support]
 * xref:0031-component-version-tracking.adoc[0031 - Central Component Version tracking]
-* xref:0032-compile-pipeline.adoc[0032 - Commodore Compile Pipeline for GitLab]
+* xref:0032-compile-pipeline-gitlab.adoc[0032 - Commodore Compile Pipeline for GitLab]
