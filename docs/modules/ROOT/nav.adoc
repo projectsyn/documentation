@@ -102,6 +102,7 @@ include::steward:ROOT:partial$nav-reference.adoc[]
 * xref:explanations/commodore-packages.adoc[Commodore Packages Best Practices]
 * xref:explanations/jsonnet.adoc[Jsonnet Best Practices]
 * xref:explanations/component_template_sync.adoc[Keep components in sync]
+* xref:explanations/argocd-multitenancy.adoc[]
 * Commodore
 +
 --
