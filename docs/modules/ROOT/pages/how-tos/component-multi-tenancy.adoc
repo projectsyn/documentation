@@ -1,0 +1,64 @@
+= Make a Commodore component multi-tenant aware
+
+Project Syn supports xref:explanations/argocd-multitenancy.adoc[multi-tenancy in the Project Syn ArgoCD instance].
+
+Currently components need to be marked as multi-tenant aware explicitly.
+This how-to provides the bare minimum configuration that's necessary to make an existing component multi-tenant aware.
+
+[NOTE]
+====
+The default https://github.com/projectsyn/commodore-component-template[Commodore component template] is updated to generate multi-tenant aware components by default.
+
+Components which receive template updates should already be updated to be multi-tenant aware.
+====
+
+. Adjust the component's ArgoCD application manifest generation (usually in `component/app.jsonnet`)
++
+.`component/app.jsonnet`
+[source,jsonnet]
+----
+local kap = import 'lib/kapitan.libjsonnet';
+local kube = import 'lib/kube.libjsonnet';
+local inv = kap.inventory();
+local params = inv.parameters.<component>; <1>
+local argocd = import 'lib/argocd.libjsonnet';
+
+local app = argocd.App(<component>, params.namespace, secrets=true); <1>
+
+local appPath =
+  local project = std.get(app, 'spec', { project: 'syn' }).project; <2>
+  if project == 'syn' then 'apps' else 'apps-%s' % project;
+
+{
+  ['%s/<component>' % appPath]: app, <1>
+}
+----
+<1> Replace `<component> with the component's name.
+<2> We use `std.get()` here because `commodore component compile` generates an empty application manifest by default.
+
+. Adjust the component's Kapitan compile step for the application manifests (in `class/<component-name>.yml`)
++
+.`class/<component-name>.yml`
+[source,yaml]
+----
+parameters:
+  kapitan:
+    compile:
+      - input_paths:
+          - ${_instance}/component/app.jsonnet
+        input_type: jsonnet
+        output_path: apps/
+        output_path: .
+----
+
+. Mark the component as multi-tenant aware
++
+[source,yaml]
+----
+parameters:
+  <component_name>: <1>
+    =_metadata: <2>
+      multi_tenant: true
+----
+<1> Replace `component_name` with the component's parameter key.
+<2> We recommend making the component's metadata constant if it isn't already.

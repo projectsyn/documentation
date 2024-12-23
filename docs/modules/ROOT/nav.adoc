@@ -42,6 +42,7 @@ include::steward:ROOT:partial$nav-tutorials.adoc[]
 * xref:how-tos/change-parameter.adoc[Change a parameter]
 * xref:how-tos/prepare_for_component_sync.adoc[Prepare component for template updates]
 * xref:how-tos/tenant-version-pins.adoc[Renovate version pins]
+* xref:how-tos/component-multi-tenancy.adoc[]
 * Commodore
 +
 --
