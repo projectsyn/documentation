@@ -1,0 +1,91 @@
+= SDD 0033 - Commodore Component Instance Versioning
+
+:sdd_author:    Aline Abler
+:sdd_owner:     Aline Abler
+:sdd_reviewers: SIG
+:sdd_date:      2025-01-08
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This SDD describes possible options to allow specifying different versions for each instance of the same Commodore component.
+It additionally details the options we chose to implement.
+====
+
+== Motivation
+
+With xref:0025-commodore-component-instantiation.adoc[SDD 0025], Commodore can instantiate a component multiple times per cluster if multiple aliases are specified.
+However, all aliases currently use version information from the base component.
+Commodore does not currently support specifying different component versions for each alias.
+
+=== Goals
+
+* Define how different versions for each component instance can be specified and generated.
+
+=== Non-Goals
+
+
+
+== Design Proposal
+
+Commodore will leverage the existing configuration options in `.parameters.components` to retrieve version information for specific instances.
+Instance versions can be specified in `.parameters.components.<instance-name>` and override the value specified in `.parameters.components.<component-name>`.
+Even if all instances provide their own version, a version for the base component (`.parameters.components.<component-name>`) must still be specified.
+
+Component authors must explicitly declare that their component supports multi-versioning.
+In a valid catalog, all used versions of the same component must advertise this support.
+
+Components with multi-versioning support must ensure they create no file conflicts when downloading dependencies.
+In practice, this means components must use the parameter `${_base_directory}` in their compile configuration (`parameters.kapitan.dependencies` and `parameters.kapitan.compile`).
+
+Support for providing different versions of Jsonnet dependencies is currently not implemented.
+Jsonnet dependencies are always provided from the main (non-instantiated) version of the component.
+If a component is to support multi-versioning, Jsonnet dependencies should therefore be compatible within a reasonable span of versions.
+
+Similarly, if the component includes a Jsonnet library that is made available to other components, the version for the library is taken from the main (non-instantiated) version of the component.
+
+=== Implementation Details/Notes/Constraints
+
+We can clone the repository of the base component and create a separate worktree for each instance to check out the correct version.
+
+If the instance version specifies a different URL from the base component, more work is needed: in this case, we clone the changed repository for the instance and create a worktree from that.
+
+This means that if two instances both override the URL to the same value, this repository is cloned twice, which can impact performance.
+However, since this only affects instances which override the repository URL, the impact is tolerable.
+
+=== Risks and Drawbacks
+
+* Since the Jsonnet dependencies and libraries are all provided from a single component version, there is a risk for some combinations of versions not compiling properly due to version compatibility issues.
+** Even if a component's dependencies are sufficiently backwards-compatible at the moment, it's possible for future changes to break compatibility.
+This might force a component author to remove multi-version support in higher component versions, causing a catalog to stop compiling if either component instance is updated.
+* Overriding the repository URL in a component instance always causes a new repository to be cloned - even if the same URL is used in multiple instances.
+
+== Alternatives
+
+=== Automatically detecting multi-version support
+
+It could be possible to automatically determine whether a component supports multi-versioning, by way of checking whether the `${_base_directory}` parameter is used in the component's compile configuration.
+However, automatically declaring components to be "safe for multi-versioning" carries some risk - even if a component is configured accordingly, it is not guaranteed that its provided Jsonnet libraries and/or its Jsonnet dependencies work if used across versions.
+Therefore, we deem it safer to let component authors decide if multi-versioning is safe to use for their component.
+
+=== Supporting different versions of Jsonnet dependencies per instance
+
+We could possibly achieve support for separate Jsonnet dependency versions per instance by reworking how we interface with Kapitan's `compile()` function.
+This would require more extensive reworking of Commodore.
+
+Making this change has no direct impact on the implementation of the multi-versioning feature, so support can still be added at a future time if required.
+
+=== Supporting different versions of a component's provided Jsonnet libraries per instance
+
+It might be possible to allow multiple versions of a component's Jsonnet libraries to be made available to other components.
+Other components would have to refer to the libraries using a specific instance's name.
+This would change how components refer to libraries, and would cause components to be somewhat aware of the context in which they are used in order to refer to the correct instances.
+Since components should be modular and reusable, introducing this sort of coupling goes against the design principles of Project Syn.
+
+== References
+
+* xref:0025-commodore-component-instantiation.adoc[0025 - Commodore Component Instantiation]
+* https://github.com/projectsyn/commodore/issues/563[projectsyn/commodore#563]
+* https://github.com/projectsyn/commodore/pull/559[projectsyn/commodore#559]
