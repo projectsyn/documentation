@@ -4,7 +4,7 @@
 :sdd_owner:     Aldebaran
 :sdd_reviewers: Simon Gerber
 :sdd_date:      2025-01-08
-:sdd_status:    draft
+:sdd_status:    accepted
 include::partial$meta-info-table.adoc[]
 
 [NOTE]
