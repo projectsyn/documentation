@@ -4,7 +4,7 @@
 :sdd_owner:     Aldebaran
 :sdd_reviewers: Simon Gerber
 :sdd_date:      2025-01-08
-:sdd_status:    accepted
+:sdd_status:    implemented
 include::partial$meta-info-table.adoc[]
 
 [NOTE]
@@ -30,7 +30,7 @@ Commodore will leverage the existing configuration options in `.parameters.compo
 Instance versions can be specified in `.parameters.components.<instance-name>` and override the value specified in `.parameters.components.<component-name>`.
 Even if all instances provide their own version, a version for the base component (`.parameters.components.<component-name>`) must still be specified.
 
-Component authors must explicitly declare that their component supports multi-versioning by setting component parameter `_metadata.multi_versioning=true`.
+Component authors must explicitly declare that their component supports multi-versioning by setting component parameter `_metadata.multi_version=true`.
 In a valid catalog, all used versions of the same component must advertise this support.
 
 Components with multi-versioning support must ensure they create no file conflicts when downloading dependencies.
@@ -41,6 +41,8 @@ Jsonnet dependencies are always provided from the main (non-instantiated) versio
 If a component is to support multi-versioning, Jsonnet dependencies should therefore be compatible within a reasonable span of versions.
 
 Similarly, if the component includes a Jsonnet library that is made available to other components, the version for the library is taken from the main (non-instantiated) version of the component.
+
+Finally, if a component reads another component's default values, it will always see the default values of the main (non-instantiated) version of the component.
 
 === Implementation Details/Notes/Constraints
 
