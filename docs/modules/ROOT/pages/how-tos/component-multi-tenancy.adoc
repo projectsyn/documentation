@@ -33,8 +33,20 @@ local appPath =
   ['%s/<component>' % appPath]: app, <1>
 }
 ----
-<1> Replace `<component> with the component's name.
+<1> Replace `<component>` with the component's name.
 <2> We use `std.get()` here because `commodore component compile` generates an empty application manifest by default.
++
+[NOTE]
+====
+If you're making a multi-instance aware component multi-tenant aware, you'll need to make sure that you create an ArgoCD app per instance.
+Additionally, you'll need to call `argocd.App()` with the optional parameter `base` set to the component name.
+
+[source,jsonnet]
+----
+local instance = inv.parameters._instance;
+local app = argocd.App(instance, params.namespace, secrets=true, base=<component>);
+----
+====
 
 . Adjust the component's Kapitan compile step for the application manifests (in `class/<component-name>.yml`)
 +
