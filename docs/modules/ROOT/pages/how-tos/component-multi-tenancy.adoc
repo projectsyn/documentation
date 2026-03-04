@@ -23,7 +23,7 @@ local inv = kap.inventory();
 local params = inv.parameters.<component>; <1>
 local argocd = import 'lib/argocd.libjsonnet';
 
-local app = argocd.App(<component>, params.namespace, secrets=true); <1>
+local app = argocd.App('<component>', params.namespace, secrets=true); <1>
 
 local appPath =
   local project = std.get(app, 'spec', { project: 'syn' }).project; <2>
@@ -44,7 +44,7 @@ Additionally, you'll need to call `argocd.App()` with the optional parameter `ba
 [source,jsonnet]
 ----
 local instance = inv.parameters._instance;
-local app = argocd.App(instance, params.namespace, secrets=true, base=<component>);
+local app = argocd.App(instance, params.namespace, secrets=true, base='<component>');
 ----
 ====
 
@@ -57,11 +57,13 @@ parameters:
   kapitan:
     compile:
       - input_paths:
-          - ${_instance}/component/app.jsonnet
+          - ${_base_directory}/component/app.jsonnet <1>
         input_type: jsonnet
         output_path: apps/
         output_path: .
 ----
+<1> We use `${_base_directory}` to find the component's `app.jsonnet`.
+This variable is set by Commodore for each component instance and points to the instance's Git worktree.
 
 . Mark the component as multi-tenant aware
 +
