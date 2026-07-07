@@ -85,6 +85,11 @@ local appPath =
 <2> We use `std.get()` to read `spec.project` because `commodore component compile` currently uses a fake `argocd.libjsonnet` which doesn't generate a valid ArgoCD application manifest.
 ====
 
+[IMPORTANT]
+====
+For multi-instance aware components, the `argocd.App()` function must be called with the optional parameter `base` set to the component name.
+====
+
 In order to enable users to easily move ownership of existing component instances, Steward and the ArgoCD Commodore component ensure that resource pruning is disabled for each root application.
 
 NOTE: Without this configuration, there's a chance that a component instance would be deleted and recreated when it's transferred to a different team.
