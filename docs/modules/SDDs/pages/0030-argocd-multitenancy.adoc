@@ -44,7 +44,7 @@ However, if another team wants to deploy applications on the cluster through Pro
 Each team's root application is managed independently from the default root application (`root`).
 
 The bootstrap process for the additional root applications is initiated by defining the team in the configuration hierarchy in parameter `syn`.
-This parameter is not associated with a specific component and becomes a reserved parameter name which components can't use.
+This parameter isn't associated with a specific component and becomes a reserved parameter name which components can't use.
 The parameter has two fields `owner` and `teams`.
 Field `owner` makes the team who owns the cluster explicit.
 This allows the implementation to ensure that the owning team's applications are always managed through the default `root` application, even if that team has some explicit assignments for applications in `syn.teams`.

@@ -23,7 +23,7 @@ While we only aim to support GitLab at the moment, the architecture should be su
 Having a continuous integration solution unlocks a number of benefits:
 It solves the problem of configuration drift, where changes to the tenant repository might not be reflected in every cluster catalog because not all of them have since been compiled, and it lessens the burden on catalog maintainers who otherwise would need to locally compile each cluster individually.
 
-It is already fairly straightforward to manually set up basic auto-compilation for individual tenant repositories without special support from Project Syn itself.
+It's already fairly straightforward to manually set up basic automated compilation for individual tenant repositories without special support from Project Syn itself.
 At VSHN, such a solution has been in use for several years.
 
 However, certain features (such as automatic configuration of the compile pipeline) are hard to implement in a standalone fashion.
@@ -47,7 +47,7 @@ This will go hand-in-hand with the existing repository management features in Li
 === Requirements for Pipeline Configuration
 
 Lieutenant imposes certain assumptions on the configuration of the pipeline:
-Namely, the pipeline has to be set up on the tenant repository by way of adding (arbitrary) files to the repository, and it is configured through setting CI/CD variables on the repository.
+Namely, the pipeline has to be set up on the tenant repository by way of adding (arbitrary) files to the repository, and it's configured through setting CI/CD variables on the repository.
 
 In particular, Lieutenant configures the following CI/CD variables:
 
@@ -62,7 +62,7 @@ In particular, Lieutenant configures the following CI/CD variables:
 We add two new fields to the `GitRepoTemplate` (and, by extension, the `GitRepo`) CRD, under the `.spec` key, called `accessTokenSecretName` and `ciVariables`.
 
 The `accessTokenSecretName` field contains a reference to a secret.
-If it is set, the Lieutenant operator will store an access token into this secret, which can be used to access the Git repository.
+If the field is set, the Lieutenant operator will store an access token into this secret, which can be used to access the Git repository.
 In the case of GitLab, this would be a Project Access Token with read-write access to the repository.
 
 The `ciVariables` field contains a list of objects describing variable names and corresponding values.
@@ -94,7 +94,7 @@ We add a new field to the `Cluster` CRD, under the `.spec` key, called `enableCo
 
 The field contains a boolean flag, which controls whether the compile pipeline should be enabled or disabled for this cluster.
 
-It is optional; not specifying it is equivalent to setting it to `false`.
+This field is optional; not specifying it defaults it to `false`.
 
 [source,yaml]
 ----
@@ -111,11 +111,11 @@ spec:
 We add new fields to the `Tenant` CRD: `spec.compilePipeline` and `status.compilePipeline`
 
 The `spec.compilePipeline` field contains configuration pertaining to the automatic setup of the compile pipeline on the tenant repository.
-It is optional.
+This field is optional.
 
 The `spec.compilePipeline` field contains a dict with the following fields:
 
-* `enabled`: Boolean field which enables or disables automatic setup of compile pipelines for this tenant (regardless of whether it is enabled on the tenant's clusters).
+* `enabled`: Boolean field which enables or disables automatic setup of compile pipelines for this tenant (regardless of whether automatic setup enabled on the tenant's clusters).
 * `pipelineFiles`: Dictionary containing file paths as keys, and file contents as values.
   These files will be added to the tenant's `gitRepoTemplate.templateFiles` by the Lieutenant operator.
   This field is optional; if absent, no new template files are added to the `gitRepoTemplate`.
@@ -152,15 +152,15 @@ status:
 The Lieutenant Operator will be extended to automatically manage the compile pipeline for repositories where this is enabled (by way of deploying the CI config file in the tenant and the `enableCompilePipeline` field on the cluster).
 
 Since the compile pipeline has to interact with both the tenant repository as well as the cluster catalog repositories, it must be enabled on both corresponding resources for the configuration to be functional.
-This way, it is possible to enable auto-compilation for some, but not all clusters on a tenant.
+This way, it's possible to enable automated compilation for some, but not all clusters on a tenant.
 
 The operator will reconcile *GitRepos* as follows:
 
 * When `spec.accessTokenSecretName` is set, the operator generates an access token for the corresponding repository (via the repository host's API, using the API secret in `.spec.apiSecretRef`), and writes this token into a secret with the given name.
   In the case of GitLab, this is a Project Access Token.
-  The operator also runs a scheduled job which refreshes these tokens when they are close to expiring, or when they no longer exist on the repository host.
+  The operator also runs a scheduled job which refreshes these tokens when they're close to expiring, or when they no longer exist on the repository host.
 * The content of `.spec.ciVariables` is written to the repository's configuration on the Git host.
-  In the case of GitLab, it is written as CI/CD variables.
+  In the case of GitLab, each entry is written as a CI/CD variable.
   If the content of `.spec.ciVariables` changes, the corresponding configuration on the Git host should be updated.
   A scheduled job in the ooperator regularly checks for drift between `.spec.ciVariables` and the configuration on the Git host, and updates the latter if necessary.
 
@@ -196,11 +196,11 @@ If a setup already includes a bunch of tenant repositories with manually configu
 +
 In particular, these repositories would already have a working `.gitlab-ci.yml` that probably could be left as-is, but can also be replaced by a lieutenant-managed one.
 +
-Any existing manually created Project Access Tokens will be superseded by new auto-generated ones.
+Any existing manually created Project Access Tokens will be superseded by new automatically generated ones.
 This will lead to a bunch of now-unused tokens needing to be cleaned up, but should otherwise work without requiring extra effort.
 
 External Catalog Repositories::
-There may be cases where the catalog repositories are not hosted on the same repository host as the tenant repository, in which case API access for the purpose of creating Project Access Tokens is unavailable.
+There may be cases where the catalog repositories aren't hosted on the same repository host as the tenant repository, in which case API access for the purpose of creating Project Access Tokens is unavailable.
 The Commodore Compile Pipeline can still be used against such catalog repositories by specifying an SSH key to access them.
 +
 This can still be configured manually, and the automated configuration would not interfere.
