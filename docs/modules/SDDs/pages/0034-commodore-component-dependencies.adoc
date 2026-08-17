@@ -1,0 +1,197 @@
+= SDD 0034 - Commodore Component Dependencies
+
+:sdd_author:    Simon Gerber
+:sdd_owner:     Aldebaran
+:sdd_reviewers: VSHN Tech Teams
+:sdd_date:      2026-08-17
+:sdd_status:    draft
+include::partial$meta-info-table.adoc[]
+
+[NOTE]
+.Summary
+====
+This SDD describes possible architectures which allow Commodore components to explicitly specify other components on which they depend.
+====
+
+== Motivation
+
+Currently, each Commodore component intrinsically depends on https://github.com/projectsyn/component-argocd[component-argocd].
+This dependency is special; Commodore https://github.com/projectsyn/commodore/blob/v1.34.1/commodore/component/compile.py#L266-L277[automatically injects a dummy `argocd.libjsonnet`] when compiling a component in isolation.
+
+Additionally, many components depend on monitoring stack components (https://github.com/projectsyn/component-prometheus[component-prometheus], https://github.com/appuio/component-openshift4-monitoring[component-openshift4-monitoring]) or on https://github.com/projectsyn/component-espejote[component-espejote].
+
+These dependencies can't explicitly be expressed at the moment.
+This has multiple drawbacks:
+
+* Authors of components which depend on other components need to use workarounds to make component compilation work.
+The usual workarounds are fetching component libraries via `kapitan.dependencies` and replicating parts of the component's defaults.
+
+* Commodore has no way to verify that a cluster catalog includes all the components on which other components depend.
+The catalog compilation only fails once a component library on which another component depends is missing.
+Some components provide better error messages by explicitly checking that their dependencies are present in the Reclass inventory's `applications` array.
+
+We've been considering explicit component dependencies https://github.com/projectsyn/commodore/issues/690[for a long time] already.
+
+However, recently there's been an uptick of needless busywork associated with component dependencies, because we've moved some Jsonnet logic from the monitoring component libraries to the shared https://github.com/projectsyn/jsonnet-libs[Jsonnet library repository].
+This code move requires that all components that want to use the monitoring component helper libraries need to explicitly depend on the Jsonnet library repository in order for `commodore component compile` to work.
+We would like to remove this explicit dependency on the Jsonnet library repository from components which only indirectly use the library repository through another component's component library.
+
+Explicit component dependencies allow us to remove the explicit dependency on the Jsonnet library repository from most components.
+With explicit component dependencies, components don't need to know implementation details of component libraries that they consume.
+Instead, components can simply declare that they depend on the components whose libraries they use.
+This gives Commodore enough information to automatically include any direct component dependencies (including their Jsonnet dependencies) when compiling a component.
+
+=== Goals
+
+* Commodore components can specify other components on which they depend
+* Commodore uses component dependency information for component compilation
+* Commodore uses component dependency information for cluster catalog compilation
+
+=== Non-Goals
+
+* Automatic component inclusion in cluster catalogs based on dependency information
+* Automatic component version resolution
+* Nested component dependency resolution and fetching for component compilation
+
+== Design Proposal
+
+=== Dependency specification in the component
+
+// TODO(sg): Dependency groups? (group all monitoring dependencies -> enables validation of non-overlapping CEL?)
+
+// TODO(sg): use `<component_name>._metadata.dependencies` instead of `commodore.dependencies`? Would probably make parsing in catalog compile easier.
+
+Commodore components can define other components on which they depend in Reclass parameter `commodore.dependencies`.
+Since the parameter is specific to the component (rather than part of the component's default configuration), it must be set in the component's `<component-name>.yml`, the same as `kapitan.compile`, `kapitan.dependencies` and `commodore.postprocess`.
+Configuring dependencies in `<component-name>.yml` ensures that the dependency definitions don't leak to other components.
+
+The content of parameter `commodore.dependencies` is expected to be an object where each key is a component name.
+Commodore expects that the keys in `commodore.dependencies` follow the same rules as keys of https://syn.tools/commodore/reference/architecture.html#_dependency_discovery_and_versions[parameter `components`].
+Each entry of parameter `commodore.dependencies` is expected to hold an object with the following keys:
+
+* `url`: A URL pointing to the component's Git repository.
+This field is used by component compilation to automatically fetch component dependencies.
+This field is ignored by catalog compilation.
+* `minversion`: An optional field which authors can use to specify a minimum required version for the dependency.
+Commodore parses this field as a https://semver.org/[semantic versioning ("SemVer")] version prefixed with a `v`.
+If the field isn't set, Commodore assumes that the component works with any version of the dependency.
+Notably, arbitrary https://git-scm.com/docs/gitglossary#Documentation/gitglossary.txt-tree-ishalsotreeish[Git tree-ish]s (which are supported for parameter `components.<component-name>.version`) aren't supported in this field.
+* `requiredif`: An optional field which enables authors to express optional and situational dependencies (for example OpenShift-only, non-OpenShift-only).
+The value is expected to be a https://cel.dev/[Common Expression Language (CEL)] expression.
+The expression can reference cluster facts as `facts.<fact>`.
+Additionally the expression can reference component parameters (the rendered contents of `parameters.<component_name>`) as `config.<field>`.
+Other cluster metadata (dynamic facts, etc.) isn't available in the CEL expression.
+For dependencies which are completely optional, the field can simply be set to `false`.
+
+==== Example
+
+The following configuration models the dependencies of https://github.com/projectsyn/component-cilium[component-cilium] in version `v4.1.11`:
+
+[source,yaml]
+----
+parameters:
+  commodore:
+    dependencies:
+      openshift4-monitoring:
+        url: https://github.com/appuio/component-openshift4-monitoring
+        minversion: v6.11.3
+        requiredif: 'facts.distribution == "openshift4" || facts.distribution == "oke"'
+      prometheus:
+        url: https://github.com/projectsyn/component-prometheus
+        requiredif: '!(facts.distribution == "openshift4" || facts.distribution == "oke")'
+      espejote:
+        url: https://github.com/projectsyn/component-espejote
+        requiredif: '(config.egress_gateway.enabled && config.egress_gateway.self_service_namespace.ips) || ((facts.distribution == "openshift4" || facts.distribution == "oke") && config.cilium_helm_values.kubeProxyReplacement == "strict")'
+      openshift-nmstate:
+        url: https://github.com/projectsyn/component-espejote
+        requiredif: 'config.egress_gateway.enabled && config.egress_gateway.egress_ip_ranges.exists(r, has(config.egress_gateway.egress_ip_ranges[r].auto_egress_interfaces) && config.egress_gateway.egress_ip_ranges[r].auto_egress_interfaces)'
+----
+
+=== Commodore component compilation
+
+Commodore component compilation renders an initial inventory for the component with just the component definition and the user-supplied input.
+Commodore then reads `commodore.dependencies` from this initial inventory and determines which component dependencies to include based on each entry's `requiredif`.
+The caller can steer dependency fetching by setting suitable cluster facts and component configurations in the user-supplied input.
+
+For dependencies which specify `minversion`, that version is used when compiling the component.
+Using the version specified in `minversion` (if any) for component compilation trivially ensures that component changes that require a newer dependency version than the one specified in `minversion` result in a compilation error.
+This ensures that component authors update their dependency `minversion` when they start using features introduced by a later version.
+
+For all other dependencies, the dependency's default branch is used when compiling the component.
+Notably, using the oldest available tagged version of dependencies without `minversion` would be more equivalent to how we handle dependencies with explicit `minversion`.
+However, doing so would introduce a lot of overhead, and isn't necessary for the currently specified semantics of `minversion`.
+
+After fetching the dependencies (using the already existing dependency fetching logic used in catalog compilation), the component compilation regenerates the temporary inventory with each dependency's defaults and component libraries included.
+Additionally, this new temporary inventory will have each dependency added to the `applications` array.
+
+Afterwards, component compilation proceeds by calling Jsonnet-Bundler and Kapitan to render the component's manifests.
+
+Notably, the implementation doesn't recursively fetch dependencies.
+Therefore, if any of a component's dependencies has further component dependencies, component authors must explicitly define those dependencies in the component compilation input files.
+
+TIP: When using the Project Syn component template, we recommend adding any indirect component dependencies in the component's test cases.
+
+=== Commodore catalog compilation
+
+Commodore catalog compilation collects the component dependency specifications for all included components after fetching the components included by the catalog.
+The dependency specifications are unified by component name, and the minimum required version is the maximum of all specified minimum required versions.
+
+As noted in section "<<_dependency_specification_in_the_component>>", Commodore expects that matching keys in parameters `components` and `<component_name>.commodore.dependencies` refer to the same component.
+This assumption significantly simplifies matching required dependency versions to components that are included in a catalog.
+
+After dependency specifications are unified, Commodore verifies that each component dependency is explicitly included in the catalog with a compatible version
+Notably, verification treats any component version Git tree-ish which doesn't parse as a SemVer version (prefixed with `v`) as higher than all SemVer versions.
+Once that verification is completed, catalog compilation continues as usual.
+
+Notably, catalog compilation won't try to automatically include component dependencies or adjust component versions.
+Making sure that a catalog includes all required components in a suitable version remains the responsibility of the operator defining the cluster catalog.
+This ensures that we can keep the single pass component fetching stage for catalog compilation.
+
+=== Implementation Details/Notes/Constraints
+
+As noted in section "<<_dependency_specification_in_the_component>>", the implementation assumes that matching keys in parameters `components` and `commodore.dependencies` refer to the same component.
+
+We'll need to decide on a Python library which implements https://cel.dev[CEL].
+A quick search has found the following options:
+
+* https://github.com/cel-expr/cel-python[Google's cel-expr/cel-python] which wraps the Google C++ implementation of CEL in a Python module.
+* https://github.com/hardbyte/python-common-expression-language[hardbyte/python-common-expression-language] which wraps the Rust https://crates.io/crates/cel[cel] crate in a Python module via https://pyo3.rs[PyO3].
+* https://github.com/cloud-custodian/cel-python[cloud-custodian/cel-python] which is a pure Python implementation of CEL.
+
+We haven't decided on one of these libraries yet, but most likely we'll either use `cel-expr/cel-python` or `hardbyte/python-common-expression-language`.
+
+For component version parsing, we'll probably use https://github.com/python-semver/python-semver[python-semver/python-semver].
+
+=== Risks and Mitigations
+
+When enabling component authors to define component dependencies with version constraints, there's an inherent risk that some components can't be included in the same cluster catalog due to dependency version conflicts.
+We don't expect this to be a problem as long as component authors use dependency version constraints sparingly.
+Additionally, since the proposal only allows specifying a minimum version, the risk is reduced already compared to an implementation that supports full version constraints.
+
+//TODO(sg): add more if we find them during impl
+
+== Drawbacks
+
+The proposed implementation makes component compilation more complex.
+In particular, component compilation will consume more network traffic and disk space because we now download the full component dependency instead of just the library.
+Additionally, component compilation make take longer, both because we download more data and also because Commodore needs to do more setup work before the component can be compiled.
+
+== Alternatives
+
+=== Use Jsonnet-Bundler to implement component dependencies
+
+Instead of extending Commodore itself to support explicit component dependencies, we could try to use https://github.com/projectsyn/jsonnet-bundler[Jsonnet-Bundler] to manage component dependencies.
+However, this approach has more drawbacks than the proposed design:
+
+* Jsonnet-Bundler doesn't have a native way to express a minimum required version
+* Commodore catalog compilation would need a significant redesign to accommodate this approach
+** Commodore's component version management would need to be integrated with Jsonnet-Bundler
+** Commodore's component fetching would need to be replaced by Jsonnet-Bundler
+* Jsonnet-Bundler doesn't work well when multiple components depend on the same component but specify different versions.
+
+== References
+
+* https://github.com/projectsyn/commodore/issues/690[Commodore #690: Add support for explicit component dependencies]
+* https://github.com/projectsyn/jsonnet-bundler[projectsyn/jsonnet-bundler]
+* https://cel.dev[Common Expression Language (CEL)]
+* https://semver.org[Semantic Versioning ("SemVer")]
