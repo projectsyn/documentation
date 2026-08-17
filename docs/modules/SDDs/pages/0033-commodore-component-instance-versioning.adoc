@@ -18,7 +18,7 @@ It additionally details the options we chose to implement.
 
 With xref:0025-commodore-component-instantiation.adoc[SDD 0025], Commodore can instantiate a component multiple times per cluster if multiple aliases are specified.
 However, all aliases currently use version information from the base component.
-Commodore does not currently support specifying different component versions for each alias.
+Commodore doesn't currently support specifying different component versions for each alias.
 
 === Goals
 
@@ -40,7 +40,7 @@ Support for providing different versions of Jsonnet dependencies is currently no
 Jsonnet dependencies are always provided from the main (non-instantiated) version of the component.
 If a component is to support multi-versioning, Jsonnet dependencies should therefore be compatible within a reasonable span of versions.
 
-Similarly, if the component includes a Jsonnet library that is made available to other components, the version for the library is taken from the main (non-instantiated) version of the component.
+Similarly, if the component includes a Jsonnet library that's made available to other components, the version for the library is taken from the main (non-instantiated) version of the component.
 
 Finally, if a component reads another component's default values, it will always see the default values of the main (non-instantiated) version of the component.
 
@@ -62,7 +62,7 @@ This might force a component author to remove multi-version support in higher co
 === Automatically detecting multi-version support
 
 We could try to automatically determine whether a component supports multi-versioning, by way of checking whether the `${_base_directory}` parameter is used in the component's compile configuration and for Jsonnet expressions that refer to downloaded data.
-However, automatically declaring components to be "safe for multi-versioning" carries some risk - even if a component is configured accordingly, it is not guaranteed that its provided Jsonnet libraries and/or its Jsonnet dependencies work if used across versions.
+However, automatically declaring components to be "safe for multi-versioning" carries some risk - even if a component is configured accordingly, there's no guarantee that its provided Jsonnet libraries and/or its Jsonnet dependencies work if used across versions.
 Additionally, so far we've defined explicit flags for components to indicate that they support optional features, such as multiple instances.
 For all of those reasons, we've decided that component authors must explicitly declare whether multi-versioning is safe to use for their component.
 
@@ -77,7 +77,7 @@ Making this change has no direct impact on the implementation of the multi-versi
 
 It might be possible to allow multiple versions of a component's Jsonnet libraries to be made available to other components.
 Other components would have to refer to the libraries using a specific instance's name.
-This would change how components refer to libraries, and would cause components to be somewhat aware of the context in which they are used in order to refer to the correct instances.
+This would change how components refer to libraries, and would cause components to be somewhat aware of the context in which they're used in order to refer to the correct instances.
 Since components should be modular and reusable, introducing this sort of coupling goes against the design principles of Project Syn.
 
 == References

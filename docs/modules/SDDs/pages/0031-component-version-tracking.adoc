@@ -17,17 +17,17 @@ This describes how we want to extend the Lieutenant API, CRD, and operator to al
 == Motivation
 
 Currently, component versions used in a Commodore compile are tracked in the cluster catalog repository.
-They are stored in the commit message.
+They're stored in the commit message.
 
 This approach has several drawbacks:
-* The version information is not easily accessible programmatically.
+* The version information isn't easily accessible programmatically.
 * To get an overview one needs to find every repository and check the commit history.
 
 To improve this situation, we want to introduce a central component version tracking system.
 The system should be centralized and accessible programmatically.
 
 Lieutenant is the central component for managing the cluster catalogs and already has a REST API.
-It is backed by a CRD which already stores some state information and cluster metadata.
+This API is backed by a CRD which already stores some state information and cluster metadata.
 
 We want to extend the Lieutenant API, CRD, and operator to store version information for each Commodore compile.
 
@@ -66,7 +66,7 @@ Each version entry contains the following fields:
 Can be a branch name, tag, or commit hash.
 The `version` can point to different commits depending on when the compile was done.
 * `gitSha`: The commit hash of the commit referenced by the `version` field
-With the `gitSha` and the `url` it is possible to uniquely identify the commit.
+With the `gitSha` and the `url` it's possible to uniquely identify the commit.
 
 The `packages` and `instances` fields additionally contain:
 
@@ -143,7 +143,7 @@ syn_lieutenant_cluster_compile_meta_tenant{cluster="my-cluster", url="https://..
 === Commodore
 
 Commodore will be extended to send updated compilation information for catalog compilations which actually push a new catalog commit.
-Any other catalog compilations will not update the compile metadata on the Lieutenant API.
+Any other catalog compilations won't update the compile metadata on the Lieutenant API.
 
 Commodore will use its existing API token to push the compilation metadata to Lieutenant.
 
@@ -154,7 +154,7 @@ https://github.com/projectsyn/commodore/issues/563[projectsyn/commodore#563] wan
 The current design with instance name as the top key allows for this.
 
 Configuration packages::
-Configuration package versions are not yet added to the commit message.
+Configuration package versions aren't yet added to the commit message.
 We need to add them to the commit message and the Lieutenant API.
 
 == Alternatives
