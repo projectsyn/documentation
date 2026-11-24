@@ -25,7 +25,7 @@ Check the command line parameter documentation for xref:commodore:ROOT:reference
 +
 [TIP]
 ====
-You can run `commodore component update --dry-run .` in the component directory to see what will be updated from the template.
+You can run `commodore component update .` in the component directory to see what will be updated from the template.
 You need a working `commodore` command to do so.
 Please note that the command only works if there's no uncommitted changes in the component repository.
 The command will create a commit with the changes on the current branch.
